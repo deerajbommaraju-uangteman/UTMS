@@ -3,9 +3,11 @@ package ut.microservices.loanApplicationMicroService.service;
 import java.util.HashMap;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import ut.microservices.loanApplicationMicroService.model.ApplicantData;
@@ -13,6 +15,10 @@ import ut.microservices.loanApplicationMicroService.repository.ApplicantDataRepo
 
 @Service
 public class LoanApplicationService {
+
+    @Autowired
+    KafkaTemplate<String, String> kafkaTemplate;
+    
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -36,8 +42,22 @@ public class LoanApplicationService {
             }
             else{
                 applicantData.setBanned("U");
-                applicantDataRepository.save(applicantData);
-                
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                HashMap<String, String> valueMap = new HashMap<String, String>();
+                map.put("email_id", applicantData.getEmailAddress());
+                valueMap.put("fullname", applicantData.getFullName());
+                valueMap.put("loan_id","loan_ID");
+                map.put("id", "4");
+                String param = "";
+                try {
+                    param = objectMapper.writeValueAsString(valueMap);
+                    map.put("values",param);
+                    param = objectMapper.writeValueAsString(map);
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+                kafkaTemplate.send("sendMail", param);
+                applicantDataRepository.save(applicantData); 
             }
         }  catch (Exception e) {
             e.printStackTrace();
