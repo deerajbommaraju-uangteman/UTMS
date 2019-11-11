@@ -1,5 +1,6 @@
 package ut.microservices.loanApplicationMicroService.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -20,8 +21,13 @@ import lombok.Data;
 @Table(name = "LAMS_ApplicationData")
 @JsonIgnoreProperties(value = {"CreatedAt","UpdatedAt"}, allowGetters = true)
 @Data
-public class ApplicationData{
+public class ApplicationData implements Serializable{
    
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ApplicationID")
@@ -182,9 +188,9 @@ public class ApplicationData{
     @Column(name = "ApprovalStatus", nullable = true)
     private String ApprovalStatus;
     
-    @Column(name = "ApplicationOverride")
-    @JsonProperty(value="ApplicationOverride",required=true)
-    private String ApplicationOverride;
+    // @Column(name = "ApplicationOverride")
+    // @JsonProperty(value="ApplicationOverride",required=true)
+    // private String ApplicationOverride;
     
     @Column(name = "OfficePhoned", nullable = true)
     private String OfficePhoned;
@@ -299,4 +305,5 @@ public class ApplicationData{
     @Column(name="UpdatedAt",nullable = false)
     @CreationTimestamp
     private Date UpdatedAt;    
-    }
+    
+}

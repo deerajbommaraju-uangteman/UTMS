@@ -1,41 +1,54 @@
 package ut.microservices.loanApplicationMicroService.controller;
 
-import java.io.IOException;
 import java.util.HashMap;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import ut.microservices.loanApplicationMicroService.model.TempApplicantDataModel;
 import ut.microservices.loanApplicationMicroService.service.LoanApplicationService;
 
 @RestController
 @RequestMapping("/application-form")
 public class LoanApplicationCtrl {
-    @Autowired
-    LoanApplicationService loanApplicationService;
 
-    @CrossOrigin
-    @PostMapping("/received")
-    public String newApplicationReceived(@RequestBody HashMap<String, String> application) throws IOException {
-    return loanApplicationService.newApplicationReceived(application);
-  }
-
+  @Autowired
+  LoanApplicationService loanApplicationService;
 
   @CrossOrigin
-  @GetMapping(path = "/getApplicationData")
-  public @ResponseBody String getApplicationData(String status) {
-    return loanApplicationService.getApplicationData(status);
+  @PostMapping(path = "/received")
+  public String newApplicationReceived(@RequestBody TempApplicantDataModel application) {
+    System.out.println(application);
+    if(application.getID() != null) {
+      return loanApplicationService.newApplicationEnded(application);
+    }
+    return loanApplicationService.newApplicationStarted(application);
   }
 
-    @CrossOrigin
-    @GetMapping(path = "/example")
-    public @ResponseBody String getExample() {
-    return "hello";
-    }
+  @CrossOrigin
+  @GetMapping(path = "/getApplicationData/{ApplicationID}")
+  public @ResponseBody String getApplicationData(@PathVariable String ApplicationID) throws JsonProcessingException {
+
+    System.out.println(loanApplicationService.getApplicationData(ApplicationID));
+    return "ass"; 
+  }
+  
+  @CrossOrigin
+  @GetMapping(path = "/getDistrictData")
+  public @ResponseBody String getDistrictData() throws JsonProcessingException {
+
+    System.out.println(loanApplicationService.getDistrictData());
+    return "ass"; 
+  }
+  
+
 }

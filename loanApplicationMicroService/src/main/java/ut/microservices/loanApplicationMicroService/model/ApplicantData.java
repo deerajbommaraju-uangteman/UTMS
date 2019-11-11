@@ -1,5 +1,6 @@
 package ut.microservices.loanApplicationMicroService.model;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -20,7 +21,12 @@ import lombok.Data;
 @Table(name = "LAMS_ApplicantData")
 @JsonIgnoreProperties(value = {"CreatedAt","UpdatedAt"}, allowGetters = true)
 @Data
-public class ApplicantData{
+public class ApplicantData implements Serializable{
+
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,8 +39,8 @@ public class ApplicantData{
     @Column(name = "BorrowerReference", nullable = true)
     private String BorrowerReference;
     
-    @Column(name = "FullName", nullable = true)
-    @JsonProperty(value="FullName",required=true)
+    @Column(name = "Fullname", nullable = true)
+    @JsonProperty(value="Fullname",required=true)
     private String FullName;
     
     @Column(name = "Gender", nullable = true)
@@ -172,8 +178,8 @@ public class ApplicantData{
     @Column(name = "DomicilePostalCode", nullable = true)
     private Integer DomicilePostalCode;
     
-    @Column(name = "DomicileCountry")
-    private Integer DomicileCountry;
+    // @Column(name = "DomicileCountry")
+    // private Integer DomicileCountry;
     
     @Column(name = "Family1Name", nullable = true)
     @JsonProperty(value="Family1Name",required=true)
@@ -207,8 +213,8 @@ public class ApplicantData{
     @JsonProperty(value="Family1PostalCode",required=true)
     private String Family1PostalCode;
     
-    @Column(name = "Family1Country")
-    private Integer Family1Country;
+    // @Column(name = "Family1Country")
+    // private Integer Family1Country;
 
     @Column(name = "Family2Name", nullable = true)
     private String Family2Name;
@@ -303,8 +309,8 @@ public class ApplicantData{
     @JsonProperty(value="EmployerPostalCode",required=true)
     private String EmployerPostalCode;
     
-    @Column(name = "EmployerCountry")
-    private Integer EmployerCountry;
+    // @Column(name = "EmployerCountry")
+    // private Integer EmployerCountry;
     
     @Column(name = "WorkTelephone", nullable = true)
     @JsonProperty(value="WorkTelephone",required=true)
@@ -338,8 +344,8 @@ public class ApplicantData{
     @Column(name = "Campaign", nullable = true)
     private String Campaign;
     
-    @Column(name = "Banned")
-    private String Banned;
+    // @Column(name = "Banned")
+    // private String Banned;
     
     
     @Column(name = "BannedExpired", nullable = true)
@@ -457,27 +463,26 @@ public class ApplicantData{
         return "ApplicantData [Address=" + Address + ", AddressRT=" + AddressRT + ", AddressRW=" + AddressRW + ", Age="
                 + Age + ", AmountChild=" + AmountChild + ", ApplicantID=" + ApplicantID + ", ApplicantIDTemp="
                 + ApplicantIDTemp + ", BankNameID=" + BankNameID + ", BankNumber=" + BankNumber + ", BankUsername="
-                + BankUsername + ", Banned=" + Banned + ", BannedExpired=" + BannedExpired + ", BorrowerReference="
+                + BankUsername + ", BannedExpired=" + BannedExpired + ", BorrowerReference="
                 + BorrowerReference + ", Campaign=" + Campaign + ", City=" + City + ", DateOfBirth=" + DateOfBirth
                 + ", District=" + District + ", DomicileAddress=" + DomicileAddress + ", DomicileCity=" + DomicileCity
-                + ", DomicileCountry=" + DomicileCountry + ", DomicileDistrict=" + DomicileDistrict
+                + ", DomicileDistrict=" + DomicileDistrict
                 + ", DomicilePostalCode=" + DomicilePostalCode + ", DomicileProvince=" + DomicileProvince
                 + ", DomicileTelephone=" + DomicileTelephone + ", DomicileVillage=" + DomicileVillage + ", Education="
                 + Education + ", EmailAddress=" + EmailAddress + ", EmployerAddress=" + EmployerAddress
-                + ", EmployerCity=" + EmployerCity + ", EmployerCountry=" + EmployerCountry + ", EmployerDistrict="
+                + ", EmployerCity=" + EmployerCity + ", EmployerDistrict="
                 + EmployerDistrict + ", EmployerIndustryID=" + EmployerIndustryID + ", EmployerName=" + EmployerName
                 + ", EmployerPostalCode=" + EmployerPostalCode + ", EmployerProvince=" + EmployerProvince
                 + ", EmployerRole=" + EmployerRole + ", EmployerType=" + EmployerType + ", EmployerVillage="
                 + EmployerVillage + ", FacebookID=" + FacebookID + ", Family1Address=" + Family1Address
-                + ", Family1City=" + Family1City + ", Family1Country=" + Family1Country + ", Family1District="
+                + ", Family1City=" + Family1City + ", Family1District="
                 + Family1District + ", Family1Name=" + Family1Name + ", Family1PostalCode=" + Family1PostalCode
                 + ", Family1Province=" + Family1Province + ", Family1Telephone=" + Family1Telephone
                 + ", Family1Village=" + Family1Village + ", Family2Address=" + Family2Address + ", Family2City="
                 + Family2City + ", Family2District=" + Family2District + ", Family2Name=" + Family2Name
                 + ", Family2PostalCode=" + Family2PostalCode + ", Family2Province=" + Family2Province
                 + ", Family2Telephone=" + Family2Telephone + ", Family2Village=" + Family2Village + ", FamilyIDNumber="
-                + FamilyIDNumber + ", FromIPAddress=" + FromIPAddress + ", FullName=" + FullName + ", Gender=" + Gender
-                + ", GooglePlusID=" + GooglePlusID + ", HllDomicile=" + HllDomicile + ", HllKtp=" + HllKtp
+                + FamilyIDNumber + ", FromIPAddress=" + FromIPAddress + ", FullName=" + FullName + ", GooglePlusID=" + GooglePlusID + ", HllDomicile=" + HllDomicile + ", HllKtp=" + HllKtp
                 + ", HllWork=" + HllWork + ", HomeStatus=" + HomeStatus + ", HomeStatus2=" + HomeStatus2
                 + ", IDEmployerIndustry=" + IDEmployerIndustry + ", IsBankAccountCorrect=" + IsBankAccountCorrect
                 + ", IsPartnerWorking=" + IsPartnerWorking + ", KnowUT=" + KnowUT + ", Latitude=" + Latitude
@@ -501,6 +506,8 @@ public class ApplicantData{
                 + SpouseWorkPostalCode + ", SpouseWorkProvince=" + SpouseWorkProvince + ", SpouseWorkTelephone="
                 + SpouseWorkTelephone + ", SpouseWorkVillage=" + SpouseWorkVillage + ", StartCreatedAt="
                 + StartCreatedAt + ", SubmitAt=" + SubmitAt + ", TaxIDNumber=" + TaxIDNumber + ", TelephoneNumber="
-                + TelephoneNumber + ", Village=" + Village + ", WorkTelephone=" + WorkTelephone + "]";
+                + TelephoneNumber + ", Village=" + Village + ", WorkTelephone=" + WorkTelephone + 
+                //Banned=" + Banned + ",DomicileCountry=" + DomicileCountry + ",Gender=" + Gender+ ",, EmployerCountry=" + EmployerCountry + "Family1Country=" + Family1Country + ",    
+                "]";
     }
 }
