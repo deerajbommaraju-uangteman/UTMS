@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Repayment Micro Service</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Repayment Details Page</title>
+		<script type="application/x-javascript"> 
+
+		addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+			<script>
+
+			function loanDetails(){	
+
+			var fields = {};
+
+			$("#LoanForm").find(':input').each(function() {
+				fields[this.name] = $(this).val();
+			});
+
+			console.log("obj array:"+JSON.stringify(fields));
+				    $.ajax({
+				    	type : "POST",
+				        url: "http://localhost:9093/user/postLoginDetails?LoanApplicationID=" + fields.LoanApplicationID,
+				        data : JSON.stringify(fields),
+				        async: false,
+						cache: false,
+						contentType: "application/json;  charset=utf-8",
+						success : function(data){
+								console.log(data);
+				     		  	$('#vaGenerate').show();
+				       			$('#LoanAmount').append(data.repaymentAmount);
+
+						}
+
+				    });
+
+		}
+
+		function generateVa(){
+			var fields = {};
+	
+			
+			$("#LoanForm").find(':input').each(function() {
+				fields[this.name] = $(this).val();
+			});
+
+		
+			console.log("obj array:"+JSON.stringify(fields));
+
+				 $.ajax({
+						type: "POST",
+						url: 'http://localhost:9093/user/makeLoanRepayment',
+						async: false,
+						cache: false,
+						
+						data: JSON.stringify(fields),
+						contentType: "application/json;  charset=utf-8",
+						
+						success: function(data){
+							console.log(data.response);
+									if(data.response == "success"){
+									// Success Action
+									window.alert("Result: "+ data.vaNumber);
+								}
+								else{
+									window.alert(data.response);
+								}
+									// if(data.callback = "success"){
+									// 	console.log("values:",data);
+									// 	window.alert("VA Created Sucessfully");
+									// }
+									// else{
+									// 	window.alert("VA number already exists");
+									// }
+						}
+
+			});
+				returned=false;
+				
+		 }
+
+	</script>
+	<style type="text/css">
+
+	input[type=text]{
+	  padding: 12px;
+	  border: 1px solid #ccc;
+	  border-radius: 4px;
+	  resize: vertical;
+	}
+
+	input[type=button] {
+	  background-color: #4CAF50;
+	  color: white;
+	  border: none;
+	  border-radius: 4px;
+	  cursor: pointer;
+	  margin: auto;
+	  width: 20%;
+	  padding: 10px;
+	}
+
+	input[type=button]:hover {
+	  background-color: #45a049;
+	}
+
+	</style>
+	</head>
+	
+	<body >
+		<div style="text-align: center;">
+		<form id="LoanForm" content="application/json" class="text-center border border-light p-5" method="POST">
+			<h3>Loan Repayment Page</h3><br/>
+			
+			<label style="font-size: 17px">Enter your Loan Id: </label> <input type="text" name="LoanApplicationID" id="LoanApplicationID"  placeholder="Loan Id" required />
+		</form>
+		<input type="button" class="button" id="loanId" value="submit" onclick="loanDetails()">
+	</div>
+	<br/><br/>
+	<div id="vaGenerate" style="display: none;	text-align: center;padding-top: 20px">
+		<h3>Click to generate VA number </h3>
+		<label style="font-size: 17px">Amount to be paid: </label><p id="LoanAmount"> </p>
+		<input type="button" class="button" id="submit" name="paymentType" value="doku-bca" onclick="generateVa()">
+	</div>
+		
+	</body>
+</html>
