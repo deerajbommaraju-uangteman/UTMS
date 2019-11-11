@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#table {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#table td, #table th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#table tr:nth-child(even){background-color: #f2f2f2;}
+
+#table tr:hover {background-color: #ddd;}
+
+#table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}
+.button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+</style>
+
+<script type="text/javascript">
+    var url='http://localhost:9091/ut/investor/confirmation-funding';
+    var xhr = new XMLHttpRequest();//createCORSRequest('POST', url);
+	xhr.open('GET',url,true);
+	xhr.send();
+	xhr.onreadystatechange=processRequest;
+	function processRequest(e){
+		if(xhr.readyState ==4 && xhr.status ==200){
+			var x, txt=""
+			var input=JSON.parse(xhr.response);
+			
+			txt +="<h1>Funded Loan Details:</h1>"
+			var data=JSON.parse(input.fundingLoans);
+			console.log(data);
+//document.getElementById("origin").innerHTML=response[0].dmt_id;
+			txt += "<table  id=table><col width='130'><col width='80'>"
+			txt +="<th>Id</th><th>Loan Id</th><th>Loan Amount</th>";
+			var i=0;
+			var totalAmount= 0
+			for (x in data) {
+				i=i+1;
+				totalAmount += data[x].loanAmount
+				txt +="<tr>";
+				txt +="<td align='center'>" + i+"</td>";
+				txt +="<td align='center'>" + data[x].loanAppID+"</td>";
+				txt +="<td align='center'>" + data[x].loanAmount+"</td>";
+			//	txt +="<td align='center'>" + data[x].+"</td>";
+			//	txt +="<td align='center'>" + data[x].+"</td>";
+				txt += "</tr>";
+			}
+			txt += "</table>"
+			txt += "<br/><b>Total Amount Funding : </b> " + totalAmount
+			if(data.length>0)
+				txt += "<p><button id='"+JSON.stringify(data)+"' onclick=paymentDone(this.id)>Done Payment</button></p>"
+			txt += "<p>VA NUMBER : "+ input.VANumber+"</p>";
+			console.log(totalAmount)
+			document.getElementById("val").innerHTML = txt;
+			
+		}
+	}
+	function paymentDone(result){
+	var url='http://localhost:9091/ut/investor/payment-done';
+    var xhr = new XMLHttpRequest();//createCORSRequest('POST', url);
+	xhr.open('POST',url,true);
+	var data={"isVAGenerated":true,"loans":JSON.parse(result)}
+	console.log(JSON.stringify(data))
+	xhr.send(JSON.stringify(data))
+	xhr.onreadystatechange=processRequest;
+		function processRequest(e){
+			if(xhr.readyState ==4 && xhr.status ==200){
+				document.location.reload();
+			}
+		}
+	}
+
+
+	
+</script>
+
+</head>
+
+<body>
+<p id="val"></p>
+</body>
+</html>

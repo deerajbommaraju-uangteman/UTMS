@@ -30,6 +30,9 @@ public class LoanInvestment implements Serializable {
     @Column(name="LoanAppID")
     private String loanAppID;
 
+    @Column(name="ApplicationID")
+    private Integer applicationID;
+
    
     @Column(name="InvestorID")
     private Integer investorID;

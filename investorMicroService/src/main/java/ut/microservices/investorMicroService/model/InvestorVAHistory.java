@@ -22,35 +22,35 @@ public class InvestorVAHistory implements Serializable {
     @Column(name="ID")
     private Long ID;
 
-    @NotBlank
+    
     @Column(name="InvestorID")
     private Integer investorID;
 
     @NotBlank
     @Column(name="LoanID")
-    private String loanID;
+    private String loanAppID;
 
-    @NotBlank
+    
     @Column(name="ApplicationID")
     private Integer applicationID;
 
-    @NotBlank
+    
     @Column(name="LoanAmount")
     private Double loanAmount;
     
-    @NotBlank
+    
     @Column(name="VaNumber")
     private Integer vaNumber;
 
-    @NotBlank
+    
     @Column(name="Status")
     private Integer status;
 
-    @NotBlank
+    
     @Column(name="PaymentTime")
     private Date paymentTime;
 
-    @NotBlank
+    
     @Column(name="BankID")
     private Integer bankID;
 
@@ -59,7 +59,7 @@ public class InvestorVAHistory implements Serializable {
     private Date createdDateTime;
 
 
-    @NotBlank
+    
     @Column(name="CreatedBy")
     private Integer createdBy;
 
@@ -68,12 +68,12 @@ public class InvestorVAHistory implements Serializable {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updatedDatetime;
 
-    @NotBlank
+    
     @Column(name="UpdatedBy")
     private Integer updatedBy;
 
 
-    @NotBlank
+    
     @Column(name="NotifiedTime")
     private Date notifiedTime;
 

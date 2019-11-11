@@ -24,14 +24,13 @@ public class DigisignAgreement implements Serializable {
     private Long ID ;
 
     @Column(name="DocumentID")
-    @JsonProperty(value = "DocumentID" , required = true)
-    private String documentId ;
+    private String documentID ;
 
     @Column(name="ApplicantID")
     private Long applicantID;
 
     @Column(name="ApplicationID")
-    private Long applicationID;
+    private Integer applicationID;
 
     @Column(name="StatusAgreement")
     private String statusAgreement;
@@ -67,7 +66,7 @@ public class DigisignAgreement implements Serializable {
 
 
     @Column(name="InvestorID")
-    private Long investorID;
+    private Integer investorID;
 
     @Column(name="DuLenderEmailUser")
     private String duLenderEmailUser;

@@ -22,7 +22,7 @@ public class InvestorFundingHistory implements Serializable {
     @Column(name="ID")
     private Long ID;
 
-    @NotBlank
+   
     @Column(name="InvestorID")
     private Integer investorID;
     
@@ -34,11 +34,11 @@ public class InvestorFundingHistory implements Serializable {
     @Column(name="FundTxnNumber")
     private String fundTxnNumber;
 
-    @NotBlank
+    
     @Column(name="TxnStatus")
     private Integer txnStatus;
 
-    @NotBlank
+    
     @Column(name="InvestmentLogID")
     private Integer investmentLogID;
 

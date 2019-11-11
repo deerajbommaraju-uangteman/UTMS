@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class InvestorMicroServiceAspect {
 
-	@Before(value = "execution(* ut.microservices.investorMicroService.service.InvestorService.*(..)) and args(..)")
+	@Before(value = "execution(* ut.microservices.investorMicroService.service.*.*(..)) and args(..)")
 	public void beforeAdvice(JoinPoint joinPoint) {
 		System.out.println("Before method:" + joinPoint.getSignature());
 	}
 
-	@After(value = "execution(* ut.microservices.investorMicroService.service.InvestorService.*(..)) and args(..)")
+	@After(value = "execution(* ut.microservices.investorMicroService.service.*.*(..)) and args(..)")
 	public void afterAdvice(JoinPoint joinPoint) {
 		System.out.println("After method:" + joinPoint.getSignature());
 	}
