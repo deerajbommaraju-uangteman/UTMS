@@ -1,4 +1,4 @@
-package ut.microservices.repaymentMicroService;
+package ut.microservices.repaymentmicroservice;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;

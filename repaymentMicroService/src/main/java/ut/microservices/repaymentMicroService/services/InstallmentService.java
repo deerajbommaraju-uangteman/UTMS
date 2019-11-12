@@ -1,4 +1,4 @@
-package ut.microservices.repaymentMicroService.services;
+package ut.microservices.repaymentmicroservice.services;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -10,69 +10,63 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ut.microservices.repaymentMicroService.dao.IGenericDao;
-import ut.microservices.repaymentMicroService.models.*;
+import ut.microservices.repaymentmicroservice.dao.IGenericDAO;
+import ut.microservices.repaymentmicroservice.models.*;
 
 @Component
 @Service
 @Transactional
 public class InstallmentService {
 
-    IGenericDao<ApplicantData> applicantDataDao;
-    IGenericDao<ApplicationData> applicationDataDao;
-    IGenericDao<CustomerVaHistory> customerVaHistoryDao;
-    IGenericDao<CustomerLoanRepayment> custLoanRepaymentDao;
-    IGenericDao<CustomerLoanInstallmentRepayment> clirDao;
-    IGenericDao<LogDokuBca> LogDokuBcaDao;
+    IGenericDAO<ApplicantData> applicantDataDAO;
+    IGenericDAO<ApplicationData> applicationDataDAO;
+    IGenericDAO<CustomerVaHistory> customerVaHistoryDAO;
+    IGenericDAO<CustomerLoanRepayment> custLoanRepaymentDAO;
+    IGenericDAO<CustomerLoanInstallmentRepayment> clirDAO;
+    IGenericDAO<LogDokuBca> logDokuBcaDAO;
 
     @Autowired
-    public void setApplicantDataDao(IGenericDao<ApplicantData> daoToSet){
-        applicantDataDao = daoToSet;
-        applicantDataDao.setClazz(ApplicantData.class);
+    public void setApplicantDataDAO(IGenericDAO<ApplicantData> applicantDataDAO){
+        this.applicantDataDAO = applicantDataDAO;
+        applicantDataDAO.setClazz(ApplicantData.class);
     }
 
     @Autowired
-    public void setApplicationDataDao(IGenericDao<ApplicationData> daoToSet){
-        applicationDataDao = daoToSet;
-        applicationDataDao.setClazz(ApplicationData.class);
+    public void setApplicationDataDAO(IGenericDAO<ApplicationData> applicationDataDAO){
+        this.applicationDataDAO = applicationDataDAO;
+        applicationDataDAO.setClazz(ApplicationData.class);
     }
 
     @Autowired
-    public void setCustomerVaHistoryDao(IGenericDao<CustomerVaHistory> daoToSet) {
-        customerVaHistoryDao = daoToSet;
-        customerVaHistoryDao.setClazz(CustomerVaHistory.class);
+    public void setCustomerVaHistoryDAO(IGenericDAO<CustomerVaHistory> customerVaHistoryDAO) {
+        this.customerVaHistoryDAO = customerVaHistoryDAO;
+        customerVaHistoryDAO.setClazz(CustomerVaHistory.class);
     }
 
     @Autowired
-    public void setCustLoanRepaymentDao(IGenericDao<CustomerLoanRepayment> daoToSet) {
-        custLoanRepaymentDao = daoToSet;
-        custLoanRepaymentDao.setClazz(CustomerLoanRepayment.class);
+    public void setCustLoanRepaymentDAO(IGenericDAO<CustomerLoanRepayment> custLoanRepaymentDAO) {
+        this.custLoanRepaymentDAO = custLoanRepaymentDAO;
+        custLoanRepaymentDAO.setClazz(CustomerLoanRepayment.class);
     }
 
     @Autowired
-    public void setCustLoanInstallmentDao(IGenericDao<CustomerLoanInstallmentRepayment> daoToSet) {
-        clirDao = daoToSet;
-        clirDao.setClazz(CustomerLoanInstallmentRepayment.class);
+    public void setCustLoanInstallmentDAO(IGenericDAO<CustomerLoanInstallmentRepayment> clirDAO) {
+        this.clirDAO = clirDAO;
+        clirDAO.setClazz(CustomerLoanInstallmentRepayment.class);
     }
 
     @Autowired
-    public void setLogDokuBcaDao(IGenericDao<LogDokuBca> daoToSet) {
-        LogDokuBcaDao = daoToSet;
-        LogDokuBcaDao.setClazz(LogDokuBca.class);
+    public void setLogDokuBcaDAO(IGenericDAO<LogDokuBca> logDokuBcaDAO) {
+        this.logDokuBcaDAO = logDokuBcaDAO;
+        logDokuBcaDAO.setClazz(LogDokuBca.class);
     }
-
-    @Autowired
-    private DokuPaymentService dokuPaymentService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     public void insertInstallmentLoanRepayment(){
         CustomerLoanInstallmentRepayment clir = new CustomerLoanInstallmentRepayment();
         // clir.setCustomerLoanRepaymentID();
         // clir.setIndexOfInstallment(1)
         // clir.setDueDate();
-        clirDao.save(clir);
+        clirDAO.save(clir);
         
     } 
 

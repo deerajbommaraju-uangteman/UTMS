@@ -1,4 +1,4 @@
-package ut.microservices.repaymentMicroService.services;
+package ut.microservices.repaymentmicroservice.services;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ut.microservices.repaymentMicroService.dao.IGenericDao;
-import ut.microservices.repaymentMicroService.models.*;
+import ut.microservices.repaymentmicroservice.dao.IGenericDAO;
+import ut.microservices.repaymentmicroservice.models.*;
 
 @Component
 @Service
@@ -37,30 +37,27 @@ public class DokuPaymentService {
 
 	HashMap<String, String> data = new HashMap<>();
 	
-    IGenericDao<CustomerVaHistory> customerVaHistoryDao;
-    IGenericDao<CustomerLoanRepayment> custLoanRepaymentDao;
-	IGenericDao<LogDokuBca> logDokuBcaDao;
+    IGenericDAO<CustomerVaHistory> customerVaHistoryDAO;
+    IGenericDAO<CustomerLoanRepayment> custLoanRepaymentDAO;
+	IGenericDAO<LogDokuBca> logDokuBcaDAO;
 
-	@Autowired
-    public void setCustomerVaHistoryDao(IGenericDao<CustomerVaHistory> daoToSet) {
-        customerVaHistoryDao = daoToSet;
-        customerVaHistoryDao.setClazz(CustomerVaHistory.class);
+    @Autowired
+    public void setCustomerVaHistoryDAO(IGenericDAO<CustomerVaHistory> customerVaHistoryDAO) {
+        this.customerVaHistoryDAO = customerVaHistoryDAO;
+        customerVaHistoryDAO.setClazz(CustomerVaHistory.class);
     }
 
     @Autowired
-    public void setCustLoanRepaymentDao(IGenericDao<CustomerLoanRepayment> daoToSet) {
-        custLoanRepaymentDao = daoToSet;
-        custLoanRepaymentDao.setClazz(CustomerLoanRepayment.class);
+    public void setCustLoanRepaymentDAO(IGenericDAO<CustomerLoanRepayment> custLoanRepaymentDAO) {
+        this.custLoanRepaymentDAO = custLoanRepaymentDAO;
+        custLoanRepaymentDAO.setClazz(CustomerLoanRepayment.class);
     }
 
     @Autowired
-    public void setLogDokuBcaDao(IGenericDao<LogDokuBca> daoToSet) {
-        logDokuBcaDao = daoToSet;
-        logDokuBcaDao.setClazz(LogDokuBca.class);
+    public void setLogDokuBcaDAO(IGenericDAO<LogDokuBca> logDokuBcaDAO) {
+        this.logDokuBcaDAO = logDokuBcaDAO;
+        logDokuBcaDAO.setClazz(LogDokuBca.class);
     }
-
-	@Autowired
-	private RepaymentService repaymentService;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -116,11 +113,11 @@ public class DokuPaymentService {
             // objLog.setInquiryReqDatetime(currentdate.format(d));
             objLog.setInquiryResponse(xml);
             objLog.setInquiryRespDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
-            logDokuBcaDao.save(objLog);
+            logDokuBcaDAO.save(objLog);
 			inqResponse = "Invalid data";
         }
 
-		CustomerVaHistory vaNumberData = customerVaHistoryDao.findByVANumber(requestdata.get("PAYMENTCODE")).get(0);
+		CustomerVaHistory vaNumberData = customerVaHistoryDAO.findByVANumber(requestdata.get("PAYMENTCODE")).get(0);
 		
 		if(vaNumberData == null){
 			System.out.println("VA data is empty for Inquiry");
@@ -131,7 +128,7 @@ public class DokuPaymentService {
             // objLog.setInquiryReqDatetime(currentdate.format(d));
             objLog.setInquiryResponse(xml);
             objLog.setInquiryRespDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
-            logDokuBcaDao.save(objLog);
+            logDokuBcaDAO.save(objLog);
 			inqResponse = "Invalid VA number";
 		}
 		
@@ -140,7 +137,7 @@ public class DokuPaymentService {
             //Updating the generated Transmerchant id in CustomerVaHistory
             String randTransId = RandomStringUtils.randomAlphanumeric(10);
             vaNumberData.setVaTransMerchantID(randTransId);
-            customerVaHistoryDao.update(vaNumberData);
+            customerVaHistoryDAO.update(vaNumberData);
 
             String signature = this.getBcaMallId() + this.SHARED_KEY + randTransId;
 
@@ -154,7 +151,7 @@ public class DokuPaymentService {
             nPaidResp += "<PURCHASECURRENCY>" + this.PAY_CURRENCY +"</PURCHASECURRENCY>\n";
             nPaidResp += "<SESSIONID>" + RandomStringUtils.randomAlphanumeric(32) +"</SESSIONID>\n";
             nPaidResp += "<ADDITIONALDATA>UangTeman</ADDITIONALDATA>\n";
-            CustomerLoanRepayment clr = custLoanRepaymentDao.findValueByColumn("ApplicantID",vaNumberData.getApplicantID()).get(0);    
+            CustomerLoanRepayment clr = custLoanRepaymentDAO.findValueByColumn("ApplicantID",vaNumberData.getApplicantID()).get(0);    
 
             objLog.setVaNumber(requestdata.get("PAYMENTCODE"));
             objLog.setLogAppID(clr.getLoanApplicationID());
@@ -162,7 +159,7 @@ public class DokuPaymentService {
             // objLog.setInquiryReqDatetime(currentdate.format(now));
             xml = headResp + nPaidResp + footResp;
             objLog.setInquiryResponse(xml);
-            logDokuBcaDao.save(objLog);
+            logDokuBcaDAO.save(objLog);
 
             inqResponse = "success";
         }

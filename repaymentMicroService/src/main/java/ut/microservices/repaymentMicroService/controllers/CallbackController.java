@@ -1,4 +1,4 @@
-package ut.microservices.repaymentMicroService.controllers;
+package ut.microservices.repaymentmicroservice.controllers;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import ut.microservices.repaymentMicroService.services.CallbackService;
+import ut.microservices.repaymentmicroservice.services.CallbackService;
 
 @RestController
 @RequestMapping("/repayment")

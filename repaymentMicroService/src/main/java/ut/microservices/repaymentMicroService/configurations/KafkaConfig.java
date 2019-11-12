@@ -1,4 +1,4 @@
-package ut.microservices.repaymentMicroService.configurations;
+package ut.microservices.repaymentmicroservice.configurations;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;

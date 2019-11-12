@@ -1,5 +1,5 @@
 
-package ut.microservices.repaymentMicroService.models;
+package ut.microservices.repaymentmicroservice.models;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package ut.microservices.repaymentMicroService.models;
+package ut.microservices.repaymentmicroservice.models;
 
 import java.io.Serializable;
 import java.util.Date;

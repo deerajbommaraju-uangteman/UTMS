@@ -1,4 +1,4 @@
-package ut.microservices.repaymentMicroService.aspect;
+package ut.microservices.repaymentmicroservice.aspect;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class RepaymentAspect {
 
-	@Before(value = "execution(* ut.microservices.repaymentMicroService.services.RepaymentService.*(..)) and args(..)")
+	@Before(value = "execution(* ut.microservices.repaymentmicroservice.services.RepaymentService.*(..)) and args(..)")
 	public void beforeAdvice(JoinPoint joinPoint) {
 		System.out.println("Before method:" + joinPoint.getSignature());
 	}
 
-	@After(value = "execution(* ut.microservices.repaymentMicroService.services.RepaymentService.*(..)) and args(..)")
+	@After(value = "execution(* ut.microservices.repaymentmicroservice.services.RepaymentService.*(..)) and args(..)")
 	public void afterAdvice(JoinPoint joinPoint) {
 		System.out.println("After method:" + joinPoint.getSignature());
 	}

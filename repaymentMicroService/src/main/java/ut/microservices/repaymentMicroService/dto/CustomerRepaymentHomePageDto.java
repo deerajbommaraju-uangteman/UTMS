@@ -1,8 +1,8 @@
-package ut.microservices.repaymentMicroService.dto;
+package ut.microservices.repaymentmicroservice.dto;
 
 import java.util.Date;
 
-public class CustomerRepaymentHomePageDto {
+public class CustomerRepaymentHomePageDTO {
     private Double repaymentAmount;
     private String dueDate;
     private String message;
