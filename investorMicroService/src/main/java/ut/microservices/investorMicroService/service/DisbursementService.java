@@ -43,18 +43,16 @@ public class DisbursementService {
     }
 
     public void disburseLoan(DigisignAgreement digisignAgreement) throws Exception {
-      if(true){
-        System.out.println("Loan Disbursed");
-        return;
-      }
-      String url=baseUrl+digisignAgreement.getApplicationID();
-      RestTemplate restTemplate = new RestTemplate();
-      ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
-      JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
-      JsonNode jnApplicationData = jsonNode.get("ApplicantData");
-      ApplicantData aplicantData =  objectMapper.readValue(jnApplicationData.toString(),ApplicantData.class);
-        //insert record into cimbniaga
-      databaseService.insertRecordToLogsCIMBNiaga();
+      //Getting Data From LAMS
+          // String url=baseUrl+digisignAgreement.getApplicationID();
+          // RestTemplate restTemplate = new RestTemplate();
+          // ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+          // JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
+          // JsonNode jnApplicationData = jsonNode.get("ApplicantData");
+          // ApplicantData aplicantData =  objectMapper.readValue(jnApplicationData.toString(),ApplicantData.class);
+          //   //insert record into cimbniaga
+          // databaseService.insertRecordToLogsCIMBNiaga();
+
       // Send data to repayment micro service
       HashMap<String, Object> map = new HashMap<>();
       map.put("ApplicantID", digisignAgreement.getApplicantID());
@@ -64,5 +62,4 @@ public class DisbursementService {
       map.put("RepaymentAmount", loan.getLoanAmount());
       kafkaTemplate.send("loanDisbursed", objectMapper.writeValueAsString(map));
     }
-
 }
