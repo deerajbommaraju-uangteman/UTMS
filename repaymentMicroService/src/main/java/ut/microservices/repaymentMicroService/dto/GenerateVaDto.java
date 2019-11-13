@@ -1,8 +1,8 @@
-package ut.microservices.repaymentmicroservice.dto;
+package ut.microservices.repaymentMicroService.dto;
 
 import java.util.Date;
 
-public class GenerateVaDTO {
+public class GenerateVaDto {
     private String response;
     private String loanAppId;
     private Double repaymentAmount;

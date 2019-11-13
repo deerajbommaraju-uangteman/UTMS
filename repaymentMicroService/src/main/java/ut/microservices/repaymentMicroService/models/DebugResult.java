@@ -1,4 +1,4 @@
-package ut.microservices.repaymentmicroservice.models;
+package ut.microservices.repaymentMicroService.models;
 
 import lombok.Data;
 import javax.persistence.*;

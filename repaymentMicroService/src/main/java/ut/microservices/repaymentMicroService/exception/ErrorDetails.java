@@ -1,4 +1,4 @@
-package ut.microservices.repaymentmicroservice.exception;
+package ut.microservices.repaymentMicroService.exception;
 
 import java.util.Date;
 

@@ -1,4 +1,4 @@
-package ut.microservices.repaymentmicroservice.controllers;
+package ut.microservices.repaymentMicroService.controllers;
 
 import java.util.HashMap;
 
@@ -12,29 +12,31 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import ut.microservices.repaymentmicroservice.dto.CustomerRepaymentHomePageDTO;
-import ut.microservices.repaymentmicroservice.dto.GenerateVaDTO;
-import ut.microservices.repaymentmicroservice.services.RepaymentService;
+import ut.microservices.repaymentMicroService.dto.CustomerRepaymentHomePageDto;
+import ut.microservices.repaymentMicroService.dto.GenerateVaDto;
+import ut.microservices.repaymentMicroService.services.RepaymentService;
 
-@CrossOrigin
+
 @RestController
 @RequestMapping("/user")
 public class RepaymentCtrl {
 
-  @Autowired
+    @Autowired
 	private RepaymentService repaymentService;
 
-  
-  @PostMapping(value = "/postLoginDetails")
-  public @ResponseBody CustomerRepaymentHomePageDTO postCustomerLogin(@RequestBody HashMap<String, String> param) throws Exception{
-      return repaymentService.postCustomerLogin(param);    
+	@CrossOrigin
+    @PostMapping(value = "/postLoginDetails")
+    public @ResponseBody CustomerRepaymentHomePageDto postCustomerLogin(@RequestBody HashMap<String, String> param) throws Exception{
+        return repaymentService.postCustomerLogin(param);    
 	}
-    
-  @PostMapping("/makeLoanRepayment")
-  public @ResponseBody GenerateVaDTO makeLoanRepayment(@RequestBody HashMap<String, String> userdata) throws Exception{
-    return repaymentService.makeLoanRepayment(userdata);
+
+    @CrossOrigin
+    @PostMapping("/makeLoanRepayment")
+    public @ResponseBody GenerateVaDto makeLoanRepayment(@RequestBody HashMap<String, String> userdata) throws Exception{
+		 return repaymentService.makeLoanRepayment(userdata);
   }
-  
+
+  @CrossOrigin
   @GetMapping(path = "/getRepaymentData/{VaNumber}")
   public @ResponseBody String loanDataForReconcile(@PathVariable String VaNumber) throws Exception {
     return repaymentService.loanDataForReconcile(VaNumber);

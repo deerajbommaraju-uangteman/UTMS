@@ -1,4 +1,4 @@
-package ut.microservices.repaymentmicroservice.aspect;
+package ut.microservices.repaymentMicroService.aspect;
 
 import java.util.Arrays;
 
@@ -34,9 +34,9 @@ public class LoggingAspect {
     /**
      * Pointcut that matches all Spring beans in the application's main packages.
      */
-    @Pointcut("within(ut.microservices.repaymentmicroservice..*)" +
-        " || within(ut.microservices.repaymentmicroservice.services..*)" +
-        " || within(ut.microservices.repaymentmicroservice.controllers..*)")
+    @Pointcut("within(ut.microservices.repaymentMicroService..*)" +
+        " || within(ut.microservices.repaymentMicroService.services..*)" +
+        " || within(ut.microservices.repaymentMicroService.controllers..*)")
     public void applicationPackagePointcut() {
         // Method is empty as this is just a Pointcut, the implementations are in the advices.
     }

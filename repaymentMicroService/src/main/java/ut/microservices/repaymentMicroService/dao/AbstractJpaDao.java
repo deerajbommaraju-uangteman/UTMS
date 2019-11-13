@@ -1,4 +1,4 @@
-package ut.microservices.repaymentmicroservice.dao;
+package ut.microservices.repaymentMicroService.dao;
 
 import java.io.Serializable;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 // @SuppressWarnings("unchecked")
 @Transactional
-public abstract class AbstractJpaDAO<T extends Serializable> {
+public abstract class AbstractJpaDao<T extends Serializable> {
 
     @PersistenceContext
     EntityManager entityManager;
@@ -58,6 +58,11 @@ public abstract class AbstractJpaDAO<T extends Serializable> {
         return  entityManager.createQuery( "from " + clazz.getName() + " e " + " where " + " e.VaNumber='"+ VaNumber + "'").getResultList(); 
 
      }
+
+   //   public List<T> findByLoanId(String LoanApplicationID) {
+   //      System.out.println(LoanApplicationID);
+   //      return  entityManager.createQuery( "from " + clazz.getName() + " e " + " where " + " e.LoanApplicationID='"+ LoanApplicationID + "'").getResultList(); 
+   //   }
 
      public List<T> findValueByColumn(String column, String value){
          System.out.println(clazz.getName()+"::"+column+"::"+value+"::");

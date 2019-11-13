@@ -1,4 +1,4 @@
-package ut.microservices.repaymentmicroservice.repositories;
+package ut.microservices.repaymentMicroService.repositories;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
-import ut.microservices.repaymentmicroservice.models.CustomerVaHistory;
+import ut.microservices.repaymentMicroService.models.CustomerVaHistory;
 
 @Component
 @Repository

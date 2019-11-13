@@ -1,4 +1,4 @@
-package ut.microservices.repaymentmicroservice.services;
+package ut.microservices.repaymentMicroService.services;
 
 import java.net.InetAddress;
 import java.util.Arrays;
@@ -11,19 +11,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ut.microservices.repaymentmicroservice.dao.IGenericDAO;
-import ut.microservices.repaymentmicroservice.models.LogsCallback;
+import ut.microservices.repaymentMicroService.dao.IGenericDao;
+import ut.microservices.repaymentMicroService.models.LogsCallback;
 
 @Service
 @Transactional
 public class CallbackService {
 
-    IGenericDAO<LogsCallback> logsCallbackDAO;
+    IGenericDao<LogsCallback> logsCallbackDao;
 
     @Autowired
-    public void setDAO(IGenericDAO<LogsCallback> logsCallbackDAO) {
-        this.logsCallbackDAO = logsCallbackDAO;
-        logsCallbackDAO.setClazz(LogsCallback.class);
+    public void setDao(IGenericDao<LogsCallback> daoToSet) {
+        logsCallbackDao = daoToSet;
+        logsCallbackDao.setClazz(LogsCallback.class);
     }
 
     private String vendors[] = { "Dokualfa", "Dokubca" };
@@ -48,7 +48,7 @@ public class CallbackService {
         if(init){
                 logs.setIsValid(1);
                 logs.setDescription("Ip Address accepted for payment Inquiry");
-                logsCallbackDAO.save(logs);
+                logsCallbackDao.save(logs);
                 switch(data.get("vendor")){
                     case "Dokualfa":
                         return repaymentService.getDokuInquiry(data);
@@ -63,7 +63,7 @@ public class CallbackService {
             // fill logs callback as invalid vendor type specified!!
                 logs.setIsValid(0);
                 logs.setDescription("Invalid vendor type specified!!");
-                logsCallbackDAO.save(logs);           
+                logsCallbackDao.save(logs);           
         }
         
         return "callback execution failed";
@@ -83,7 +83,7 @@ public class CallbackService {
         if(init){
                 logs.setIsValid(1);
                 logs.setDescription("Ip Address accepted for payment Notify");
-                logsCallbackDAO.save(logs);
+                logsCallbackDao.save(logs);
                 switch(data.get("vendor")){
                     case "Dokubca":
                         return repaymentService.setAsDokuPaid(data);
@@ -95,7 +95,7 @@ public class CallbackService {
             // fill logs callback as invalid vendor type specified!!
                 logs.setIsValid(0);
                 logs.setDescription("Invalid vendor type specified!!");
-                logsCallbackDAO.save(logs);           
+                logsCallbackDao.save(logs);           
         }
         
         return "Notify callback execution failed";
