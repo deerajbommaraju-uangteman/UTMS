@@ -1,4 +1,4 @@
-package ut.microservices.loanApplicationMicroService.model;
+package ut.microservices.loanapplicationmicroservice.model;
 
 import java.io.Serializable;
 import java.util.Date;

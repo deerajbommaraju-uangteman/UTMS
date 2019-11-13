@@ -1,4 +1,4 @@
-package ut.microservices.loanApplicationMicroService.repository;
+package ut.microservices.loanapplicationmicroservice.repository;
 
 import java.io.Serializable;
 import java.util.List;
@@ -8,12 +8,10 @@ import javax.persistence.PersistenceContext;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import ut.microservices.loanApplicationMicroService.model.*;
 
-public abstract class AbstractJpaDao<T extends Serializable> {
+public abstract class AbstractJpaDAO<T extends Serializable> {
    private Class<T> clazz;
  
    @PersistenceContext

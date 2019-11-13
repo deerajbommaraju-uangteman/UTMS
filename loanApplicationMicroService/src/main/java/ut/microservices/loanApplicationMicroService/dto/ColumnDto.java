@@ -1,6 +1,10 @@
-package ut.microservices.loanApplicationMicroService.dto;
+package ut.microservices.loanapplicationmicroservice.dto;
 
-public class ColumnDto{
+/**
+ * ColumnDTO
+ */
+public class ColumnDTO {
+
     public String title;
     public String dataIndex;
     public String key;

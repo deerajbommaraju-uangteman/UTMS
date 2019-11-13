@@ -1,4 +1,4 @@
-package ut.microservices.loanApplicationMicroService;
+package ut.microservices.loanapplicationmicroservice;
 
 import org.junit.BeforeClass;
 import org.junit.Test;

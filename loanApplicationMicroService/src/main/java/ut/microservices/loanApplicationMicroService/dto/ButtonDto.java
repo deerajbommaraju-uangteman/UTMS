@@ -1,6 +1,8 @@
-package ut.microservices.loanApplicationMicroService.dto;
-
-public class ButtonDto {
+package ut.microservices.loanapplicationmicroservice.dto;
+/**
+ * ButtonDTO
+ */
+public class ButtonDTO {
 
     public String title;
     public String key;

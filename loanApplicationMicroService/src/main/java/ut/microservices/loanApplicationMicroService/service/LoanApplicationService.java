@@ -1,4 +1,4 @@
-package ut.microservices.loanApplicationMicroService.service;
+package ut.microservices.loanapplicationmicroservice.service;
 
 import java.io.InputStream;
 import java.io.Serializable;
@@ -20,11 +20,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ut.microservices.loanapplicationmicroservice.dto.*;
+import ut.microservices.loanapplicationmicroservice.model.*;
+import ut.microservices.loanapplicationmicroservice.repository.*;
 
-import ut.microservices.loanApplicationMicroService.model.ApplicantData;
-import ut.microservices.loanApplicationMicroService.model.ApplicationData;
-import ut.microservices.loanApplicationMicroService.model.TempApplicantDataModel;
-import ut.microservices.loanApplicationMicroService.repository.IGenericDao;
 
 @Service
 public class LoanApplicationService {
@@ -34,49 +33,49 @@ public class LoanApplicationService {
     @Autowired
     KafkaTemplate<String, String> kafkaTemplate;
 
-    IGenericDao<TempApplicantDataModel> tempApplicantDao;
-    IGenericDao<ApplicantData> applicantDao;
-    IGenericDao<ApplicationData> applicationDao;
+    IGenericDAO<TempApplicantDataModel> tempApplicantDAO;
+    IGenericDAO<ApplicantData> applicantDAO;
+    IGenericDAO<ApplicationData> applicationDAO;
 
     @Autowired
-    public void setApplicantDao(IGenericDao<ApplicantData> daoToSet) {
-        applicantDao = daoToSet;
-        applicantDao.setClazz(ApplicantData.class);
+    public void setApplicantDAO(IGenericDAO<ApplicantData> DAOToSet) {
+        applicantDAO = DAOToSet;
+        applicantDAO.setClazz(ApplicantData.class);
     }
 
     @Autowired
-    public void setApplicationDao(IGenericDao<ApplicationData> daoToSet) {
-        applicationDao = daoToSet;
-        applicationDao.setClazz(ApplicationData.class);
+    public void setApplicationDAO(IGenericDAO<ApplicationData> DAOToSet) {
+        applicationDAO = DAOToSet;
+        applicationDAO.setClazz(ApplicationData.class);
     }
 
     @Autowired
-    public void setTempDao(IGenericDao<TempApplicantDataModel> daoToSet) {
-        tempApplicantDao = daoToSet;
-        tempApplicantDao.setClazz(TempApplicantDataModel.class);
+    public void setTempDAO(IGenericDAO<TempApplicantDataModel> DAOToSet) {
+        tempApplicantDAO = DAOToSet;
+        tempApplicantDAO.setClazz(TempApplicantDataModel.class);
     }
 
     @Autowired
     private ObjectMapper objectMapper;
 
     public String newApplicationStarted(TempApplicantDataModel application) {
-            System.out.println("application::"+application);
+            // System.out.println("application::"+application);
             String emailvaildate=emailValidate(application.getEmailAddress());
-            String responseTempID = tempApplicantDao.save(application).toString();
+            String responseTempID = tempApplicantDAO.save(application).toString();
             return responseTempID;
     }
 
     public String newApplicationEnded(TempApplicantDataModel application) {
-        List<TempApplicantDataModel> applicantList = tempApplicantDao.findValueByColumn("ID", application.getID().toString());
+        List<TempApplicantDataModel> applicantList = tempApplicantDAO.findValueByColumn("ID", application.getID().toString());
         TempApplicantDataModel applicantData = applicantList.get(0);
         applicantData.setformData(application);
-        tempApplicantDao.updateOne(applicantData);
+        tempApplicantDAO.updateOne(applicantData);
         if(application.getFormID().equals("form9")){
         Boolean CRE_accept = this.CRECheck();
         if(CRE_accept){
             int applicantID=this.newApplicationReceived(applicantData);
             applicantData.setApplicantID(applicantID);
-            tempApplicantDao.updateOne(applicantData);
+            tempApplicantDAO.updateOne(applicantData);
             return "Application Saved Successfully";
             }
         }
@@ -98,7 +97,7 @@ public class LoanApplicationService {
             
             ApplicantData applicantData = objectMapper.readValue(objectMapper.writeValueAsString(application), ApplicantData.class);
             applicantData.setApplicantIDTemp(application.getID());
-            int applicantID =(int) applicantDao.save(applicantData); 
+            int applicantID =(int) applicantDAO.save(applicantData); 
             String LoanIdEncrypt=applicantData.getPersonalIDNumber();
             String year=String.valueOf(Calendar.getInstance().get(Calendar.YEAR));
             ApplicationData applicationData=new ApplicationData();
@@ -110,7 +109,7 @@ public class LoanApplicationService {
             applicationData.setLoanStartDateTime(Calendar.getInstance().getTime());
             applicationData.setLoanDueDateTime(Calendar.getInstance().getTime());
             applicationData.setStatus("DV");
-            String applicationID= applicationDao.save(applicationData).toString();
+            String applicationID= applicationDAO.save(applicationData).toString();
             return applicantID;
         }  catch (Exception e) {
             e.printStackTrace();
@@ -121,11 +120,11 @@ public class LoanApplicationService {
 
     public String getApplicationData(String ApplicationID) throws JsonProcessingException {
         HashMap<String, Object> data = new HashMap<String, Object>();
-        ApplicationData applicationData = applicationDao.findValueByColumn("LoanApplicationID", ApplicationID).get(0);
-        ApplicantData applicantData = applicantDao.findValueByColumn("ApplicantID", applicationData.getApplicationApplicantID().toString()).get(0);
+        ApplicationData applicationData = applicationDAO.findValueByColumn("LoanApplicationID", ApplicationID).get(0);
+        ApplicantData applicantData = applicantDAO.findValueByColumn("ApplicantID", applicationData.getApplicationApplicantID().toString()).get(0);
         data.put("ApplicantData", applicantData);
         data.put("ApplicationData", applicationData);
-        System.out.println("data::"+data);
+        // System.out.println("data::"+data);
         return objectMapper.writeValueAsString(data);
     }
     

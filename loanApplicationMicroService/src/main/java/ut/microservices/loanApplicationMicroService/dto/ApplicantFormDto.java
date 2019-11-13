@@ -1,6 +1,8 @@
-package ut.microservices.loanApplicationMicroService.dto;
-
-public class ApplicantFormDto{
+package ut.microservices.loanapplicationmicroservice.dto;
+/**
+ * ApplicantFormDTO
+ */
+public class ApplicantFormDTO {
 
     private 	Integer	ApplicantID;
     private 	String	Fullname;
