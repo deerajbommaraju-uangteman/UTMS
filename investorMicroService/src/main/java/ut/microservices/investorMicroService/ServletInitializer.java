@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService;
+package ut.microservices.investormicroservice;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;

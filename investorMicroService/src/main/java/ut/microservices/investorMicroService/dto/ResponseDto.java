@@ -1,12 +1,12 @@
-package ut.microservices.investorMicroService.dto;
+package ut.microservices.investormicroservice.dto;
 
 import java.util.HashMap;
 import java.util.List;
 
-public class ResponseDto<T> {
+public class ResponseDTO<T> {
     private List<T> rows;
-    private List<ColumnDto> columns;
-    private List<ButtonDto> button;
+    private List<ColumnDTO> columns;
+    private List<ButtonDTO> button;
     private HashMap<String,String> additionalData;
 
     public List<T> getRows() {
@@ -17,19 +17,19 @@ public class ResponseDto<T> {
         this.rows = rows;
     }
 
-    public List<ColumnDto> getColumns() {
+    public List<ColumnDTO> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<ColumnDto> columns) {
+    public void setColumns(List<ColumnDTO> columns) {
         this.columns = columns;
     }
 
-    public List<ButtonDto> getButton() {
+    public List<ButtonDTO> getButton() {
         return button;
     }
 
-    public void setButton(List<ButtonDto> buttons) {
+    public void setButton(List<ButtonDTO> buttons) {
         this.button = buttons;
     }
 

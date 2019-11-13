@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService.aspect;
+package ut.microservices.investormicroservice.aspect;
 import java.util.Arrays;
 
 import org.aspectj.lang.JoinPoint;

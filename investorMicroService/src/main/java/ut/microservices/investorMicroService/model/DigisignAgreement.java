@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService.model;
+package ut.microservices.investormicroservice.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

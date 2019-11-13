@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService.repository;
+package ut.microservices.investormicroservice.repository;
 
 import java.io.Serializable;
 import java.util.List;
@@ -7,7 +7,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 
-public abstract class AbstractJpaDao<T extends Serializable> {
+public abstract class AbstractJpaDAO<T extends Serializable> {
  
    private Class< T > clazz;
   

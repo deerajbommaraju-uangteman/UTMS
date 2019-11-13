@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService.service;
+package ut.microservices.investormicroservice.service;
 
 import org.springframework.stereotype.Service;
 
