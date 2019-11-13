@@ -1,6 +1,4 @@
-package ut.microservices.loanApplicationMicroService.model;
-
-import static org.mockito.ArgumentMatchers.notNull;
+package ut.microservices.loanapplicationmicroservice.model;
 
 import java.io.Serializable;
 import java.sql.Date;

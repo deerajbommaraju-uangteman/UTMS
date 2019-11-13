@@ -1,4 +1,4 @@
-package ut.microservices.loanApplicationMicroService.model;
+package ut.microservices.loanapplicationmicroservice.model;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -244,10 +244,12 @@ public class ApplicantData implements Serializable{
     @JsonProperty(value="MaritalStatus",required=true)
     private String MaritalStatus;
     
-    @Column(name = "amountchild", nullable = true)
+    @Column(name = "AmountChild", nullable = true)
+    @JsonProperty(value="AmountChild",required=true)
     private Integer AmountChild;
     
     @Column(name = "MonthlyIncome", nullable = true)
+    @JsonProperty(value="MonthlyIncome",required=true)
     private Double MonthlyIncome;
     
     @Column(name = "HllWork", nullable = true)
@@ -342,6 +344,7 @@ public class ApplicantData implements Serializable{
     private Integer KnowUT;
     
     @Column(name = "Campaign", nullable = true)
+    @JsonProperty(value="Campaign",required=true)
     private String Campaign;
     
     // @Column(name = "Banned")
@@ -369,9 +372,9 @@ public class ApplicantData implements Serializable{
     @Column(name = "IDEmployerIndustry", nullable = true)
     private Integer IDEmployerIndustry;
     
-    @Column(name = "MotherFullname", nullable = true)
+    @Column(name = "MotherFullName", nullable = true)
     @JsonProperty(value="MotherFullName",required=true)
-    private String MotherFullname;
+    private String MotherFullName;
 
     @Column(name = "AddressRT", nullable = true)
     @JsonProperty(value="AddressRT",required=true)
@@ -382,72 +385,95 @@ public class ApplicantData implements Serializable{
     private String AddressRW;
 
     @Column(name = "SpouseName", nullable = true)
+    @JsonProperty(value="SpouseName",required=true)
     private String SpouseName;
 
     @Column(name = "SpousePersonalID", nullable = true)
+    @JsonProperty(value="SpousePersonalID",required=true)
     private String SpousePersonalID;
 
     @Column(name = "SpouseFamilyID", nullable = true)
+    @JsonProperty(value="SpouseFamilyID",required=true)
     private String SpouseFamilyID;
 
     @Column(name = "SpouseAddress", nullable = true)
+    @JsonProperty(value="SpouseAddress",required=true)
     private String SpouseAddress;
     
     @Column(name = "SpouseAddressRT", nullable = true)
+    @JsonProperty(value="SpouseAddressRT",required=true)
     private String SpouseAddressRT;
     
     @Column(name = "SpouseAddressRW", nullable = true)
+    @JsonProperty(value="SpouseAddressRW",required=true)
     private String SpouseAddressRW;
 
     @Column(name = "SpouseVillage", nullable = true)
+    @JsonProperty(value="SpouseVillage",required=true)
     private String SpouseVillage;
 
     @Column(name = "SpouseDistrict", nullable = true)
+    @JsonProperty(value="SpouseDistrict",required=true)
     private String SpouseDistrict;
 
     @Column(name = "SpouseCity", nullable = true)
+    @JsonProperty(value="SpouseCity",required=true)
     private String SpouseCity;
 
     @Column(name = "SpouseProvince", nullable = true)
+    @JsonProperty(value="SpouseProvince",required=true)
     private String SpouseProvince;
 
     @Column(name = "SpousePostalCode", nullable = true)
+    @JsonProperty(value="SpousePostalCode",required=true)
     private String SpousePostalCode;
 
     @Column(name = "SpouseWorkName", nullable = true)
+    @JsonProperty(value="SpouseWorkName",required=true)
     private String SpouseWorkName;
 
     @Column(name = "SpouseWorkAddress", nullable = true)
+    @JsonProperty(value="SpouseWorkAddress",required=true)
     private String SpouseWorkAddress;
     
     @Column(name = "SpouseWorkTelephone", nullable = true)
+    @JsonProperty(value="SpouseWorkTelephone",required=true)
     private String SpouseWorkTelephone;
     
     @Column(name = "SpouseWorkAddressRT", nullable = true)
+    @JsonProperty(value="SpouseWorkAddressRT",required=true)
     private String SpouseWorkAddressRT;
     
     @Column(name = "SpouseWorkAddressRW", nullable = true)
+    @JsonProperty(value="SpouseWorkAddressRW",required=true)
     private String SpouseWorkAddressRW;
     
     @Column(name = "SpouseWorkVillage", nullable = true)
+    @JsonProperty(value="SpouseWorkVillage",required=true)
     private String SpouseWorkVillage;
     
     @Column(name = "SpouseWorkDistrict", nullable = true)
+    @JsonProperty(value="SpouseWorkDistrict",required=true)
     private String SpouseWorkDistrict;
 
     @Column(name = "SpouseWorkCity", nullable = true)
+    @JsonProperty(value="SpouseWorkCity",required=true)
     private Integer SpouseWorkCity;
     
     @Column(name = "SpouseWorkProvince", nullable = true)
+    @JsonProperty(value="SpouseWorkProvince",required=true)
     private String SpouseWorkProvince;
 
     @Column(name = "SpouseWorkPostalCode", nullable = true)
+    @JsonProperty(value="SpouseWorkPostalCode",required=true)
     private String SpouseWorkPostalCode;
     
     @Column(name = "IsPartnerWorking", nullable = true)
+    @JsonProperty(value="IsPartnerWorking",required=true)
     private Integer IsPartnerWorking;
     
     @Column(name = "SpouseMonthlyIncome", nullable = true)
+    @JsonProperty(value="SpouseMonthlyIncome",required=true)
     private Double SpouseMonthlyIncome;
 
     @Column(name="CreatedAt",nullable = false)

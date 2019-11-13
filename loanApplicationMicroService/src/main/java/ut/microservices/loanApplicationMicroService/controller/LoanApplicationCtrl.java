@@ -1,4 +1,4 @@
-package ut.microservices.loanApplicationMicroService.controller;
+package ut.microservices.loanapplicationmicroservice.controller;
 
 import java.util.HashMap;
 
@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import ut.microservices.loanApplicationMicroService.model.TempApplicantDataModel;
-import ut.microservices.loanApplicationMicroService.service.LoanApplicationService;
+import ut.microservices.loanapplicationmicroservice.model.*;
+import ut.microservices.loanapplicationmicroservice.service.*;
 
 @RestController
 @RequestMapping("/application-form")
@@ -27,7 +27,7 @@ public class LoanApplicationCtrl {
   @CrossOrigin
   @PostMapping(path = "/received")
   public String newApplicationReceived(@RequestBody TempApplicantDataModel application) {
-    System.out.println(application);
+    // //System.out.println(application);
     if(application.getID() != null) {
       return loanApplicationService.newApplicationEnded(application);
     }
@@ -38,7 +38,7 @@ public class LoanApplicationCtrl {
   @GetMapping(path = "/getApplicationData/{ApplicationID}")
   public @ResponseBody String getApplicationData(@PathVariable String ApplicationID) throws JsonProcessingException {
 
-    System.out.println(loanApplicationService.getApplicationData(ApplicationID));
+    //System.out.println(loanApplicationService.getApplicationData(ApplicationID));
     return "ass"; 
   }
   
@@ -46,7 +46,7 @@ public class LoanApplicationCtrl {
   @GetMapping(path = "/getDistrictData")
   public @ResponseBody String getDistrictData() throws JsonProcessingException {
 
-    System.out.println(loanApplicationService.getDistrictData());
+    //System.out.println(loanApplicationService.getDistrictData());
     return "ass"; 
   }
   

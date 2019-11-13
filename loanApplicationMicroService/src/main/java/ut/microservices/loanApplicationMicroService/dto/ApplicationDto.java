@@ -1,6 +1,9 @@
-package ut.microservices.loanApplicationMicroService.dto;
+package ut.microservices.loanapplicationmicroservice.dto;
 
-public class ApplicationDto {
+/**
+ * ApplicationDTO
+ */
+public class ApplicationDTO {
 
     private 	Integer	ApplicationID;
     private 	Integer	ApplicationApplicantID;

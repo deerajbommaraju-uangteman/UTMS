@@ -1,4 +1,4 @@
-package ut.microservices.loanApplicationMicroService.repository;
+package ut.microservices.loanapplicationmicroservice.repository;
 
 import java.io.Serializable;
 
@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @Scope( BeanDefinition.SCOPE_PROTOTYPE)
-public class GenericJpaDao<T extends Serializable> extends AbstractJpaDao<T> implements IGenericDao<T> {
+public class GenericJpaDAO<T extends Serializable> extends AbstractJpaDAO<T> implements IGenericDAO<T> {
 
 }

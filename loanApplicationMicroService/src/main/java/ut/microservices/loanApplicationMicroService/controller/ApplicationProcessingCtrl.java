@@ -1,4 +1,4 @@
-package ut.microservices.loanApplicationMicroService.controller;
+package ut.microservices.loanapplicationmicroservice.controller;
 
 import java.util.HashMap;
 
@@ -12,13 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import ut.microservices.loanApplicationMicroService.dto.ApplicationDto;
-import ut.microservices.loanApplicationMicroService.dto.ResponseDto;
-import ut.microservices.loanApplicationMicroService.model.ApplicantData;
-import ut.microservices.loanApplicationMicroService.service.DVServices;
-import ut.microservices.loanApplicationMicroService.service.ManagerServices;
-import ut.microservices.loanApplicationMicroService.service.StaffServices;
+import ut.microservices.loanapplicationmicroservice.model.*;
+import ut.microservices.loanapplicationmicroservice.dto.*;
+import ut.microservices.loanapplicationmicroservice.service.*;
 
 /**
  * ApplicationProcessingCtrl
@@ -38,8 +34,15 @@ import ut.microservices.loanApplicationMicroService.service.StaffServices;
   
     @CrossOrigin
     @GetMapping(path = "/dvRecievedApplications")
-    public @ResponseBody ResponseDto<ApplicationDto> dvApplicationRecieved() throws Exception {
+    public @ResponseBody ResponseDTO<ApplicationDTO> dvApplicationRecieved() throws Exception {
         return dvService.getAvailableLoans();
+    }
+
+    @CrossOrigin
+    @PostMapping(path = "/testcurl")
+    public String testcurl(@RequestBody String data){
+        //System.out.println("test::"+data);
+        return "failed";
     }
 
     @CrossOrigin
@@ -51,7 +54,7 @@ import ut.microservices.loanApplicationMicroService.service.StaffServices;
     @CrossOrigin
     @PostMapping(path = "/dvSubmitApplicationPersonalDetails")
     public @ResponseBody String dvSubmitApplicationPersonalDetails(@RequestBody ApplicantData ApplicationID) throws JsonProcessingException {
-        System.out.println(ApplicationID);
+        ////System.out.println(ApplicationID);
         return dvService.dvSubmitApplicationPersonalDetails(ApplicationID);
     }
     
@@ -75,7 +78,7 @@ import ut.microservices.loanApplicationMicroService.service.StaffServices;
 
     @CrossOrigin
     @GetMapping(path = "/staffRecievedApplications")
-    public @ResponseBody ResponseDto<ApplicationDto> staffApplicationRecieved() throws Exception {
+    public @ResponseBody ResponseDTO<ApplicationDTO> staffApplicationRecieved() throws Exception {
         return staffService.getAvailableLoans();
     }
 
@@ -93,7 +96,7 @@ import ut.microservices.loanApplicationMicroService.service.StaffServices;
 
     @CrossOrigin
     @GetMapping(path = "/managerRecievedApplications")
-    public @ResponseBody ResponseDto<ApplicationDto> managerApplicationRecieved() throws Exception {
+    public @ResponseBody ResponseDTO<ApplicationDTO> managerApplicationRecieved() throws Exception {
         return managerService.getAvailableLoans();
     }
 

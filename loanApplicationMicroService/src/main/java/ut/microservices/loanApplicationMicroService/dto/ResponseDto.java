@@ -1,11 +1,11 @@
-package ut.microservices.loanApplicationMicroService.dto;
+package ut.microservices.loanapplicationmicroservice.dto;
 
 import java.util.List;
 
-public class ResponseDto<T> {
+public class ResponseDTO<T> {
     private List<T> rows;
-    private List<ColumnDto> columns;
-    private List<ButtonDto> button;
+    private List<ColumnDTO> columns;
+    private List<ButtonDTO> button;
 
     public List<T> getRows() {
         return rows;
@@ -15,19 +15,19 @@ public class ResponseDto<T> {
         this.rows = rows;
     }
 
-    public List<ColumnDto> getColumns() {
+    public List<ColumnDTO> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<ColumnDto> columns) {
+    public void setColumns(List<ColumnDTO> columns) {
         this.columns = columns;
     }
 
-    public List<ButtonDto> getButton() {
+    public List<ButtonDTO> getButton() {
         return button;
     }
 
-    public void setButton(List<ButtonDto> button) {
+    public void setButton(List<ButtonDTO> button) {
         this.button = button;
     }
 
