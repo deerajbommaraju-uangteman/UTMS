@@ -1,0 +1,14 @@
+
+*.prefs
+*.class
+investorMicroService/.classpath
+investorMicroService/.factorypath
+investorMicroService/.project
+repaymentMicroService/.classpath
+repaymentMicroService/.project
+repaymentMicroService/.factorypath
+.vscode/settings.json
+*.properties
+*.json
+investorMicroService/src/main/resources/application.properties
+investorMicroService/src/main/resources/application.properties

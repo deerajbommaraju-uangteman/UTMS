@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService.kafkaconfig;
+package ut.microservices.investormicroservice.kafkaconfig;
 
 import java.util.HashMap;
 import java.util.Map;

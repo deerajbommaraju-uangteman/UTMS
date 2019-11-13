@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService.service;
+package ut.microservices.investormicroservice.service;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,19 +15,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import ut.microservices.investorMicroService.dto.ColumnDto;
-import ut.microservices.investorMicroService.dto.InvestorFundedLoansDto;
-import ut.microservices.investorMicroService.dto.ResponseDto;
-import ut.microservices.investorMicroService.model.InvestorVAHistory;
-import ut.microservices.investorMicroService.model.LoanInvestment;
-import ut.microservices.investorMicroService.repository.IGenericDao;
+import ut.microservices.investormicroservice.dto.ColumnDTO;
+import ut.microservices.investormicroservice.dto.InvestorFundedLoansDTO;
+import ut.microservices.investormicroservice.dto.ResponseDTO;
+import ut.microservices.investormicroservice.model.InvestorVAHistory;
+import ut.microservices.investormicroservice.model.LoanInvestment;
+import ut.microservices.investormicroservice.repository.IGenericDAO;
 
 @Service
 @Transactional
 public class VAGenerationService {
 
-  IGenericDao<LoanInvestment> loanInvestmentDao;
-  IGenericDao<InvestorVAHistory> investorVAHistoryDao;
+  IGenericDAO<LoanInvestment> loanInvestmentDAO;
+  IGenericDAO<InvestorVAHistory> investorVAHistoryDAO;
 
   @Autowired
   KafkaTemplate<String, String> kafkaTemplate;
@@ -39,27 +39,27 @@ public class VAGenerationService {
   DatabaseService databaseService;
 
   @Autowired
-  public void setLoanInvestmentDao(IGenericDao<LoanInvestment> daoToSet) {
-    loanInvestmentDao = daoToSet;
-    loanInvestmentDao.setClazz(LoanInvestment.class);
+  public void setLoanInvestmentDAO(IGenericDAO<LoanInvestment> loanInvestmentDAO) {
+    this.loanInvestmentDAO = loanInvestmentDAO;
+    this.loanInvestmentDAO.setClazz(LoanInvestment.class);
   }
 
   @Autowired
-  public void setInvestorVAHistoryDao(IGenericDao<InvestorVAHistory> daoToSet2) {
-    investorVAHistoryDao = daoToSet2;
-    investorVAHistoryDao.setClazz(InvestorVAHistory.class);
+  public void setInvestorVAHistoryDAO(IGenericDAO<InvestorVAHistory> investorVAHistoryDAO) {
+    this.investorVAHistoryDAO = investorVAHistoryDAO;
+    this.investorVAHistoryDAO.setClazz(InvestorVAHistory.class);
   }
 
-  public ResponseDto<InvestorFundedLoansDto> confirmationFunding() throws Exception {
+  public ResponseDTO<InvestorFundedLoansDTO> confirmationFunding() throws Exception {
     //Based on Loan State 'W'...loans are retrieved
-    List<LoanInvestment> fundedLoansList = loanInvestmentDao.findBy("State","W");
+    List<LoanInvestment> fundedLoansList = loanInvestmentDAO.findBy("State","W");
     //For now Investor ID is considered as 1
     if(fundedLoansList.isEmpty()){
-      return new ResponseDto<InvestorFundedLoansDto>();
+      return new ResponseDTO<InvestorFundedLoansDTO>();
     }
     int investorID=1;
     Integer vaNumber = null;
-    List<InvestorVAHistory> investorVAHistory=investorVAHistoryDao.findVANumberByInvestorID(investorID);
+    List<InvestorVAHistory> investorVAHistory=investorVAHistoryDAO.findVANumberByInvestorID(investorID);
     Iterator<LoanInvestment> iterator=fundedLoansList.iterator();
     if(!fundedLoansList.isEmpty()){
       if(investorVAHistory.isEmpty()){
@@ -75,7 +75,7 @@ public class VAGenerationService {
         vaNumber=investorVAHistory.get(0).getVaNumber();
         while(iterator.hasNext()){
           LoanInvestment loan=iterator.next();
-          if(investorVAHistoryDao.findBy("loanAppID",loan.getLoanAppID()).isEmpty()){
+          if(investorVAHistoryDAO.findBy("loanAppID",loan.getLoanAppID()).isEmpty()){
             databaseService.insertRecordToInvestorVAHistory(loan, vaNumber);
           };
         }
@@ -84,10 +84,10 @@ public class VAGenerationService {
     return getResponseBody(fundedLoansList,vaNumber);
   }
 
-  private ResponseDto<InvestorFundedLoansDto> getResponseBody(List<LoanInvestment> fundedLoansList, Integer vaNumber) {
+  private ResponseDTO<InvestorFundedLoansDTO> getResponseBody(List<LoanInvestment> fundedLoansList, Integer vaNumber) {
     Iterator<LoanInvestment> iterator=fundedLoansList.iterator();
-    ResponseDto<InvestorFundedLoansDto> response=new ResponseDto<InvestorFundedLoansDto>();
-    List<InvestorFundedLoansDto> rows=new LinkedList<InvestorFundedLoansDto>();
+    ResponseDTO<InvestorFundedLoansDTO> response=new ResponseDTO<InvestorFundedLoansDTO>();
+    List<InvestorFundedLoansDTO> rows=new LinkedList<InvestorFundedLoansDTO>();
     int key=0;
 
     //Preparing Rows Data
@@ -95,15 +95,15 @@ public class VAGenerationService {
     while(iterator.hasNext()){
       key++;
       LoanInvestment loan=iterator.next();
-      InvestorFundedLoansDto investorFundedLoansDto=new InvestorFundedLoansDto();
-      investorFundedLoansDto.setKey(Integer.toString(key));
-      investorFundedLoansDto.setApplicationID(Integer.toString(loan.getApplicationID()));
-      investorFundedLoansDto.setID(Long.toString(loan.getID()));
-      investorFundedLoansDto.setLoanAmount(Double.toString(loan.getLoanAmount()));
-      investorFundedLoansDto.setLoanAppID(loan.getLoanAppID());
-      investorFundedLoansDto.setLoanTenor(Integer.toString(loan.getLoanTenor()));
+      InvestorFundedLoansDTO investorFundedLoansDTO=new InvestorFundedLoansDTO();
+      investorFundedLoansDTO.setKey(Integer.toString(key));
+      investorFundedLoansDTO.setApplicationID(Integer.toString(loan.getApplicationID()));
+      investorFundedLoansDTO.setID(Long.toString(loan.getID()));
+      investorFundedLoansDTO.setLoanAmount(Double.toString(loan.getLoanAmount()));
+      investorFundedLoansDTO.setLoanAppID(loan.getLoanAppID());
+      investorFundedLoansDTO.setLoanTenor(Integer.toString(loan.getLoanTenor()));
       totalAmount+=loan.getLoanAmount();
-      rows.add(investorFundedLoansDto);
+      rows.add(investorFundedLoansDTO);
     }
     response.setRows(rows);
 
@@ -114,13 +114,13 @@ public class VAGenerationService {
     tableColumns.put("loanAmount", "Loan Amount");
     tableColumns.put("loanTenor", "Loan Tenor");
     tableColumns.put("applicationID", "Application ID");
-    List<ColumnDto> columns=new LinkedList<ColumnDto>();
+    List<ColumnDTO> columns=new LinkedList<ColumnDTO>();
     for(Map.Entry<String,String> entry : tableColumns.entrySet()){
-      ColumnDto columnDto=new ColumnDto();
-      columnDto.setKey(entry.getKey());
-      columnDto.setTitle(entry.getValue());
-      columnDto.setDataIndex(entry.getKey());
-      columns.add(columnDto);
+      ColumnDTO columnDTO=new ColumnDTO();
+      columnDTO.setKey(entry.getKey());
+      columnDTO.setTitle(entry.getValue());
+      columnDTO.setDataIndex(entry.getKey());
+      columns.add(columnDTO);
     }
     response.setColumns(columns);
     

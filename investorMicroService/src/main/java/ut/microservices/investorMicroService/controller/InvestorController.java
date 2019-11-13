@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService.controller;
+package ut.microservices.investormicroservice.controller;
 
 import java.util.HashMap;
 
@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import ut.microservices.investorMicroService.dto.AvailableLoansDto;
-import ut.microservices.investorMicroService.dto.DigisignDocumentsDto;
-import ut.microservices.investorMicroService.dto.InvestorFundedLoansDto;
-import ut.microservices.investorMicroService.dto.ResponseDto;
-import ut.microservices.investorMicroService.service.DigisignService;
-import ut.microservices.investorMicroService.service.InvestorDashboardService;
-import ut.microservices.investorMicroService.service.PaymentService;
-import ut.microservices.investorMicroService.service.VAGenerationService;
+import ut.microservices.investormicroservice.dto.AvailableLoansDTO;
+import ut.microservices.investormicroservice.dto.DigisignDocumentsDTO;
+import ut.microservices.investormicroservice.dto.InvestorFundedLoansDTO;
+import ut.microservices.investormicroservice.dto.ResponseDTO;
+import ut.microservices.investormicroservice.service.DigisignService;
+import ut.microservices.investormicroservice.service.InvestorDashboardService;
+import ut.microservices.investormicroservice.service.PaymentService;
+import ut.microservices.investormicroservice.service.VAGenerationService;
 
 @RestController
 @RequestMapping("/ut/investor")
@@ -42,16 +42,16 @@ public class InvestorController {
         return null;
     }
 
-    @CrossOrigin
-    @PostMapping("/approveLoan")
-    public String approveLoan(String loanAppID, Double loanAmount, Integer ApplicationID, Integer loanTenor)
-            throws Exception {
-        return investorDashboardservice.approveLoan(loanAppID, loanAmount, ApplicationID, loanTenor);
-    }
+    // @CrossOrigin
+    // @PostMapping("/approveLoan")
+    // public String approveLoan(String loanAppID, Double loanAmount, Integer ApplicationID, Integer loanTenor)
+    //         throws Exception {
+    //     return investorDashboardservice.approveLoan(loanAppID, loanAmount, ApplicationID, loanTenor);
+    // }
 
     @CrossOrigin
     @GetMapping("/available-loan")
-    public @ResponseBody ResponseDto<AvailableLoansDto> getAvailableLoans() throws Exception{
+    public @ResponseBody ResponseDTO<AvailableLoansDTO> getAvailableLoans() throws Exception{
       return investorDashboardservice.getAvailableLoans();
     }
 
@@ -69,7 +69,7 @@ public class InvestorController {
     
     @CrossOrigin
     @GetMapping("confirmation-funding")
-    public @ResponseBody ResponseDto<InvestorFundedLoansDto> confirmationFunding() throws Exception{
+    public @ResponseBody ResponseDTO<InvestorFundedLoansDTO> confirmationFunding() throws Exception{
         return vaGenerationService.confirmationFunding();
     }
 
@@ -81,7 +81,7 @@ public class InvestorController {
 
     @CrossOrigin
     @GetMapping("investor-documents")
-    public @ResponseBody ResponseDto<DigisignDocumentsDto> digisignDocuments() throws Exception{
+    public @ResponseBody ResponseDTO<DigisignDocumentsDTO> digisignDocuments() throws Exception{
         String investorID="1";
         return digisignService.digisignDocuments(investorID);
     }

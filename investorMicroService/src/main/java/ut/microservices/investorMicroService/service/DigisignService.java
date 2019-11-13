@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService.service;
+package ut.microservices.investormicroservice.service;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -14,15 +14,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ut.microservices.investorMicroService.dto.ButtonDto;
-import ut.microservices.investorMicroService.dto.ColumnDto;
-import ut.microservices.investorMicroService.dto.DigisignDocumentsDto;
-import ut.microservices.investorMicroService.dto.ResponseDto;
-import ut.microservices.investorMicroService.model.DigisignAgreement;
-import ut.microservices.investorMicroService.model.InvestorFundingHistory;
-import ut.microservices.investorMicroService.model.InvestorVAHistory;
-import ut.microservices.investorMicroService.model.LoanInvestment;
-import ut.microservices.investorMicroService.repository.IGenericDao;
+import ut.microservices.investormicroservice.dto.ButtonDTO;
+import ut.microservices.investormicroservice.dto.ColumnDTO;
+import ut.microservices.investormicroservice.dto.DigisignDocumentsDTO;
+import ut.microservices.investormicroservice.dto.ResponseDTO;
+import ut.microservices.investormicroservice.model.DigisignAgreement;
+import ut.microservices.investormicroservice.model.InvestorFundingHistory;
+import ut.microservices.investormicroservice.model.InvestorVAHistory;
+import ut.microservices.investormicroservice.model.LoanInvestment;
+import ut.microservices.investormicroservice.repository.IGenericDAO;
 
 @Service
 @Transactional
@@ -40,34 +40,34 @@ public class DigisignService {
   @Autowired
   NotificationService notificationService;
 
-  IGenericDao<LoanInvestment> loanInvestmentDao;
-  IGenericDao<InvestorVAHistory> investorVAHistoryDao;
-  IGenericDao<InvestorFundingHistory> investorFundingHistoryDao;
-  IGenericDao<DigisignAgreement> digisignAgreementDao;
+  IGenericDAO<LoanInvestment> loanInvestmentDAO;
+  IGenericDAO<InvestorVAHistory> investorVAHistoryDAO;
+  IGenericDAO<InvestorFundingHistory> investorFundingHistoryDAO;
+  IGenericDAO<DigisignAgreement> digisignAgreementDAO;
 
   @Autowired
-  public void setLoanInvestmentDao(IGenericDao<LoanInvestment> daoToSet) {
-    loanInvestmentDao = daoToSet;
-    loanInvestmentDao.setClazz(LoanInvestment.class);
+  public void setLoanInvestmentDAO(IGenericDAO<LoanInvestment> loanInvestmentDAO) {
+    this.loanInvestmentDAO = loanInvestmentDAO;
+    this.loanInvestmentDAO.setClazz(LoanInvestment.class);
   }
 
   @Autowired
-  public void setDigisignAgreementtDao(IGenericDao<DigisignAgreement> daoToSet) {
-    digisignAgreementDao = daoToSet;
-    digisignAgreementDao.setClazz(DigisignAgreement.class);
+  public void setDigisignAgreementtDAO(IGenericDAO<DigisignAgreement> digisignAgreementDAO) {
+    this.digisignAgreementDAO = digisignAgreementDAO;
+    this.digisignAgreementDAO.setClazz(DigisignAgreement.class);
   }
 
   @Autowired
-  public void setinvestorFundingHistoryDao(IGenericDao<InvestorFundingHistory> daoToSet) {
-    investorFundingHistoryDao = daoToSet;
-    investorFundingHistoryDao.setClazz(InvestorFundingHistory.class);
+  public void setinvestorFundingHistoryDAO(IGenericDAO<InvestorFundingHistory> investorFundingHistoryDAO) {
+    this.investorFundingHistoryDAO = investorFundingHistoryDAO;
+    this.investorFundingHistoryDAO.setClazz(InvestorFundingHistory.class);
   }
 
     
   @Autowired
-  public void setInvestorVAHistoryDao(IGenericDao<InvestorVAHistory> daoToSet2) {
-    investorVAHistoryDao = daoToSet2;
-    investorVAHistoryDao.setClazz(InvestorVAHistory.class);
+  public void setInvestorVAHistoryDAO(IGenericDAO<InvestorVAHistory> investorVAHistoryDAO) {
+    this.investorVAHistoryDAO = investorVAHistoryDAO;
+    this.investorVAHistoryDAO.setClazz(InvestorVAHistory.class);
   }
     
   void sendDocuments(Integer applicationID, Integer investorID,String loanAppID) {
@@ -75,8 +75,8 @@ public class DigisignService {
     databaseService.insertRecordToDigisignAgreement(applicationID,investorID,loanAppID);
   }
 
-  public ResponseDto<DigisignDocumentsDto> digisignDocuments(String investorID) throws Exception{
-    List<DigisignAgreement> documentsList=digisignAgreementDao.findBy("investorID",investorID);
+  public ResponseDTO<DigisignDocumentsDTO> digisignDocuments(String investorID) throws Exception{
+    List<DigisignAgreement> documentsList=digisignAgreementDAO.findBy("investorID",investorID);
     return getDigisignDocumentsResponseBody(documentsList);
   }
 
@@ -84,10 +84,10 @@ public class DigisignService {
     boolean disburse=false;
     List<DigisignAgreement> digisignAgreementList=null;
     String type="Lender-UT";
-    digisignAgreementList=digisignAgreementDao.findBy("documentLenderID",documentID.get("documentID"));
+    digisignAgreementList=digisignAgreementDAO.findBy("documentLenderID",documentID.get("documentID"));
     if(digisignAgreementList.isEmpty()){
      type="Lender-Borrower";
-     digisignAgreementList=digisignAgreementDao.findBy("documentID",documentID.get("documentID"));
+     digisignAgreementList=digisignAgreementDAO.findBy("documentID",documentID.get("documentID"));
     }
     if(!digisignAgreementList.isEmpty()){
       DigisignAgreement digisignAgreement=digisignAgreementList.get(0);
@@ -112,15 +112,16 @@ public class DigisignService {
           }
         }  
       }
-      digisignAgreementDao.update(digisignAgreement);
-      if(disburse){
+      digisignAgreementDAO.update(digisignAgreement);
+      //for now we are checking all sign
+      if(!disburse){
         disbursementService.disburseLoan(digisignAgreement);
       }
     }
   }
   public void customerSignedDocument(String documentID) throws Exception {
     boolean disburse=false;
-    DigisignAgreement digisignAgreement=digisignAgreementDao.findBy("documentID",documentID).get(0);
+    DigisignAgreement digisignAgreement=digisignAgreementDAO.findBy("documentID",documentID).get(0);
     digisignAgreement.setUserSignedAt(new Date());
     if(digisignAgreement.getStatusAgreement().equalsIgnoreCase("L")){
       digisignAgreement.setStatusAgreement("S");
@@ -128,32 +129,33 @@ public class DigisignService {
         disburse=true;
       }
     }
-    digisignAgreementDao.update(digisignAgreement);
-    if(disburse){
+    digisignAgreementDAO.update(digisignAgreement);
+    //for now we are checking all sign
+    if(!disburse){
       //Disburse Loan
       disbursementService.disburseLoan(digisignAgreement);
     }
   }
 
-  private ResponseDto<DigisignDocumentsDto> getDigisignDocumentsResponseBody(List<DigisignAgreement> documentsList) {
+  private ResponseDTO<DigisignDocumentsDTO> getDigisignDocumentsResponseBody(List<DigisignAgreement> documentsList) {
     Iterator<DigisignAgreement> iterator=documentsList.iterator();
-    ResponseDto<DigisignDocumentsDto> response=new ResponseDto<DigisignDocumentsDto>();
-    List<DigisignDocumentsDto> rows=new LinkedList<DigisignDocumentsDto>();
+    ResponseDTO<DigisignDocumentsDTO> response=new ResponseDTO<DigisignDocumentsDTO>();
+    List<DigisignDocumentsDTO> rows=new LinkedList<DigisignDocumentsDTO>();
     int key=0;
     while(iterator.hasNext()){
       key++;
       DigisignAgreement document=iterator.next();
-      DigisignDocumentsDto digisignDocumentsDto=new DigisignDocumentsDto();
-      digisignDocumentsDto.setKey(Integer.toString(key));
-      digisignDocumentsDto.setApplicationID(Integer.toString(document.getApplicationID()));
-      digisignDocumentsDto.setDocumentLenderID(document.getDocumentLenderID());
+      DigisignDocumentsDTO digisignDocumentsDTO=new DigisignDocumentsDTO();
+      digisignDocumentsDTO.setKey(Integer.toString(key));
+      digisignDocumentsDTO.setApplicationID(Integer.toString(document.getApplicationID()));
+      digisignDocumentsDTO.setDocumentLenderID(document.getDocumentLenderID());
       if(document.getStatusLenderAgreement().equalsIgnoreCase("S")){
-        digisignDocumentsDto.setLenderAgreementStatus("Signed");
+        digisignDocumentsDTO.setLenderAgreementStatus("Signed");
       }
       else{
-        digisignDocumentsDto.setLenderAgreementStatus("UnSigned");
+        digisignDocumentsDTO.setLenderAgreementStatus("UnSigned");
       }
-      rows.add(digisignDocumentsDto);
+      rows.add(digisignDocumentsDTO);
     }
 
     response.setRows(rows);
@@ -161,18 +163,18 @@ public class DigisignService {
     tableColumns.put("applicationID", "Application ID");
     tableColumns.put("documentLenderID", "Lender Document ID");
     tableColumns.put("lenderAgreementStatus", "Lender Document Status");
-    List<ColumnDto> columns=new LinkedList<ColumnDto>();
+    List<ColumnDTO> columns=new LinkedList<ColumnDTO>();
     for(Map.Entry<String,String> entry : tableColumns.entrySet()){
-      ColumnDto columnDto=new ColumnDto();
-      columnDto.setKey(entry.getKey());
-      columnDto.setTitle(entry.getValue());
-      columnDto.setDataIndex(entry.getKey());
-      columns.add(columnDto);
+      ColumnDTO columnDTO=new ColumnDTO();
+      columnDTO.setKey(entry.getKey());
+      columnDTO.setTitle(entry.getValue());
+      columnDTO.setDataIndex(entry.getKey());
+      columns.add(columnDTO);
     }
     response.setColumns(columns);
-    List<ButtonDto> buttons=new LinkedList<ButtonDto>();
-    ButtonDto buttonDto=new ButtonDto();
-    buttons.add(buttonDto);
+    List<ButtonDTO> buttons=new LinkedList<ButtonDTO>();
+    ButtonDTO buttonDTO=new ButtonDTO();
+    buttons.add(buttonDTO);
     response.setButton(buttons);
     return response;
   }

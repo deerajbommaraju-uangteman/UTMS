@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService.service;
+package ut.microservices.investormicroservice.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,38 +12,38 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ut.microservices.investorMicroService.model.InvestorFundingHistory;
-import ut.microservices.investorMicroService.model.InvestorVAHistory;
-import ut.microservices.investorMicroService.model.LoanInvestment;
-import ut.microservices.investorMicroService.repository.IGenericDao;
+import ut.microservices.investormicroservice.model.InvestorFundingHistory;
+import ut.microservices.investormicroservice.model.InvestorVAHistory;
+import ut.microservices.investormicroservice.model.LoanInvestment;
+import ut.microservices.investormicroservice.repository.IGenericDAO;
 
 @Service
 @Transactional
 public class PaymentService {
 
-    IGenericDao<LoanInvestment> loanInvestmentDao;
-    IGenericDao<InvestorVAHistory> investorVAHistoryDao;
-    IGenericDao<InvestorFundingHistory> investorFundingHistoryDao;
+    IGenericDAO<LoanInvestment> loanInvestmentDAO;
+    IGenericDAO<InvestorVAHistory> investorVAHistoryDAO;
+    IGenericDAO<InvestorFundingHistory> investorFundingHistoryDAO;
 
     
 
     @Autowired
-    public void setinvestorFundingHistoryDao(IGenericDao<InvestorFundingHistory> daoToSet) {
-      investorFundingHistoryDao = daoToSet;
-      investorFundingHistoryDao.setClazz(InvestorFundingHistory.class);
+    public void setinvestorFundingHistoryDAO(IGenericDAO<InvestorFundingHistory> investorFundingHistoryDAO) {
+      this.investorFundingHistoryDAO = investorFundingHistoryDAO;
+      this.investorFundingHistoryDAO.setClazz(InvestorFundingHistory.class);
     }
 
     
     @Autowired
-    public void setInvestorVAHistoryDao(IGenericDao<InvestorVAHistory> daoToSet2) {
-      investorVAHistoryDao = daoToSet2;
-      investorVAHistoryDao.setClazz(InvestorVAHistory.class);
+    public void setInvestorVAHistoryDAO(IGenericDAO<InvestorVAHistory> investorVAHistoryDAO) {
+      this.investorVAHistoryDAO = investorVAHistoryDAO;
+      this.investorVAHistoryDAO.setClazz(InvestorVAHistory.class);
     }
 
     @Autowired
-    public void setLoanInvestmentDao(IGenericDao<LoanInvestment> loanInvestmentDao) {
-      this.loanInvestmentDao = loanInvestmentDao;
-      this.loanInvestmentDao.setClazz(LoanInvestment.class);
+    public void setLoanInvestmentDAO(IGenericDAO<LoanInvestment> loanInvestmentDAO) {
+      this.loanInvestmentDAO = loanInvestmentDAO;
+      this.loanInvestmentDAO.setClazz(LoanInvestment.class);
     }
 
     @Autowired
@@ -62,17 +62,17 @@ public class PaymentService {
       while (iterator.hasNext()) { 
         loan=iterator.next();
         String loanAppID=loan.get("loanAppID").toString();
-        InvestorVAHistory investorVAHistory=investorVAHistoryDao.findBy("loanAppID",loanAppID).get(0);
+        InvestorVAHistory investorVAHistory=investorVAHistoryDAO.findBy("loanAppID",loanAppID).get(0);
         investorVAHistory.setStatus(1);
-        investorVAHistoryDao.update(investorVAHistory);
-        LoanInvestment loanInvestment=loanInvestmentDao.findBy("loanAppID",loanAppID).get(0);
+        investorVAHistoryDAO.update(investorVAHistory);
+        LoanInvestment loanInvestment=loanInvestmentDAO.findBy("loanAppID",loanAppID).get(0);
         loanInvestment.setState("P");
-        loanInvestmentDao.update(loanInvestment);
+        loanInvestmentDAO.update(loanInvestment);
         digisignService.sendDocuments(investorVAHistory.getApplicationID(),investorVAHistory.getInvestorID(),loanAppID);
         vaNumber=investorVAHistory.getVaNumber();
       }
-      InvestorFundingHistory investorFundingHistory=investorFundingHistoryDao.findBy("investorVaNumber",Integer.toString(vaNumber)).get(0);
+      InvestorFundingHistory investorFundingHistory=investorFundingHistoryDAO.findBy("investorVaNumber",Integer.toString(vaNumber)).get(0);
       investorFundingHistory.setTxnStatus(1);
-      investorFundingHistoryDao.update(investorFundingHistory);
+      investorFundingHistoryDAO.update(investorFundingHistory);
     }
 }

@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService.exception;
+package ut.microservices.investormicroservice.exception;
 import java.util.Date;
 
 import org.springframework.http.HttpStatus;

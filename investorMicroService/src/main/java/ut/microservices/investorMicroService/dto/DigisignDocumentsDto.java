@@ -1,6 +1,6 @@
-package ut.microservices.investorMicroService.dto;
+package ut.microservices.investormicroservice.dto;
 
-public class DigisignDocumentsDto {
+public class DigisignDocumentsDTO {
     private String DocumentID;
     private String DocumentLenderID;
     private String lenderAgreementStatus;

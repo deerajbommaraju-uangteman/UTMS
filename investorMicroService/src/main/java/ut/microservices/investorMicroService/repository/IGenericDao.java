@@ -1,9 +1,9 @@
-package ut.microservices.investorMicroService.repository;
+package ut.microservices.investormicroservice.repository;
 
 import java.io.Serializable;
 import java.util.List;
 
-public interface IGenericDao<T extends Serializable> {
+public interface IGenericDAO<T extends Serializable> {
  
     void update(final T entity);
     void delete(final T entity);
