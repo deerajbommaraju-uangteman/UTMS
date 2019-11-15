@@ -20,3 +20,8 @@ loanapplicationmicroservice/.factorypath
 *.jar
 *.html
 *.log
+
+reconcileMicroService/target/
+reconcileMicroService/.classpath
+reconcileMicroService/.factorypath
+reconcileMicroService/.project
