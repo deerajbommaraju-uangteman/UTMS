@@ -17,3 +17,6 @@ loanapplicationmicroservice/.project
 loanapplicationmicroservice/.classpath
 loanapplicationmicroservice/target/
 loanapplicationmicroservice/.factorypath
+*.jar
+*.html
+*.log
