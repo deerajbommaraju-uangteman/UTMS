@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <title>Loan Application Form</title>
+    <style type="text/css">
+      strong{
+        padding:0 10px;
+        border-radius: 50%; 
+        background-color: yellow;
+      }
+      .form-row>.center{
+        text-align: center;
+        margin: 20px 0;
+      }
+      form>.form-row{
+        margin-top: 10px;
+      }
+      #menubar{
+      	background-color: black;
+      }
+      .navbar-brand{
+      	text-align: center;
+      }
+      input[type=number]::-webkit-inner-spin-button, 
+		input[type=number]::-webkit-outer-spin-button { 
+		  -webkit-appearance: none; 
+		  margin: 0; 
+		}
+    </style>
+  </head>
+  <body>
+  	
+
+
+
+    <form id='theForm' content="application/json" method="post">
+      <div class="form-row col-12 col-md-12 col-lg-12">
+        <div class="center col-12 col-md-12 col-lg-12">
+          <strong>1</strong><br/>
+          <label>Complete and fill in your email address, mobile number and KTP number</label>
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputEmail4">Email</label>
+          <input type="email" name="EmailAddress" class="form-control" id="inputEmail4" placeholder="Email">
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputEmail4">Phone number</label>
+          <input type="number" name="MobileNumber" class="form-control text-field ut-border" id="ap_mobile_no" minlength="7" maxlength="15" min="1" step="1" placeholder="phone number" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);">
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputPassword4">Id card number</label>
+          <input type="number" name="PersonalIDNumber" class="form-control" id="inputPassword4" placeholder="Id card number">
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputPassword4">TIN number</label>
+          <input type="number" name="TIN Number" class="form-control" id="inputPassword4" placeholder="TIN number">
+        </div>
+      </div>
+
+      <div class="form-row col-12 col-md-12 col-lg-12">
+        <div class="center col-12 col-md-12 col-lg-12">
+          <strong>2</strong><br/>
+          <label>What is your reason for borrowing money and How do you know UangTeman?</label>
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputState">Reason</label>
+          <select  name="Reason" class="form-control">
+            <option selected>Choose...</option>
+            <option value="Reason">reason</option>
+          </select>
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputState">How do you know UT</label>
+          <select  name="KnowUT" class="form-control">
+            <option selected>Choose...</option>
+            <option value="1">1</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row col-12 col-md-12 col-lg-12">
+        <div class="center col-12 col-md-12 col-lg-12">
+          <strong>3</strong><br/>
+          <label>Tell us Little about you</label>
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputEmail4">Full Name</label>
+          <input type="text" name="FullName" class="form-control" id="inputEmail4" placeholder="Full Name">
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputEmail4">Place of Birth</label>
+          <input type="text" name="PlaceOfBirth" class="form-control" id="inputEmail4" placeholder="Place of Birth">
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputPassword4">Date of Birth</label>
+          <input type="date" name="DateOfBirth" class="form-control" id="inputPassword4" placeholder="Date of Birth">
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputPassword4">Gender</label>
+        <div class="">
+          <div class="form-check">
+            <input class="form-check-input" value="M" type="radio" name="Gender" id="gridRadios1" value="option1" checked>
+            <label class="form-check-label" for="gridRadios1">
+              Male
+            </label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" value="F" type="radio" name="Gender" id="gridRadios2" value="option2">
+            <label class="form-check-label" for="gridRadios2">
+              Female
+            </label>
+          </div>        
+        </div>
+      </div>
+      <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputState">Religion</label>
+          <select name="Religion" class="form-control">
+            <option selected>Choose...</option>
+            <option value="Muslim">Muslim</option>
+          </select>
+        </div>
+       <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputState">Marital Status</label>
+          <select  name="MaritalStatus" class="form-control">
+            <option selected>Choose...</option>
+            <option value="Single">Single</option>
+          </select>
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputEmail4">Mother Name</label>
+          <input type="text" name="MotherFullName" class="form-control" id="inputEmail4" placeholder="Mother Name">
+        </div>
+
+      <div class="form-row col-12 col-md-12 col-lg-12">
+        <div class="center col-12 col-md-12 col-lg-12">
+          <strong>4</strong><br/>
+          <label>What is your Last Education?</label>
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputState">Education</label>
+          <select  name="Education" class="form-control">
+            <option selected>Choose...</option>
+            <option value="1">1</option>
+          </select>
+        </div>
+
+
+	      <div class="form-row col-12 col-md-12 col-lg-12">
+	        <div class="center col-12 col-md-12 col-lg-12">
+	          <strong>5</strong><br/>
+	          <label>Write your Residential Address here</label>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputEmail4">Phone Number</label>
+	          <input type="number" name="TelephoneNumber" class="form-control" id="inputEmail4" placeholder="Email">
+	        </div>
+	        <div class="form-group col-md-8 col-lg-6 col-12">
+	          <label for="inputEmail4">Address</label>
+	          <input type="text" name="Address" class="form-control" id="inputEmail4" placeholder="Email">
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">RT/RW</label>
+	          <div class="col-lg-12 form-row">
+	            <div class="col-lg-5">
+	              <input type="text" name="AddressRT" class="form-control" id="inputPassword4" placeholder="000">
+	            </div>
+	          <div class="col-lg-2" style="text-align: center"><b>/</b></div>  
+	          <div class="col-lg-5">
+	            <input type="text" name="AddressRW" class="form-control" id="inputPassword4" placeholder="000">
+	          </div>
+	          </div>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">Province of Residence</label>
+	           <select  name="Province" class="form-control">
+	            <option selected>Choose...</option>
+	            <option value="Jakarta">Jakarta</option>
+	          </select>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">city of Residence</label>
+	           <select  name="City" class="form-control">
+	            <option selected>Choose...</option>
+	            <option value="JKT">JKT</option>
+	          </select>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">District of Residence</label>
+	           <select  name="District" class="form-control">
+	            <option selected>Choose...</option>
+	            <option value="jakarta">jakarta</option>
+	          </select>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">village of Residence</label>
+	           <select  name="Village" class="form-control">
+	            <option selected>Choose...</option>
+	            <option value="village">village</option>
+	          </select>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">Zip code</label>
+	          <input type="number" name="PostalCode" class="form-control" id="inputEmail4" placeholder="Email">
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">House Status</label>
+	          <input type="number" name="HomeStatus" class="form-control" id="inputEmail4" placeholder="Email">
+	        </div>
+	      </div>
+
+	      <div class="form-row col-12 col-md-12 col-lg-12">
+	        <div class="center col-12 col-md-12 col-lg-12">
+	          <strong>6</strong><br/>
+	          <label>Write the name & address of your family not in the house below</label>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputEmail4">Family Name</label>
+	          <input type="text" name="Family1Name" class="form-control" id="inputEmail4" placeholder="Email">
+	        </div>
+	        <div class="form-group col-md-8 col-lg-3 col-12">
+	          <label for="inputEmail4">Family Phone Number</label>
+	          <input type="number" name="Family1TelephoneNumber" class="form-control" id="inputEmail4" placeholder="Email">
+	        </div>
+	        <div class="form-group col-md-8 col-lg-6 col-12">
+	          <label for="inputEmail4">Family Address</label>
+	          <input type="text" name="Family1Address" class="form-control" id="inputEmail4" placeholder="Email">
+	        </div>
+
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">Province of Family</label>
+	           <select name="Family1Province" id="inputState" class="form-control">
+	            <option selected>Choose...</option>
+	            <option value="Bali">Bali</option>
+	          </select>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">Family city</label>
+	           <select name="Family1City" id="inputState" class="form-control">
+	            <option selected>Choose...</option>
+	            <option value="hyd">hyd</option>
+	          </select>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">Family District</label>
+	           <select name="Family1District" id="inputState" class="form-control">
+	            <option selected>Choose...</option>
+	            <option value="RR">RR</option>
+	          </select>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">Family village</label>
+	           <select name="Family1Village" id="inputState" class="form-control">
+	            <option selected>Choose...</option>
+	            <option value="tebet">tebet</option>
+	          </select>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">Zip code of Recidence</label>
+	          <input name="Family1PostalCode" type="number" class="form-control" id="inputEmail4" placeholder="Email">
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">House Status</label>
+	          <select name="HomeStatus2" id="inputState" class="form-control">
+	            <option selected>Choose...</option>
+	            <option value="own">own</option>
+	          </select>
+	        </div>
+	      </div>
+
+	    <div class="form-row col-12 col-md-12 col-lg-12">
+        <div class="center col-12 col-md-12 col-lg-12">
+          <strong>7</strong><br/>
+          <label>Fill in the bank details that you use below</label>
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputEmail4">Account Holder Name</label>
+          <input type="text" name="BankUserName" class="form-control" id="inputEmail4" placeholder="Email">
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputEmail4">Bank Name</label>
+          <!-- <input type="text" name="" class="form-control" id="inputEmail4" placeholder="Phone number"> -->
+          <select name="BankNameID" id="BankNameID" class="form-control">
+              <option selected>Choose...</option>
+              <option value="1">permata</option>
+            </select>
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputPassword4">Bank Account Number</label>
+          <input type="number" name="BankNumber" class="form-control" id="inputPassword4" placeholder="Id card number">
+        </div>
+      </div>
+
+      <div class="form-row col-12 col-md-12 col-lg-12">
+        <div class="center col-12 col-md-12 col-lg-12">
+          <strong>8</strong><br/>
+          <label>Tell us a little about your current job</label>
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputEmail4">Office Name</label>
+          <input type="text" name="EmployerName" class="form-control" id="inputEmail4" placeholder="Email">
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+          <label for="inputEmail4">Office Telephone Number</label>
+          <input type="number" name="WorkTelephone" class="form-control" id="inputEmail4" placeholder="Phone number">
+        </div>
+        <div class="form-group col-md-4 col-lg-6 col-12">
+          <label for="inputPassword4">Office Address</label>
+          <input type="text" name="EmployerAddress" class="form-control" id="inputPassword4" placeholder="Id card number">
+        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+		          <label for="inputPassword4">Provincial Office</label>
+		           <select name="EmployerProvince" id="EmployerProvince" class="form-control">
+		            <option selected>Choose...</option>
+		            <option value="tebet">tebet</option>
+		          </select>
+		    </div>
+	    	<div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">City Office</label>
+	           <select name="EmployerCity" id="inputState" class="form-control">
+	            <option selected>Choose...</option>
+	            <option value="casablanca">casablanca</option>
+	          </select>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">District Office</label>
+	           <select name="EmployerDistrict" id="inputState" class="form-control">
+	            <option selected>Choose...</option>
+	            <option value="tebet">tebet</option>
+	          </select>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">Village Office</label>
+	           <select name="EmployerVillage" id="EmployerVillage" class="form-control">
+	            <option selected>Choose...</option>
+	            <option value="tebet">tebet</option>
+	          </select>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">Office Postal code</label>
+	          <input type="text" name="EmployerPostalCode" class="form-control" id="inputPassword4" placeholder="Id card number">
+	        </div>
+      </div>
+      <div class="form-row col-12 col-md-12 col-lg-12">
+        <div class="center col-12 col-md-12 col-lg-12">
+          <strong>9</strong><br/>
+          <label>What is your current position & career position?</label>
+        </div>
+        <div class="form-group col-md-4 col-lg-3 col-12">
+		          <label for="inputPassword4">Type of Work</label>
+		           <select id="inputState" name="EmployerType" class="form-control">
+		            <option selected>Choose...</option>
+		            <option value="business">business</option>
+		          </select>
+		    </div>
+	    	<div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">Industry Sector</label>
+	           <select id="inputState" name="EmployerIndustryID" class="form-control">
+	            <option selected>Choose...</option>
+	            <option value="1">finance</option>
+	          </select>
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">length of work</label>
+	           <select id="inputState" name="EmployerWork" class="form-control">
+	            <option selected>Years of Work</option>
+	            <option value="2">2</option>
+	          </select>
+	          <select id="inputState" name="WorkingMonths" class="form-control">
+	            <option selected>Working Months</option>
+	            <option value="4">4</option>
+	          </select>
+	        </div>
+	        
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputEmail4">Position</label>
+	          <input type="text" name="EmployerRole" class="form-control" id="inputEmail4" placeholder="Email">
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputEmail4">Earings Per Month</label>
+	          <input type="number" name="EmployerEarning" class="form-control" id="inputEmail4" placeholder="Phone number">
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">Expenditure per Month</label>
+	          <input type="number" name="EmployerExpenditure" class="form-control" id="inputPassword4" placeholder="Id card number">
+	        </div>
+	        
+	        
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">KPR installments</label>
+	          <input type="text" name="NoOfInstallments" class="form-control" id="inputPassword4" placeholder="Id card number">
+	        </div>
+	        <div class="form-group col-md-4 col-lg-3 col-12">
+	          <label for="inputPassword4">How much are your Dependents</label>
+	           <select id="inputState" name="NoOfDependents" class="form-control">
+	            <option selected>Choose...</option>
+	            <option value="2">2</option>
+	          </select>
+	        </div>
+      </div>
+<!--       <div class="form-row col-12 col-md-12 col-lg-12">
+        <div class="center col-12 col-md-12 col-lg-12">
+          <strong>10</strong><br/>
+          <label>UangTeman requires the following documents for the verification process</label>
+        </div>
+      <div class="form-group col-md-12 col-lg-5 col-12 custom-file mb-3">
+      	<label class="custom-file-label" for="customFile">Upload ID card</label>
+      	<input type="file" class=" custom-file-input" id="customFile" name="filename">
+    </div>
+    <div class="form-group col-md-12 col-lg-5 col-12 custom-file mb-3">
+    	<label class="custom-file-label" for="customFile">Upload Photo of Yourself</label>
+      	<input type="file" class=" custom-file-input" id="customFile" name="filename"> 
+    </div> -->
+    <button class="button" type="button" id="bb" onclick="applicationSubmit()">SUBMIT</button>
+    </form>
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<!--     <script>
+		// Add the following code if you want the name of the file appear on select
+		$(".custom-file-input").on("change", function() {
+		  var fileName = $(this).val().split("\\").pop();
+		  $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+		});
+	</script> -->
+  <script type="text/javascript">
+        function applicationSubmit(){
+          console.log("Here");
+          var fields = {};
+              $("#theForm").find(":input").each(function() {
+              fields[this.name] = $(this).val();
+          });
+          var obj = {fields};
+          console.log(obj);
+          $.ajax({
+              type: "POST",
+              url: 'http://localhost:9090/application-form/received',
+              //async: true,
+              data: JSON.stringify(obj['fields']),
+              contentType: "application/json",
+              success: function (data) {
+                  if(data=="Success"){
+                      window.alert("Loan application submitted successfully!");
+                  }else{
+                      window.alert("Your application is rejected, email you specified already exists!");
+       
+                  }
+                  returned=false;    
+              }
+          });
+        }
+  </script>
+  </body>
+</html>

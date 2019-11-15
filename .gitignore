@@ -10,5 +10,10 @@ repaymentMicroService/.factorypath
 .vscode/settings.json
 *.properties
 *.json
-investorMicroService/src/main/resources/application.properties
-investorMicroService/src/main/resources/application.properties
+
+loanapplicationmicroservice/.classpath
+loanapplicationmicroservice/.factorypath
+loanapplicationmicroservice/.project
+loanapplicationmicroservice/.classpath
+loanapplicationmicroservice/target/
+loanapplicationmicroservice/.factorypath
