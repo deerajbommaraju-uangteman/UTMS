@@ -1,7 +1,0 @@
-jdbcSettings:
-  url: "jdbc:mysql://10.0.0.13:3306/microservices?useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC"
-  username: "Devreadonly"
-  password: "Welcome@123"
-  driverClassName: "org.h2.Driver"
-
-packageName: "com.example.entity"
