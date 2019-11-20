@@ -44,8 +44,8 @@ import ut.microservices.loanapplicationmicroservice.service.*;
     @CrossOrigin
     @PostMapping(path = "/testcurl")
     public String testcurl(@RequestBody String data){
-        //System.out.println("test::"+data);
-        return "FAI";
+        System.out.println("test::"+data);
+        return "FAIL";
     }
 
     @CrossOrigin

@@ -12,14 +12,19 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.internal.function.text.Concatenate;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+
 import ut.microservices.loanapplicationmicroservice.dto.*;
 import ut.microservices.loanapplicationmicroservice.model.*;
 import ut.microservices.loanapplicationmicroservice.repository.*;
@@ -59,10 +64,13 @@ public class LoanApplicationService {
     private ObjectMapper objectMapper;
 
     public String newApplicationStarted(TempApplicantDataModel application) {
-            // System.out.println("application::"+application);
-            String emailvaildate=emailValidate(application.getEmailAddress());
-            String responseTempID = tempApplicantDAO.save(application).toString();
-            return responseTempID;
+        String emailvaildate=emailValidate(application.getEmailAddress());
+        String checkData = this.isDataRecordInRPMS(application.getEmailAddress(), application.getMobileNumber(), application.getPersonalIDNumber());
+        if(!checkData.equals("failed")){
+            return "Data Already Exists";
+        }    
+        String responseTempID = tempApplicantDAO.save(application).toString();
+        return responseTempID;
     }
 
     public String newApplicationEnded(TempApplicantDataModel application) {
@@ -142,6 +150,14 @@ public class LoanApplicationService {
     public String getDistrictData(){
     return "success";
     }
-    
+    public String isDataRecordInRPMS(String emailId, String mobileNo, String ktpNo){
+        // final String baseUrl = "http://localhost:9090/application-processing/testcurl";
+        // RestTemplate restTemplate = new RestTemplate();
+        // ResponseEntity<String> responseEntity = restTemplate.exchange(baseUrl, HttpMethod.GET, null, String.class);
+        // String result = responseEntity.getBody();
+        // System.out.println(result);
+        //save to ApplicantData
+        return "failed";
+    }
 
 }

@@ -46,7 +46,7 @@ public class LoanApplicationCtrl {
   public @ResponseBody String getDistrictData() throws JsonProcessingException {
 
     //System.out.println(loanApplicationService.getDistrictData());
-    return "ass"; 
+    return "success"; 
   }
   
 

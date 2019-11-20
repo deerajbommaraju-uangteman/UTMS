@@ -8,6 +8,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -21,6 +22,9 @@ import ut.microservices.loanapplicationmicroservice.service.*;
  */
 @Service
 public class DVServices {
+
+    @Value("${application.emailValidator}")
+    private Boolean emailVaildate;
 
     @Autowired
     KafkaTemplate<String, String> kafkaTemplate;
@@ -51,6 +55,7 @@ public class DVServices {
     private ObjectMapper objectMapper;
 
     public @ResponseBody ResponseDTO<ApplicationDTO> getAvailableLoans() throws Exception {
+        System.out.println("test:::"+this.emailVaildate);
         List<ApplicationData> LoanApplicationsList = applicationDAO.findValueByColumn("Status", "DV");
         return getApplicationResponseBody(LoanApplicationsList);
     }

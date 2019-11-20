@@ -5,6 +5,8 @@ import java.sql.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -48,7 +50,7 @@ public class TempApplicantDataModel implements Serializable{
     @Column(name = "Gender")
     @JsonProperty(value="Gender",required=true)
     private String Gender;
-    
+
     @Column(name = "EmailAddress", nullable = true)
     @JsonProperty(value="EmailAddress",required=true)
     private String EmailAddress;
