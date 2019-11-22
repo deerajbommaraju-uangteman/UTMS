@@ -1,22 +1,27 @@
 package ut.microservices.repaymentmicroservice.services;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import ut.microservices.repaymentmicroservice.configurations.ServicesConfig;
 import ut.microservices.repaymentmicroservice.dao.IGenericDAO;
 import ut.microservices.repaymentmicroservice.models.ApplicantData;
 import ut.microservices.repaymentmicroservice.models.ApplicationData;
 import ut.microservices.repaymentmicroservice.models.CustomerLoanInstallmentRepayment;
 import ut.microservices.repaymentmicroservice.models.CustomerLoanRepayment;
 import ut.microservices.repaymentmicroservice.models.CustomerVaHistory;
+import ut.microservices.repaymentmicroservice.models.LogsArtajasa;
+import ut.microservices.repaymentmicroservice.models.VaArtajasa;
 
 @Component
 @Service
@@ -28,6 +33,8 @@ public class ArtajasaPaymentService {
     IGenericDAO<CustomerVaHistory> customerVaHistoryDAO;
     IGenericDAO<CustomerLoanRepayment> custLoanRepaymentDAO;
     IGenericDAO<CustomerLoanInstallmentRepayment> clirDAO;
+    IGenericDAO<VaArtajasa> vaArtajasaDAO;
+    IGenericDAO<LogsArtajasa> logsArtajasaDAO;
 
     @Autowired
     public void setApplicantDataDAO(IGenericDAO<ApplicantData> applicantDataDAO) {
@@ -48,6 +55,12 @@ public class ArtajasaPaymentService {
     }
 
     @Autowired
+    public void setVaArtajasaDAO(IGenericDAO<VaArtajasa> vaArtajasaDAO) {
+        this.vaArtajasaDAO = vaArtajasaDAO;
+        vaArtajasaDAO.setClazz(VaArtajasa.class);
+    }    
+
+    @Autowired
     public void setCustLoanRepaymentDAO(IGenericDAO<CustomerLoanRepayment> custLoanRepaymentDAO) {
         this.custLoanRepaymentDAO = custLoanRepaymentDAO;
         custLoanRepaymentDAO.setClazz(CustomerLoanRepayment.class);
@@ -57,6 +70,12 @@ public class ArtajasaPaymentService {
     public void setCustLoanInstallmentDAO(IGenericDAO<CustomerLoanInstallmentRepayment> clirDAO) {
         this.clirDAO = clirDAO;
         clirDAO.setClazz(CustomerLoanInstallmentRepayment.class);
+    }
+
+    @Autowired
+    public void setLogsArtajasaDAO(IGenericDAO<LogsArtajasa> logsArtajasaDAO) {
+        this.logsArtajasaDAO = logsArtajasaDAO;
+        logsArtajasaDAO.setClazz(LogsArtajasa.class);
     }
 
     @Autowired
@@ -79,7 +98,9 @@ public class ArtajasaPaymentService {
     private final String secretKeyBiller = "NNwV9OV0";
 	private final String secretKeyBillerProd= "Uangteman123";
 
-    HashMap<String, String> data = new HashMap<>();
+    public HashMap<String, String> data = new HashMap<>();
+
+    public HashMap<String, String> inquiryResponse = new HashMap<>();
 
     public void setStaticVARequest(HashMap<String, String> userdata) {
         if (userdata.isEmpty()) {
@@ -115,16 +136,177 @@ public class ArtajasaPaymentService {
       return this.artajasaCode + this.artajasaPrefixVaDev + phoneNumber;
     }
 
-	private String getSignatureBiller() {
+	public String getSignatureBiller() {
 		if(this.isLive){
-			return this.secretKeyBillerProd + this.usernameBillerProd; // add md5 hashing
+			return DigestUtils.md5Hex(this.secretKeyBillerProd + this.usernameBillerProd); // add md5 hashing
 		}else{
-			return this.secretKeyBiller + this.usernameBiller; // add md5 hashing
+			return DigestUtils.md5Hex(this.secretKeyBiller + this.usernameBiller); 
 		}
     }
 
     public HashMap<String, String> getStaticVARequest() {
 		return this.data;
+    }
+    
+    public void setInquiryResponse(HashMap<String, String> requestdata, LogsArtajasa logArtajasa){
+
+        Date inqRequestDatetime = new Date();
+        // Set XML Format for Inquiry response
+        String headResp = "<?xml version='1.0'?>\n";
+        headResp += "<data>\n";
+		String footResp = "</data>\n";
+        String Resp = "<type>resinqpayment</type>\n";
+
+        if(requestdata.isEmpty()){
+    
+            Resp += "<ack>"+ ServicesConfig.GENERAL_ERROR_05 +"</ack>\n";
+            Resp += "<bookingid>NULL</bookingid>\n";
+            Resp += "<customer_name>NULL</customer_name>\n";
+            Resp += "<min_amount>0</min_amount>\n";
+            Resp += "<max_amount>0</max_amount>\n";
+            Resp += "<productid>NULL</productid>\n";
+            Resp += "<signature>" + this.getSignatureBiller() +"</signature>\n";
+
+            String xml = headResp + Resp + footResp;
+            
+            logArtajasa.setVaNumber(null);
+            logArtajasa.setLogAppID(null);
+            logArtajasa.setVaRequest(requestdata.toString());
+            logArtajasa.setVaResponse(xml);
+            logArtajasa.setVaReqDatetime(inqRequestDatetime);
+            logArtajasa.setVaRespDatetime(new Date());
+            logsArtajasaDAO.save(logArtajasa);
+
+            this.inquiryResponse.put("status","false");
+            this.inquiryResponse.put("message", xml);
+
+			return ;
+        }
+
+        // signature mismatch during inquiry request
+        if(requestdata.get("signature") != this.getSignatureBiller()){
+
+            Resp += "<ack>"+ ServicesConfig.ILLEGAL_SIGNATURE_INQ_REQUEST_01 +"</ack>\n";
+            Resp += "<bookingid>NULL</bookingid>\n";
+            Resp += "<customer_name>NULL</customer_name>\n";
+            Resp += "<min_amount>0</min_amount>\n";
+            Resp += "<max_amount>0</max_amount>\n";
+            Resp += "<productid>NULL</productid>\n";
+            Resp += "<signature>" + this.getSignatureBiller() +"</signature>\n";
+
+            String xml = headResp + Resp + footResp;
+            
+            logArtajasa.setVaNumber(null);
+            logArtajasa.setLogAppID(null);
+            logArtajasa.setVaRequest(requestdata.toString());
+            logArtajasa.setVaResponse(xml);
+            logArtajasa.setVaReqDatetime(inqRequestDatetime);
+            logArtajasa.setVaRespDatetime(new Date());
+            logsArtajasaDAO.save(logArtajasa);
+
+            this.inquiryResponse.put("status","false");
+            this.inquiryResponse.put("message", xml);
+
+			return ;
+        }
+
+		CustomerVaHistory vaNumberData = customerVaHistoryDAO.findByVANumber(requestdata.get("va")).get(0);
+        
+        // when va is not found
+		if(vaNumberData == null){ 
+            Resp += "<ack>"+ ServicesConfig.INVALID_TO_ACCOUNT_76 +"</ack>\n";
+            Resp += "<bookingid>NULL</bookingid>\n";
+            Resp += "<customer_name>NULL</customer_name>\n";
+            Resp += "<min_amount>0</min_amount>\n";
+            Resp += "<max_amount>0</max_amount>\n";
+            Resp += "<productid>NULL</productid>\n";
+            Resp += "<signature>" + this.getSignatureBiller() +"</signature>\n";
+
+            String xml = headResp + Resp + footResp;
+            
+            logArtajasa.setVaNumber(requestdata.get("va"));
+            logArtajasa.setLogAppID(null);
+            logArtajasa.setVaRequest(requestdata.toString());
+            logArtajasa.setVaResponse(xml);
+            logArtajasa.setVaReqDatetime(inqRequestDatetime);
+            logArtajasa.setVaRespDatetime(new Date());
+            logsArtajasaDAO.save(logArtajasa);
+
+			return ;                  
+        }else{
+
+            VaArtajasa vaa = vaArtajasaDAO.findValueByColumn("CvhID", vaNumberData.getID().toString()).get(0);
+
+            if(vaNumberData.getStatus() == 1 && vaNumberData.getIsVaActive().equals("Y")){
+                // already paid 
+                Resp += "<ack>"+ ServicesConfig.ALREADY_PAID_78 +"</ack>\n";
+                Resp += "<bookingid>" + vaa.getBookingID() + "</bookingid>\n";
+                Resp += "<customer_name>NULL</customer_name>\n";
+                Resp += "<min_amount>" + vaNumberData.getAmountToPay() + "</min_amount>\n";
+                Resp += "<max_amount>" + vaNumberData.getAmountToPay() +"</max_amount>\n";
+                Resp += "<productid>NULL</productid>\n";
+                Resp += "<signature>" + this.getSignatureBiller() +"</signature>\n";
+    
+                String xml = headResp + Resp + footResp;
+                
+                logArtajasa.setVaNumber(vaNumberData.getVaNumber());
+                logArtajasa.setLogAppID(null);
+                logArtajasa.setVaRequest(requestdata.toString());
+                logArtajasa.setVaResponse(xml);
+                logArtajasa.setVaReqDatetime(inqRequestDatetime);
+                logArtajasa.setVaRespDatetime(new Date());
+                logsArtajasaDAO.save(logArtajasa);
+    
+                return ;   
+            }else if(vaNumberData.getStatus() == 0 && !vaNumberData.getIsVaActive().equals("Y")){
+                // not yet paid 
+                Resp += "<ack>"+ ServicesConfig.TRANSACTION_SUCCESS_00 +"</ack>\n";
+                Resp += "<bookingid>" + vaa.getBookingID() + "</bookingid>\n";
+                Resp += "<customer_name>NULL</customer_name>\n";
+                Resp += "<min_amount>" + vaNumberData.getAmountToPay() + "</min_amount>\n";
+                Resp += "<max_amount>" + vaNumberData.getAmountToPay() +"</max_amount>\n";
+                Resp += "<productid>NULL</productid>\n";
+                Resp += "<signature>" + this.getSignatureBiller() +"</signature>\n";
+    
+                String xml = headResp + Resp + footResp;
+                
+                logArtajasa.setVaNumber(vaNumberData.getVaNumber());
+                logArtajasa.setLogAppID(null);
+                logArtajasa.setVaRequest(requestdata.toString());
+                logArtajasa.setVaResponse(xml);
+                logArtajasa.setVaReqDatetime(inqRequestDatetime);
+                logArtajasa.setVaRespDatetime(new Date());
+                logsArtajasaDAO.save(logArtajasa);
+    
+            }else{
+                // error
+                Resp += "<ack>"+ ServicesConfig.GENERAL_ERROR_05 +"</ack>\n";
+                Resp += "<bookingid>NULL</bookingid>\n";
+                Resp += "<customer_name>NULL</customer_name>\n";
+                Resp += "<min_amount>0</min_amount>\n";
+                Resp += "<max_amount>0</max_amount>\n";
+                Resp += "<productid>NULL</productid>\n";
+                Resp += "<signature>" + this.getSignatureBiller() +"</signature>\n";
+    
+                String xml = headResp + Resp + footResp;
+                
+                logArtajasa.setVaNumber(null);
+                logArtajasa.setLogAppID(null);
+                logArtajasa.setVaRequest(requestdata.toString());
+                logArtajasa.setVaResponse(xml);
+                logArtajasa.setVaReqDatetime(inqRequestDatetime);
+                logArtajasa.setVaRespDatetime(new Date());
+                logsArtajasaDAO.save(logArtajasa);
+
+                this.inquiryResponse.put("status", "false");
+                this.inquiryResponse.put("message", xml);
+            }
+
+        }
+    }
+
+    public HashMap<String, String> getInquiryResponse() {
+		return this.inquiryResponse;
 	}
 
 }
