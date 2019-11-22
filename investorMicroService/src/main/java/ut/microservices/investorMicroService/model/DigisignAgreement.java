@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService.model;
+package ut.microservices.investormicroservice.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -9,7 +9,6 @@ import java.util.Date;
 
 @Entity
 @Table(name = "INVMS_DigisignAgreement")
-@NamedQuery(name="DigisignAgreement.findAll", query="SELECT b FROM DigisignAgreement b")
 @Data
 public class DigisignAgreement implements Serializable {
 

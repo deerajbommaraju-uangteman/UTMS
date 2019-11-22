@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService.repository;
+package ut.microservices.investormicroservice.repository;
 
 import java.io.Serializable;
 import java.util.List;
@@ -7,7 +7,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 
-public abstract class AbstractJpaDao<T extends Serializable> {
+public abstract class AbstractJpaDAO<T extends Serializable> {
  
    private Class< T > clazz;
   
@@ -38,7 +38,10 @@ public abstract class AbstractJpaDao<T extends Serializable> {
    public List<T> findBy(String column, String value){
      return entityManager.createQuery("from " + clazz.getName() + " a " + " where a." +column+"='"+value+"'").getResultList();
    } 
-   public List<T> findVANumberByInvestorID(Integer investorID){
-     return entityManager.createQuery("from "+ clazz.getName()+" a  where a.investorID='"+investorID+"' and a.status=0").getResultList();
+   public List<T> findBy(String column1,String value1,String column2,String value2){
+     return entityManager.createQuery("from "+ clazz.getName()+" a  where a."+column1+"='"+value1+"' and a."+column2+"='"+value2+"'").getResultList();
+   }
+   public List<T> findAll(){
+     return entityManager.createQuery("from "+ clazz.getName()+" a").getResultList();
    }
  }

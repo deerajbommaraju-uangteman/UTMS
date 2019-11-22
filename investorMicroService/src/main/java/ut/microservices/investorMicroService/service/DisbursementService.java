@@ -1,6 +1,5 @@
-package ut.microservices.investorMicroService.service;
+package ut.microservices.investormicroservice.service;
 
-import java.util.HashMap;
 
 import javax.transaction.Transactional;
 
@@ -10,14 +9,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import ut.microservices.investorMicroService.model.ApplicantData;
-import ut.microservices.investorMicroService.model.DigisignAgreement;
-import ut.microservices.investorMicroService.model.LoanInvestment;
-import ut.microservices.investorMicroService.repository.IGenericDao;
+import ut.microservices.investormicroservice.model.ApplicantData;
+import ut.microservices.investormicroservice.model.DigisignAgreement;
+import ut.microservices.investormicroservice.model.LoanInvestment;
+import ut.microservices.investormicroservice.repository.IGenericDAO;
+
 
 @Service
 @Transactional
@@ -25,7 +24,8 @@ public class DisbursementService {
 
     private final String baseUrl = "http://localhost:9090/application-form/getApplicationData/";
 
-    IGenericDao<LoanInvestment> loanInvestmentDao;
+    IGenericDAO<LoanInvestment> loanInvestmentDAO;
+    IGenericDAO<ApplicantData> applicantDataDAO;
 
     @Autowired
     DatabaseService databaseService;
@@ -34,35 +34,35 @@ public class DisbursementService {
     ObjectMapper objectMapper;
 
     @Autowired
-    KafkaTemplate<String, String> kafkaTemplate;
+    CronjobService cronJobService;    
 
     @Autowired
-    public void setLoanInvestmentDao(IGenericDao<LoanInvestment> daoToSet) {
-        loanInvestmentDao = daoToSet;
-        loanInvestmentDao.setClazz(LoanInvestment.class);
+    public void setLoanInvestmentDAO(IGenericDAO<LoanInvestment> loanInvestmentDAO) {
+        this.loanInvestmentDAO = loanInvestmentDAO;
+        this.loanInvestmentDAO.setClazz(LoanInvestment.class);
+    }
+
+    @Autowired
+    public void setApplicantDataDAO(IGenericDAO<ApplicantData> applicantDataDAO) {
+      this.applicantDataDAO = applicantDataDAO;
+      this.applicantDataDAO.setClazz(ApplicantData.class);
     }
 
     public void disburseLoan(DigisignAgreement digisignAgreement) throws Exception {
-      if(true){
-        System.out.println("Loan Disbursed");
-        return;
-      }
-      String url=baseUrl+digisignAgreement.getApplicationID();
-      RestTemplate restTemplate = new RestTemplate();
-      ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
-      JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
-      JsonNode jnApplicationData = jsonNode.get("ApplicantData");
-      ApplicantData aplicantData =  objectMapper.readValue(jnApplicationData.toString(),ApplicantData.class);
-        //insert record into cimbniaga
-      databaseService.insertRecordToLogsCIMBNiaga();
-      // Send data to repayment micro service
-      HashMap<String, Object> map = new HashMap<>();
-      map.put("ApplicantID", digisignAgreement.getApplicantID());
-      map.put("ApplicationID", digisignAgreement.getApplicationID());
-      LoanInvestment loan=loanInvestmentDao.findBy("applicationID", Integer.toString(digisignAgreement.getApplicationID())).get(0);
-      map.put("LoanApplicationID",loan.getLoanAppID() );
-      map.put("RepaymentAmount", loan.getLoanAmount());
-      kafkaTemplate.send("loanDisbursed", objectMapper.writeValueAsString(map));
-    }
+        LoanInvestment loan=loanInvestmentDAO.findBy("applicationID", Integer.toString(digisignAgreement.getApplicationID())).get(0);
+        String url=baseUrl+loan.getLoanAppID();
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+        JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
+        JsonNode jnApplicantData = jsonNode.get("ApplicantData");
+        ApplicantData applicantData =  objectMapper.readValue(jnApplicantData.toString(),ApplicantData.class);
+        applicantDataDAO.save(applicantData);
 
+        databaseService.insertRecordToLogsCIMBNiaga(applicantData,loan,digisignAgreement);
+
+        //TODO
+        //For now We are invoking CronJob CallBack from here
+        //Need to Uncomment following method Call in production
+        cronJobService.loanDisbursed(loan.getLoanAppID(),loan.getLoanAmount());
+    }
 }

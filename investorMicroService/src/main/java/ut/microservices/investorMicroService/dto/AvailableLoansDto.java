@@ -1,5 +1,5 @@
-package ut.microservices.investorMicroService.dto;
-public class AvailableLoansDto {
+package ut.microservices.investormicroservice.dto;
+public class AvailableLoansDTO {
     private String ID;
     private String key;
     private String loanAppID;

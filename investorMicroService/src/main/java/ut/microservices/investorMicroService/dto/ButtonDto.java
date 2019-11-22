@@ -1,5 +1,5 @@
-package ut.microservices.investorMicroService.dto;
-public class ButtonDto {
+package ut.microservices.investormicroservice.dto;
+public class ButtonDTO {
 
     public String title;
     public String key;

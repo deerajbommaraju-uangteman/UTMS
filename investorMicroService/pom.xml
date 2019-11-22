@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>ut.microservices</groupId>
-	<artifactId>investorMicroService</artifactId>
+	<artifactId>investormicroservice</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
-	<name>investorMicroService</name>
+	<name>investormicroservice</name>
 	<description>Investor Micro Service</description>
 
 	<properties>

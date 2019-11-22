@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService.service;
+package ut.microservices.investormicroservice.service;
 
 import java.util.HashMap;
 
@@ -7,43 +7,61 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ut.microservices.investorMicroService.model.DigisignAgreement;
-import ut.microservices.investorMicroService.model.InvestorFundingHistory;
-import ut.microservices.investorMicroService.model.InvestorVAHistory;
-import ut.microservices.investorMicroService.model.LoanInvestment;
-import ut.microservices.investorMicroService.repository.IGenericDao;
+import ut.microservices.investormicroservice.model.ApplicantData;
+import ut.microservices.investormicroservice.model.DigisignAgreement;
+import ut.microservices.investormicroservice.model.InvestorFundingHistory;
+import ut.microservices.investormicroservice.model.InvestorVAHistory;
+import ut.microservices.investormicroservice.model.LoanInvestment;
+import ut.microservices.investormicroservice.model.LogsCIMBNiaga;
+import ut.microservices.investormicroservice.model.MrBankList;
+import ut.microservices.investormicroservice.repository.IGenericDAO;
 
 @Service
 @Transactional 
 public class DatabaseService {
-    IGenericDao<LoanInvestment> loanInvestmentDao;
-    IGenericDao<InvestorVAHistory> investorVAHistoryDao;
-    IGenericDao<InvestorFundingHistory> investorFundingHistoryDao;
-    IGenericDao<DigisignAgreement> digisignAgreementDao;
+    IGenericDAO<LoanInvestment> loanInvestmentDAO;
+    IGenericDAO<InvestorVAHistory> investorVAHistoryDAO;
+    IGenericDAO<InvestorFundingHistory> investorFundingHistoryDAO;
+    IGenericDAO<DigisignAgreement> digisignAgreementDAO;
+    IGenericDAO<LogsCIMBNiaga> logsCIMBNiagaDAO;
+    IGenericDAO<MrBankList> mrBankListDAO;
+
 
     @Autowired
-    public void setDigisignAgreementtDao(IGenericDao<DigisignAgreement> daoToSet) {
-      digisignAgreementDao = daoToSet;
-      digisignAgreementDao.setClazz(DigisignAgreement.class);
+    public void setDigisignAgreementDAO(IGenericDAO<DigisignAgreement> digisignAgreementDAO) {
+      this.digisignAgreementDAO = digisignAgreementDAO;
+      this.digisignAgreementDAO.setClazz(DigisignAgreement.class);
     }
 
     @Autowired
-    public void setLoanInvestmentDao(IGenericDao<LoanInvestment> daoToSet) {
-      loanInvestmentDao = daoToSet;
-      loanInvestmentDao.setClazz(LoanInvestment.class);
+    public void setLoanInvestmentDAO(IGenericDAO<LoanInvestment> loanInvestmentDAO) {
+      this.loanInvestmentDAO = loanInvestmentDAO;
+      this.loanInvestmentDAO.setClazz(LoanInvestment.class);
     }
 
     @Autowired
-    public void setinvestorFundingHistoryDao(IGenericDao<InvestorFundingHistory> daoToSet) {
-      investorFundingHistoryDao = daoToSet;
-      investorFundingHistoryDao.setClazz(InvestorFundingHistory.class);
+    public void setinvestorFundingHistoryDAO(IGenericDAO<InvestorFundingHistory> investorFundingHistoryDAO) {
+      this.investorFundingHistoryDAO = investorFundingHistoryDAO;
+      this.investorFundingHistoryDAO.setClazz(InvestorFundingHistory.class);
     }
 
     
     @Autowired
-    public void setInvestorVAHistoryDao(IGenericDao<InvestorVAHistory> daoToSet2) {
-      investorVAHistoryDao = daoToSet2;
-      investorVAHistoryDao.setClazz(InvestorVAHistory.class);
+    public void setInvestorVAHistoryDAO(IGenericDAO<InvestorVAHistory> investorVAHistoryDAO) {
+      this.investorVAHistoryDAO = investorVAHistoryDAO;
+      this.investorVAHistoryDAO.setClazz(InvestorVAHistory.class);
+    }
+
+    @Autowired
+    public void setLogsCIMBNiagaDAO(IGenericDAO<LogsCIMBNiaga> logsCIMBNiagaDAO) {
+      this.logsCIMBNiagaDAO = logsCIMBNiagaDAO;
+      this.logsCIMBNiagaDAO.setClazz(LogsCIMBNiaga.class);
+    }
+
+    @Autowired
+    public void setMrBankListDAO(IGenericDAO<MrBankList> mrBankListDAO) {
+      this.mrBankListDAO = mrBankListDAO;
+      this.mrBankListDAO.setClazz(MrBankList.class);
     }
     
     void insertRecordToInvestorVAHistory(LoanInvestment loan,Integer vaNumber) {
@@ -56,7 +74,7 @@ public class DatabaseService {
         investorVAHistory.setUpdatedBy(loan.getInvestorID());
         investorVAHistory.setBankID(01);
         investorVAHistory.setApplicationID(loan.getApplicationID());
-        investorVAHistoryDao.save(investorVAHistory);
+        investorVAHistoryDAO.save(investorVAHistory);
       }
       void insertRecordToInvestorFundingHistory(Integer investorID,Integer vaNumber) {
         InvestorFundingHistory investorFundingHistory=new InvestorFundingHistory();
@@ -64,7 +82,7 @@ public class DatabaseService {
         investorFundingHistory.setInvestorVaNumber(Integer.toString(vaNumber));
         investorFundingHistory.setFundTxnNumber("FundingTxtNumber");
         investorFundingHistory.setTxnStatus(0);
-        investorFundingHistoryDao.save(investorFundingHistory);
+        investorFundingHistoryDAO.save(investorFundingHistory);
       }
       void insertRecordToLoanInvestment(HashMap<String, Object> loanData) {
         LoanInvestment loanInvestment=new LoanInvestment();
@@ -76,24 +94,39 @@ public class DatabaseService {
         loanInvestment.setInvestorID(01);
         loanInvestment.setCreatedBy(01);
         loanInvestment.setUpdatedBy(01);
-        loanInvestmentDao.save(loanInvestment);
+        loanInvestmentDAO.save(loanInvestment);
       }
 
 	public void insertRecordToDigisignAgreement(Integer applicationID, Integer investorID,String loanAppID) {
+        //TODO
+        //loanAppID is used in future purpose
         //Calling LAMS endpoint to get applicant data
         DigisignAgreement digisignAgreement=new DigisignAgreement();
         digisignAgreement.setApplicationID(applicationID);
         digisignAgreement.setInvestorID(investorID);
         digisignAgreement.setDocumentID(applicationID+""+001);
         digisignAgreement.setDocumentLenderID(applicationID+""+investorID);
-        digisignAgreement.setApplicantID(new Long(001));//For now..Assuming ApplicantID is received from applicantData
+        digisignAgreement.setApplicantID(Long.valueOf(001));//For now..Assuming ApplicantID is received from applicantData
         digisignAgreement.setDuLenderEmailUser("lenderemail@gmail.com");//For now....Assuming lenderemail  is received from Lender 
         digisignAgreement.setStatusAgreement("D");//Always Document initial status is D
         digisignAgreement.setStatusLenderAgreement("D");//Always Document initial status is D
-        digisignAgreementDao.save(digisignAgreement);
+        digisignAgreementDAO.save(digisignAgreement);
 	}
 
-	public void insertRecordToLogsCIMBNiaga() {
-        //New loan record is inserted to LogsCIMBNiaga table
+	public void insertRecordToLogsCIMBNiaga(ApplicantData applicantData, LoanInvestment loan, DigisignAgreement digisignAgreement) {
+    LogsCIMBNiaga logsCIMBNiaga=new LogsCIMBNiaga();
+    logsCIMBNiaga.setBankAccountName(applicantData.getBankUsername());
+    logsCIMBNiaga.setBankAccountNumber(applicantData.getBankNumber());
+    logsCIMBNiaga.setLoanAppID(loan.getLoanAppID());
+    logsCIMBNiaga.setLoanAmount(loan.getLoanAmount());
+    logsCIMBNiaga.setStatus("PENDING");
+    //For now UTBankID is 4....In further value has to be fetched from Config
+    logsCIMBNiaga.setUtBankID(Integer.valueOf(4));
+    MrBankList bankDetails=mrBankListDAO.findBy("ID", Integer.toString(applicantData.getBankNameID())).get(0);
+    logsCIMBNiaga.setBankCode(bankDetails.getCode());
+    //TODO
+    //For now value is stored.....In future it has to be encrypted before storing
+    logsCIMBNiaga.setKeyChecking(loan.getLoanAppID()+"PENDING");
+    logsCIMBNiagaDAO.save(logsCIMBNiaga);
 	}
 }

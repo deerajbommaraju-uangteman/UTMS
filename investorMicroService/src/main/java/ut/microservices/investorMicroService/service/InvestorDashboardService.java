@@ -1,32 +1,34 @@
-package ut.microservices.investorMicroService.service;
+package ut.microservices.investormicroservice.service;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.transaction.Transactional;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.List;
+
+import javax.transaction.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.web.bind.annotation.ResponseBody;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import ut.microservices.investorMicroService.dto.AvailableLoansDto;
-import ut.microservices.investorMicroService.dto.ButtonDto;
-import ut.microservices.investorMicroService.dto.ColumnDto;
-import ut.microservices.investorMicroService.dto.ResponseDto;
-import ut.microservices.investorMicroService.model.LoanInvestment;
-import ut.microservices.investorMicroService.repository.IGenericDao;
+import ut.microservices.investormicroservice.dto.AvailableLoansDTO;
+import ut.microservices.investormicroservice.dto.LoansDTO;
+import ut.microservices.investormicroservice.dto.ResponseDTO;
+import ut.microservices.investormicroservice.model.InvestorFundingHistory;
+import ut.microservices.investormicroservice.model.InvestorVAHistory;
+import ut.microservices.investormicroservice.model.LoanInvestment;
+import ut.microservices.investormicroservice.repository.IGenericDAO;
 
 @Service
 @Transactional 
 public class InvestorDashboardService {
 
-  IGenericDao<LoanInvestment> loanInvestmentDao;
+  IGenericDAO<LoanInvestment> loanInvestmentDAO;
+  IGenericDAO<InvestorFundingHistory> investorFundingHistoryDAO;
+  IGenericDAO<InvestorVAHistory> investorVAHistoryDAO;
 
   @Autowired
    KafkaTemplate<String, String> kafkaTemplate;
@@ -35,32 +37,79 @@ public class InvestorDashboardService {
   ObjectMapper objectMapper;
 
   @Autowired
+  ResponseBodyService responseBodyService;
+
+  @Autowired
   DatabaseService databaseService;
 
 
   @Autowired
-  public void setLoanInvestmentDao(IGenericDao<LoanInvestment> daoToSet) {
-     loanInvestmentDao = daoToSet;
-    loanInvestmentDao.setClazz(LoanInvestment.class);
+  public void setinvestorFundingHistoryDAO(IGenericDAO<InvestorFundingHistory> investorFundingHistoryDAO) {
+    this.investorFundingHistoryDAO = investorFundingHistoryDAO;
+    this.investorFundingHistoryDAO.setClazz(InvestorFundingHistory.class);
+  }
+  
+  @Autowired
+  public void setInvestorVAHistoryDAO(IGenericDAO<InvestorVAHistory> investorVAHistoryDAO) {
+    this.investorVAHistoryDAO = investorVAHistoryDAO;
+    this.investorVAHistoryDAO.setClazz(InvestorVAHistory.class);
   }
 
-  public @ResponseBody ResponseDto<AvailableLoansDto> getAvailableLoans() throws Exception{
-    List<LoanInvestment> fundingLoansList = loanInvestmentDao.findBy("State","N");
-    return getResponseBody(fundingLoansList);
+  @Autowired
+  public void setLoanInvestmentDAO(IGenericDAO<LoanInvestment> loanInvestmentDAO) {
+    this.loanInvestmentDAO = loanInvestmentDAO;
+    this.loanInvestmentDAO.setClazz(LoanInvestment.class);
+  }
+
+  public ResponseDTO<LoansDTO> getLoans() {
+    List<LoanInvestment> fundingLoansList = loanInvestmentDAO.findAll();
+    List<LoanInvestment> loansList = sortWithInvestorPreference(fundingLoansList);
+    return responseBodyService.getLoanResponseBody(loansList);
+  }
+
+  public @ResponseBody ResponseDTO<AvailableLoansDTO> getAvailableLoans() throws Exception {
+    List<LoanInvestment> fundingLoansList = loanInvestmentDAO.findBy("State","N");
+    List<LoanInvestment> loansList = sortWithInvestorPreference(fundingLoansList);
+    return responseBodyService.getAvailableLoanResponseBody(loansList);
+  }
+
+  private List<LoanInvestment> sortWithInvestorPreference(List<LoanInvestment> fundingLoansList) {
+    //TODO
+    //Short list loans according to Investor Preferences
+    return fundingLoansList;
   }
 
   public void fundLoan(String loanAppID) {
-    //UPDATING STATE TO W FOR CORRESPONDING FUNDED LOANAPPID
-    LoanInvestment loanInvestment=loanInvestmentDao.findBy("loanAppID",loanAppID).get(0);
-    loanInvestment.setState("W");
-    loanInvestmentDao.update(loanInvestment);   
+    //True indicates payment is not done
+    if(checkFundingStatus()){
+      LoanInvestment loanInvestment=loanInvestmentDAO.findBy("loanAppID",loanAppID).get(0);
+      loanInvestment.setState("W");
+      loanInvestmentDAO.update(loanInvestment);
+    }
+    else{
+      //TODO
+      //Please complete previous funding
+    }    
+  }
+
+  public boolean checkFundingStatus() {
+    //For now InvestorID is static
+    int investorID=1;
+    List<InvestorFundingHistory> investorFundingHistoryList=investorFundingHistoryDAO.findBy("investorID",Integer.toString(investorID),"txnStatus","0");
+    if(investorFundingHistoryList.size()==0){
+      List<InvestorVAHistory> investorVAHistoryList=investorVAHistoryDAO.findBy("investorID", Integer.toString(investorID), "status", "0");
+      if(investorVAHistoryList.size()!=0){
+        return false;
+      }  
+    }
+    return true;
   }
 
   public void rejectLoan(String loanAppID) {
     //UPDATING STATE TO R FOR CORRESPONDING REJECTED LOANAPPID
-    LoanInvestment loanInvestment=loanInvestmentDao.findBy("loanAppID",loanAppID).get(0);
+    LoanInvestment loanInvestment=loanInvestmentDAO.findBy("loanAppID",loanAppID).get(0);
     loanInvestment.setState("R");
-    loanInvestmentDao.update(loanInvestment);
+    loanInvestmentDAO.update(loanInvestment);
   }
 
   public String approveLoan(String loanAppID,Double loanAmount,Integer ApplicationID,Integer loanTenor) throws Exception{
@@ -79,54 +128,21 @@ public class InvestorDashboardService {
     databaseService.insertRecordToLoanInvestment(loanData);
   }
 
-  private ResponseDto<AvailableLoansDto> getResponseBody(List<LoanInvestment> fundingLoansList) {
-    Iterator<LoanInvestment> iterator=fundingLoansList.iterator();
-    ResponseDto<AvailableLoansDto> response=new ResponseDto<AvailableLoansDto>();
-    List<AvailableLoansDto> rows=new LinkedList<AvailableLoansDto>();
-    int key=0;
+public void fundAllLoan() {
+  List<LoanInvestment> fundingLoansList = loanInvestmentDAO.findBy("State","N");
+  List<LoanInvestment> loansList = sortWithInvestorPreference(fundingLoansList);
+  Iterator<LoanInvestment> iterator=loansList.iterator();
+  while(iterator.hasNext()){
+    kafkaTemplate.send("fundLoans",iterator.next().getLoanAppID());
+  }
+}
 
-    //Preparing Rows Data
-    while(iterator.hasNext()){
-      key++;
-      LoanInvestment loan=iterator.next();
-      AvailableLoansDto availableLoansDto=new AvailableLoansDto();
-      availableLoansDto.setKey(Integer.toString(key));
-      availableLoansDto.setApplicationID(Integer.toString(loan.getApplicationID()));
-      availableLoansDto.setID(Long.toString(loan.getID()));
-      availableLoansDto.setLoanAmount(Double.toString(loan.getLoanAmount()));
-      availableLoansDto.setLoanAppID(loan.getLoanAppID());
-      availableLoansDto.setLoanTenor(Integer.toString(loan.getLoanTenor()));
-      rows.add(availableLoansDto);
-    }
-    response.setRows(rows);
-
-    //Preparing Column data
-    HashMap<String,String> tableColumns=new HashMap<String,String>();
-    tableColumns.put("id", "ID");
-    tableColumns.put("loanAppID", "Loan ID");
-    tableColumns.put("loanAmount", "Loan Amount");
-    tableColumns.put("loanTenor", "Loan Tenor");
-    tableColumns.put("applicationID", "Application ID");
-    tableColumns.put("Action","Action");
-    List<ColumnDto> columns=new LinkedList<ColumnDto>();
-    for(Map.Entry<String,String> entry : tableColumns.entrySet()){
-      ColumnDto columnDto=new ColumnDto();
-      columnDto.setKey(entry.getKey());
-      columnDto.setTitle(entry.getValue());
-      columnDto.setDataIndex(entry.getKey());
-      columns.add(columnDto);
-    }
-    response.setColumns(columns);
-
-    //Preparing Button data
-    List<ButtonDto> buttons=new LinkedList<ButtonDto>();
-    ButtonDto buttonDto=new ButtonDto();
-    buttonDto.setTitle("Action");
-    buttonDto.setKey("Action");
-    buttonDto.setAction("Action");
-    buttons.add(buttonDto);
-    response.setButton(buttons);
-    return response;
+@KafkaListener(topics = "fundLoans")
+  public void fundLoans(String param){
+    //Not funding all loans for now
+    //Uncomment fundLoan(param) method call to fund all loans 
+    System.out.println("Funding Loan : "+param);
+    //this.fundLoan(param);
   }
 
 }

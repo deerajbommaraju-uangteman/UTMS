@@ -1,4 +1,4 @@
-package ut.microservices.investorMicroService.dto;
-public class ResponseDataDto {
+package ut.microservices.investormicroservice.dto;
+public class ResponseDataDTO {
     
 }

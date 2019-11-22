@@ -1,10 +1,8 @@
-package ut.microservices.investorMicroService.service;
+package ut.microservices.investormicroservice.service;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import javax.transaction.Transactional;
@@ -15,19 +13,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import ut.microservices.investorMicroService.dto.ColumnDto;
-import ut.microservices.investorMicroService.dto.InvestorFundedLoansDto;
-import ut.microservices.investorMicroService.dto.ResponseDto;
-import ut.microservices.investorMicroService.model.InvestorVAHistory;
-import ut.microservices.investorMicroService.model.LoanInvestment;
-import ut.microservices.investorMicroService.repository.IGenericDao;
+import ut.microservices.investormicroservice.dto.InvestorFundedLoansDTO;
+import ut.microservices.investormicroservice.dto.ResponseDTO;
+import ut.microservices.investormicroservice.model.InvestorFundingHistory;
+import ut.microservices.investormicroservice.model.InvestorVAHistory;
+import ut.microservices.investormicroservice.model.LoanInvestment;
+import ut.microservices.investormicroservice.repository.IGenericDAO;
 
 @Service
 @Transactional
 public class VAGenerationService {
 
-  IGenericDao<LoanInvestment> loanInvestmentDao;
-  IGenericDao<InvestorVAHistory> investorVAHistoryDao;
+  IGenericDAO<LoanInvestment> loanInvestmentDAO;
+  IGenericDAO<InvestorVAHistory> investorVAHistoryDAO;
+  IGenericDAO<InvestorFundingHistory> investorFundingHistoryDAO;
 
   @Autowired
   KafkaTemplate<String, String> kafkaTemplate;
@@ -39,96 +38,70 @@ public class VAGenerationService {
   DatabaseService databaseService;
 
   @Autowired
-  public void setLoanInvestmentDao(IGenericDao<LoanInvestment> daoToSet) {
-    loanInvestmentDao = daoToSet;
-    loanInvestmentDao.setClazz(LoanInvestment.class);
+  ResponseBodyService responseBodyService;
+
+  @Autowired
+  public void setLoanInvestmentDAO(IGenericDAO<LoanInvestment> loanInvestmentDAO) {
+    this.loanInvestmentDAO = loanInvestmentDAO;
+    this.loanInvestmentDAO.setClazz(LoanInvestment.class);
   }
 
   @Autowired
-  public void setInvestorVAHistoryDao(IGenericDao<InvestorVAHistory> daoToSet2) {
-    investorVAHistoryDao = daoToSet2;
-    investorVAHistoryDao.setClazz(InvestorVAHistory.class);
+  public void setInvestorVAHistoryDAO(IGenericDAO<InvestorVAHistory> investorVAHistoryDAO) {
+    this.investorVAHistoryDAO = investorVAHistoryDAO;
+    this.investorVAHistoryDAO.setClazz(InvestorVAHistory.class);
   }
 
-  public ResponseDto<InvestorFundedLoansDto> confirmationFunding() throws Exception {
-    //Based on Loan State 'W'...loans are retrieved
-    List<LoanInvestment> fundedLoansList = loanInvestmentDao.findBy("State","W");
+  @Autowired
+  public void setInvestorFundingHistoryDAO(IGenericDAO<InvestorFundingHistory> investorFundingHistoryDAO) {
+    this.investorFundingHistoryDAO = investorFundingHistoryDAO;
+    this.investorFundingHistoryDAO.setClazz(InvestorFundingHistory.class);
+  }
+
+  public ResponseDTO<InvestorFundedLoansDTO> confirmationFunding() throws Exception {
     //For now Investor ID is considered as 1
-    if(fundedLoansList.isEmpty()){
-      return new ResponseDto<InvestorFundedLoansDto>();
-    }
     int investorID=1;
-    Integer vaNumber = null;
-    List<InvestorVAHistory> investorVAHistory=investorVAHistoryDao.findVANumberByInvestorID(investorID);
+    ArrayList<LoanInvestment> fundedLoansList = (ArrayList<LoanInvestment>) loanInvestmentDAO.findBy("investorID",Integer.toString(investorID),"State","W");
+    if(fundedLoansList.isEmpty()){
+      return new ResponseDTO<InvestorFundedLoansDTO>();
+    }
+    Integer vaNumber = 0;
+    List<InvestorFundingHistory> investorFundingHsitoryList=investorFundingHistoryDAO.findBy("investorID",Integer.toString(investorID),"txnStatus","0");
+    List<InvestorVAHistory> investorVAHistoryList=investorVAHistoryDAO.findBy("investorID",Integer.toString(investorID),"status","0");
     Iterator<LoanInvestment> iterator=fundedLoansList.iterator();
-    if(!fundedLoansList.isEmpty()){
-      if(investorVAHistory.isEmpty()){
+    if(investorFundingHsitoryList.isEmpty()){
+      if(investorVAHistoryList.isEmpty()){
+        //Payment not done
+        //VA not generated
         Random random=new Random();
-        vaNumber=random.nextInt();
+        int min=1000;
+        int max=9999;
+        vaNumber=random.nextInt((max - min) + 1) + min;
         while(iterator.hasNext()){
           LoanInvestment loan=iterator.next();
           databaseService.insertRecordToInvestorVAHistory(loan,vaNumber);
         }
         databaseService.insertRecordToInvestorFundingHistory(investorID,vaNumber);
+        System.out.println("Payment not done and VA not generated");
       }
       else{
-        vaNumber=investorVAHistory.get(0).getVaNumber();
-        while(iterator.hasNext()){
-          LoanInvestment loan=iterator.next();
-          if(investorVAHistoryDao.findBy("loanAppID",loan.getLoanAppID()).isEmpty()){
-            databaseService.insertRecordToInvestorVAHistory(loan, vaNumber);
-          };
-        }
+        //Payment Done 
+        //Receipt not uploaded
+        vaNumber=investorVAHistoryList.get(0).getVaNumber();
+        System.out.println("Payment Done and Receipt not uploaded");
       }
     }
-    return getResponseBody(fundedLoansList,vaNumber);
-  }
-
-  private ResponseDto<InvestorFundedLoansDto> getResponseBody(List<LoanInvestment> fundedLoansList, Integer vaNumber) {
-    Iterator<LoanInvestment> iterator=fundedLoansList.iterator();
-    ResponseDto<InvestorFundedLoansDto> response=new ResponseDto<InvestorFundedLoansDto>();
-    List<InvestorFundedLoansDto> rows=new LinkedList<InvestorFundedLoansDto>();
-    int key=0;
-
-    //Preparing Rows Data
-    Double totalAmount=0.0;
-    while(iterator.hasNext()){
-      key++;
-      LoanInvestment loan=iterator.next();
-      InvestorFundedLoansDto investorFundedLoansDto=new InvestorFundedLoansDto();
-      investorFundedLoansDto.setKey(Integer.toString(key));
-      investorFundedLoansDto.setApplicationID(Integer.toString(loan.getApplicationID()));
-      investorFundedLoansDto.setID(Long.toString(loan.getID()));
-      investorFundedLoansDto.setLoanAmount(Double.toString(loan.getLoanAmount()));
-      investorFundedLoansDto.setLoanAppID(loan.getLoanAppID());
-      investorFundedLoansDto.setLoanTenor(Integer.toString(loan.getLoanTenor()));
-      totalAmount+=loan.getLoanAmount();
-      rows.add(investorFundedLoansDto);
+    else{
+      //Payment not done but VA Generated
+      vaNumber=Integer.parseInt(investorFundingHsitoryList.get(0).getInvestorVaNumber());
+      while(iterator.hasNext()){
+        LoanInvestment loan=iterator.next();
+        if(investorVAHistoryDAO.findBy("loanAppID",loan.getLoanAppID()).isEmpty()){
+          databaseService.insertRecordToInvestorVAHistory(loan,vaNumber);
+        };
+      }
+      System.out.println("Payment not done but VA Generated");
     }
-    response.setRows(rows);
-
-    //Preparing Columns Data
-    HashMap<String,String> tableColumns=new HashMap<String,String>();
-    tableColumns.put("id", "ID");
-    tableColumns.put("loanAppID", "Loan ID");
-    tableColumns.put("loanAmount", "Loan Amount");
-    tableColumns.put("loanTenor", "Loan Tenor");
-    tableColumns.put("applicationID", "Application ID");
-    List<ColumnDto> columns=new LinkedList<ColumnDto>();
-    for(Map.Entry<String,String> entry : tableColumns.entrySet()){
-      ColumnDto columnDto=new ColumnDto();
-      columnDto.setKey(entry.getKey());
-      columnDto.setTitle(entry.getValue());
-      columnDto.setDataIndex(entry.getKey());
-      columns.add(columnDto);
-    }
-    response.setColumns(columns);
-    
-    //Preparing Additional Data
-    HashMap<String,String> data=new HashMap<String,String>();
-    data.put("vaNumber",Integer.toString(vaNumber));
-    data.put("totalAmount",Double.toString(totalAmount));
-    response.setAdditionalData(data);
-    return response;
+    return responseBodyService.getFundedLoansResponseBody(fundedLoansList,vaNumber);
   }
 }

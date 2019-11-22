@@ -1,5 +1,5 @@
-package ut.microservices.investorMicroService.dto;
-public class ColumnDto{
+package ut.microservices.investormicroservice.dto;
+public class ColumnDTO{
     public String title;
     public String dataIndex;
     public String key;
