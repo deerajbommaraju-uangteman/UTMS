@@ -5,7 +5,9 @@ import java.util.HashMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,7 +64,7 @@ public class DokuPaymentService {
 	@Autowired
 	private ObjectMapper objectMapper;
 	
-	String inqResponse = null;
+	HashMap<String, Object> inqResponse = new HashMap<>();
 
 	// Set BCA request data for generateDokuVA - VA generation
 	public void setBCARequest(HashMap<String, String> userdata) {
@@ -114,7 +116,9 @@ public class DokuPaymentService {
             objLog.setInquiryResponse(xml);
             objLog.setInquiryRespDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
             logDokuBcaDAO.save(objLog);
-			inqResponse = "Invalid data";
+
+            inqResponse.put("status", HttpStatus.EXPECTATION_FAILED);
+			inqResponse.put("message", "Invalid data");
         }
 
 		CustomerVaHistory vaNumberData = customerVaHistoryDAO.findByVANumber(requestdata.get("PAYMENTCODE")).get(0);
@@ -129,10 +133,12 @@ public class DokuPaymentService {
             objLog.setInquiryResponse(xml);
             objLog.setInquiryRespDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
             logDokuBcaDAO.save(objLog);
-			inqResponse = "Invalid VA number";
+
+            inqResponse.put("status", HttpStatus.EXPECTATION_FAILED);
+			inqResponse.put("message", "Invalid VA number");
 		}
 		
-        if(vaNumberData.getStatus() == 0 && vaNumberData.getIsVaActive().equals("Y")){
+        if(vaNumberData.getStatus() == 0 && !vaNumberData.getIsVaActive().equals("Y")){
 
             //Updating the generated Transmerchant id in CustomerVaHistory
             String randTransId = RandomStringUtils.randomAlphanumeric(10);
@@ -149,7 +155,7 @@ public class DokuPaymentService {
             nPaidResp += "<WORDS>"+ signature +"</PURCHASEAMOUNT>\n";
             nPaidResp += "<CURRENCY>" + this.PAY_CURRENCY +"</CURRENCY>\n";
             nPaidResp += "<PURCHASECURRENCY>" + this.PAY_CURRENCY +"</PURCHASECURRENCY>\n";
-            nPaidResp += "<SESSIONID>" + RandomStringUtils.randomAlphanumeric(32) +"</SESSIONID>\n";
+            nPaidResp += "<SESSIONID>" + DigestUtils.shaHex(RandomStringUtils.randomAlphanumeric(32)) +"</SESSIONID>\n";
             nPaidResp += "<ADDITIONALDATA>UangTeman</ADDITIONALDATA>\n";
             CustomerLoanRepayment clr = custLoanRepaymentDAO.findValueByColumn("ApplicantID",vaNumberData.getApplicantID()).get(0);    
 
@@ -161,14 +167,29 @@ public class DokuPaymentService {
             objLog.setInquiryResponse(xml);
             logDokuBcaDAO.save(objLog);
 
-            inqResponse = "success";
+            inqResponse.put("status", HttpStatus.OK);
+            inqResponse.put("message",xml);
+
+        }else{
+
+            objLog.setVaNumber(requestdata.get("PAYMENTCODE"));
+            objLog.setLogAppID(null);
+            objLog.setInquiryRequest(objectMapper.writeValueAsString(requestdata));
+            objLog.setInquiryReqDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
+            objLog.setInquiryResponse(headResp + failResp + footResp);
+            objLog.setInquiryRespDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
+            logDokuBcaDAO.save(objLog);
+
+            inqResponse.put("status", HttpStatus.EXPECTATION_FAILED);
+            inqResponse.put("message", headResp + failResp + footResp);
+
         }
 
         // response.put("message", msg);
         // response.put("status", "success");
 	}
 
-	public String getResponse() {
+	public HashMap<String, Object> getResponse() {
 		return this.inqResponse;
 	}
 
