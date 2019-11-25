@@ -5,13 +5,16 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Date;
 import javax.transaction.Transactional;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -27,6 +30,7 @@ import ut.microservices.repaymentmicroservice.models.CustomerLoanRepayment;
 import ut.microservices.repaymentmicroservice.models.CustomerPrimaryData;
 import ut.microservices.repaymentmicroservice.models.CustomerVaHistory;
 import ut.microservices.repaymentmicroservice.models.LogDokuBca;
+import ut.microservices.repaymentmicroservice.models.LogsArtajasa;
 import ut.microservices.repaymentmicroservice.models.VaArtajasa;
 
 @Service
@@ -42,6 +46,7 @@ public class RepaymentService {
     IGenericDAO<CustomerLoanData> custLoanDataDAO;
     IGenericDAO<CustomerPrimaryData> custPrimaryDataDAO;
     IGenericDAO<VaArtajasa> vaArtajasaDAO;
+    IGenericDAO<LogsArtajasa> logsArtajasaDAO;
 
     @Autowired
     public void setApplicantDataDAO(IGenericDAO<ApplicantData> applicantDataDAO){
@@ -97,6 +102,12 @@ public class RepaymentService {
         vaArtajasaDAO.setClazz(VaArtajasa.class);
     }
 
+    @Autowired
+    public void setLogsArtajasaDAO(IGenericDAO<LogsArtajasa> logsArtajasaDAO) {
+        this.logsArtajasaDAO = logsArtajasaDAO;
+        logsArtajasaDAO.setClazz(LogsArtajasa.class);
+    }
+    
     @Autowired
     private DokuPaymentService dokuPaymentService;
 
@@ -279,16 +290,23 @@ public class RepaymentService {
     }
 
     // Doku Alfa and BCA Inquiry data
-    public String getDokuInquiry(HashMap<String, String> requestdata) throws Exception {
+    public HashMap<String, Object> getDokuInquiry(HashMap<String, String> requestdata) throws Exception {
         // String inquiryResp[];
+        HashMap<String, Object> response = new HashMap<>();
 		if(this.validateBin(requestdata.get("PAYMENTCODE").toString(), dokuPaymentService.getBcaBin().toString())){
             LogDokuBca objLog = new LogDokuBca();
 
             // this.checkVAExistanceAndCreateVA($_POST,dokuPaymentService.getBcaBin(),"doku-bca");			
             dokuPaymentService.setVAInquiryResponse(requestdata, objLog);
-            return dokuPaymentService.getResponse();
-		}
-		return "doku inquiry failed";
+            response = dokuPaymentService.getResponse();
+
+            //return ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body(inquiryResp);      
+        }
+
+        response.put("status", HttpStatus.BAD_REQUEST);
+        response.put("message", "doku inquiry failed");
+        
+		return response;
     }
     
 	private boolean validateBin(String paymentCode, String bin) {
@@ -553,6 +571,47 @@ public class RepaymentService {
         return result;          
     }
     
+    public ResponseEntity getArtajasaInquiry(HashMap<String, String> requestdata) throws Exception {
+
+        // result = this.checkVAExistanceAndCreateVAForArtajasa(requestdata,artajasaPaymentService.getBillerBin(), "atm_bersama");
+        LogsArtajasa logArtajasa = new LogsArtajasa();
+        if(true){ // result
+            
+            artajasaPaymentService.setInquiryResponse(requestdata, logArtajasa);
+            HashMap<String, String> inquiryResp = artajasaPaymentService.getInquiryResponse();
+            return ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body(inquiryResp);      
+        }
+        else{
+            String headResp = "<?xml version='1.0'?>\n";
+            headResp += "<data>\n";
+            String footResp = "</data>\n";
+            String Resp = "<type>resinqpayment</type>\n";
+            Resp += "<ack>76</ack>\n";
+            Resp += "<bookingid>NULL</bookingid>\n";
+            Resp += "<customer_name>NULL</customer_name>\n";
+            Resp += "<min_amount>0</min_amount>\n";
+            Resp += "<max_amount>0</max_amount>\n";
+            Resp += "<productid>NULL</productid>\n";
+            Resp += "<signature>" + artajasaPaymentService.getSignatureBiller() +"</signature>\n";
+
+            String xml = headResp + Resp + footResp;
+            
+            logArtajasa.setVaNumber(null);
+            logArtajasa.setLogAppID(null);
+            logArtajasa.setVaRequest(requestdata.toString());
+            logArtajasa.setVaResponse(xml);
+            logArtajasa.setVaReqDatetime(new Date());
+            logArtajasa.setVaRespDatetime(new Date());
+            logsArtajasaDAO.save(logArtajasa);
+            HttpHeaders headers = new HttpHeaders();
+            // return ResponseEntity.ok(xml).contentType(MediaType.APPLICATION_XML_VALUE);
+            return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_XML).body(xml);      
+        }
+        
+      
+        // return null;
+    }
+
     public String loanDataForReconcile(String VaNumber) throws Exception {
         CustomerVaHistory cVaHistory = customerVaHistoryDAO.findValueByColumn("VaNumber", VaNumber).get(0);
         CustomerLoanRepayment custLoanRepayment = custLoanRepaymentDAO.findValueByColumn("ApplicantID", cVaHistory.getApplicantID()).get(0);
@@ -564,7 +623,7 @@ public class RepaymentService {
         return objectMapper.writeValueAsString(data);
     }
 
-    
+
 	public String getLoanDetails(String data) {
 
 		return null;

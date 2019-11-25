@@ -9,6 +9,7 @@ import javax.transaction.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import ut.microservices.repaymentmicroservice.dao.IGenericDAO;
@@ -26,7 +27,7 @@ public class CallbackService {
         logsCallbackDAO.setClazz(LogsCallback.class);
     }
 
-    private String vendors[] = { "Dokualfa", "Dokubca" };
+    private String vendors[] = { "Dokualfa", "Dokubca", "Artajasa" };
 
     @Autowired
     private RepaymentService repaymentService;
@@ -34,8 +35,8 @@ public class CallbackService {
     @Autowired
     ObjectMapper objectMapper;
 
-	public String getCallbackInquiryData(HashMap<String, String> data) throws Exception {
-      
+	public HashMap<String, Object> getCallbackInquiryData(HashMap<String, String> data) throws Exception {
+        HashMap<String , Object> response = new HashMap<>();
         boolean init = Arrays.asList(vendors).contains(data.get("vendor"));
 
         InetAddress myIP=InetAddress.getLocalHost();
@@ -51,12 +52,17 @@ public class CallbackService {
                 logsCallbackDAO.save(logs);
                 switch(data.get("vendor")){
                     case "Dokualfa":
-                        return repaymentService.getDokuInquiry(data);
+                        response = repaymentService.getDokuInquiry(data);
 
-                    case "Dokubca":
-                        return repaymentService.getDokuInquiry(data);
-                    default: 
-                        return "Invalid vendor type";
+                    case "Dokubca" :
+                        response = repaymentService.getDokuInquiry(data);
+
+                    case "Artajasa" :
+                        //response = repaymentService.getArtajasaInquiry(data);   
+                                             
+                    default : 
+                        response.put("status", HttpStatus.BAD_REQUEST);
+                        response.put("message", "Invalid vendor type ");
 
             }
         }else{
@@ -66,7 +72,7 @@ public class CallbackService {
                 logsCallbackDAO.save(logs);           
         }
         
-        return "callback execution failed";
+        return response;
     }
     
     public String getCallbackNotifyData(HashMap<String, String> data) throws Exception {
