@@ -33,6 +33,9 @@ public class CallbackService {
     private RepaymentService repaymentService;
 
     @Autowired
+    private ArtajasaPaymentService artajasaPaymentService;
+    
+    @Autowired
     ObjectMapper objectMapper;
 
 	public HashMap<String, Object> getCallbackInquiryData(HashMap<String, String> data) throws Exception {
@@ -58,18 +61,21 @@ public class CallbackService {
                         response = repaymentService.getDokuInquiry(data);
 
                     case "Artajasa" :
-                        //response = repaymentService.getArtajasaInquiry(data);   
+                        response = repaymentService.getArtajasaInquiry(data);   
                                              
-                    default : 
-                        response.put("status", HttpStatus.BAD_REQUEST);
-                        response.put("message", "Invalid vendor type ");
+                    // default : 
+                    //     response.put("status", HttpStatus.BAD_REQUEST);
+                    //     response.put("message", "Invalid vendor type ");
 
             }
         }else{
             // fill logs callback as invalid vendor type specified!!
-                logs.setIsValid(0);
-                logs.setDescription("Invalid vendor type specified!!");
-                logsCallbackDAO.save(logs);           
+            logs.setIsValid(0);
+            logs.setDescription("Invalid vendor type specified!!");
+            logsCallbackDAO.save(logs); 
+
+            response.put("status", false);
+            response.put("message", "Invalid vendor type specified");              
         }
         
         return response;
@@ -91,8 +97,15 @@ public class CallbackService {
                 logs.setDescription("Ip Address accepted for payment Notify");
                 logsCallbackDAO.save(logs);
                 switch(data.get("vendor")){
+                    case "Dokualfa":
+                        return repaymentService.setAsDokuPaid(data);
+
                     case "Dokubca":
                         return repaymentService.setAsDokuPaid(data);
+                    
+                    case "Artajasa":
+                        return artajasaPaymentService.setAsArtajasaPaid(data);
+
                     default: 
                         return "Invalid vendor type";
 

@@ -2,6 +2,7 @@ package ut.microservices.repaymentmicroservice.services;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.transaction.Transactional;
@@ -91,6 +92,9 @@ public class DatabaseService {
     private RepaymentService repaymentService;
 
     @Autowired
+    private InstallmentService installmentService;
+
+    @Autowired
     private ObjectMapper objectMapper;
     
     @Autowired
@@ -119,6 +123,12 @@ public class DatabaseService {
         custLoanRepaymentDAO.save(clr);
 
         this.postDisbusementSaveDetails(dataMap.get("LoanApplicationID").toString());
+
+        // ApplicationData apliData = applicationDataDAO.findValueByColumn("ApplicationID", dataMap.get("ApplicationID").toString()).get(0);       
+        // if(apliData.getIsInstallment().equals("Y")){        
+        //     installmentService.insertInstallmentLoanRepayment(apliData);
+        // }
+    
         ack.acknowledge();
     }
 
@@ -140,17 +150,18 @@ public class DatabaseService {
         custLoanDataDAO.save(cld);
 
         //save details to CustomerPrimaryData
-        // CustomerPrimaryData  cd= new CustomerPrimaryData();
-        // cd.setApplicantID((int) lamsData.get("ApplicantData").get("applicantID"));
-        // cd.setFullName(lamsData.get("ApplicantData").get("Fullname").toString());
-        // cd.setGender(lamsData.get("ApplicantData").get("Gender").toString());
-        // cd.setEmailAddress(lamsData.get("ApplicantData").get("EmailAddress").toString());
-        // cd.setPassword("testing");
-        // cd.setPersonalIDNumber(lamsData.get("ApplicantData").get("PersonalIDNumber").toString());
-        // cd.setMobileNumber(lamsData.get("ApplicantData").get("MobileNumber").toString());
-        // cd.setDomicileCountry(102);
-        // cd.setFamily1Country(102);
-        // cd.setEmployerCountry(102);
-        // custPrimaryDataDAO.save(cd);
+        CustomerPrimaryData  cd= new CustomerPrimaryData();
+        cd.setApplicantID((int) lamsData.get("ApplicantData").get("applicantID"));
+        cd.setFullName(lamsData.get("ApplicantData").get("Fullname").toString());
+        cd.setGender(lamsData.get("ApplicantData").get("Gender").toString());
+        cd.setEmailAddress(lamsData.get("ApplicantData").get("EmailAddress").toString());
+        cd.setPassword("testing");
+        cd.setPersonalIDNumber(lamsData.get("ApplicantData").get("PersonalIDNumber").toString());
+        cd.setMobileNumber(lamsData.get("ApplicantData").get("MobileNumber").toString());
+        cd.setDomicileCountry(102);
+        cd.setFamily1Country(102);
+        cd.setEmployerCountry(102);
+        custPrimaryDataDAO.save(cd);
+
     }
 }

@@ -12,10 +12,10 @@ import java.io.Serializable;
 import java.util.Date;
 
 @Entity
-@Table(name = "RPYMS_LogsArtajasa")
+@Table(name = "RPYMS_LogDokualfa")
 @JsonIgnoreProperties(value = {"CreatedAt"},allowGetters = true) 
 @Data
-public class LogsArtajasa implements Serializable{
+public class LogDokuAlfa implements Serializable{
 
     /**
      *
@@ -24,8 +24,8 @@ public class LogsArtajasa implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="ArtajasaLogID")
-    private 	Integer	ArtajasaLogID;
+    @Column(name="DokualfaLogID")
+    private 	Integer	DokualfaLogID;
 
     @Column(name="VaNumber", nullable=true)
     @JsonProperty(value="VaNumber")
@@ -33,51 +33,47 @@ public class LogsArtajasa implements Serializable{
 
     @Column(name="LogAppID", nullable=true)
     @JsonProperty(value="LogAppID")
-    private 	String	LogAppID;
+    private String	LogAppID;
 
-    @Column(name="VaRequest", nullable=true)
-    @JsonProperty(value="VaRequest")
-    private 	String	VaRequest;
+    @Column(name="InquiryRequest", nullable=true)
+    @JsonProperty(value="InquiryRequest")
+    private String	InquiryRequest;
 
-    @Column(name="VaResponse", nullable=true)
-    @JsonProperty(value="VaResponse")
-    private 	String	VaResponse;
+    @Column(name="InquiryResponse", nullable=true)
+    @JsonProperty(value="InquiryResponse")
+    private String	InquiryResponse;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="VaReqDatetime", nullable=true)
-    @JsonProperty(value="VaReqDatetime")
-    private 	Date	VaReqDatetime;
+    @Column(name="InquiryReqDatetime", nullable=true)
+    @JsonProperty(value="InquiryReqDatetime")
+    private Date InquiryReqDatetime;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name="VaRespDatetime", nullable=true)
-    @JsonProperty(value="VaRespDatetime")
-    private 	Date	VaRespDatetime;
+    @Column(name="InquiryRespDatetime", nullable=true)
+    @JsonProperty(value="InquiryRespDatetime")
+    private Date InquiryRespDatetime;
 
     @Column(name="NotifyRequest", nullable=true)
     @JsonProperty(value="NotifyRequest")
-    private 	String	NotifyRequest;
+    private String	NotifyRequest;
 
     @Column(name="NotifyResponse", nullable=true)
     @JsonProperty(value="NotifyResponse")
-    private 	String	NotifyResponse;
+    private String	NotifyResponse;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name="NotifyReqDatetime", nullable=true)
     @JsonProperty(value="NotifyReqDatetime")
-    private 	Date	NotifyReqDatetime;
+    private Date	NotifyReqDatetime;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name="NotifyRespDatetime", nullable=true)
     @JsonProperty(value="NotifyRespDatetime")
-    private 	Date	NotifyRespDatetime;
+    private Date	NotifyRespDatetime;
 
-    @Column(name="AttemptNumber", nullable=true)
-    @JsonProperty(value="AttemptNumber")
-    private 	Integer	AttemptNumber;
+    @Column(name="AttemptNo", nullable=true)
+    @JsonProperty(value="AttemptNo")
+    private Integer	AttemptNo;
 
     @Column(name="CreatedAt")
     @CreationTimestamp
     private Date CreatedAt;
-
-}    
     
+}   
+ 
