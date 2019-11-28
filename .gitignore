@@ -25,3 +25,4 @@ reconcileMicroService/target/
 reconcileMicroService/.classpath
 reconcileMicroService/.factorypath
 reconcileMicroService/.project
+ui/node_modules/
