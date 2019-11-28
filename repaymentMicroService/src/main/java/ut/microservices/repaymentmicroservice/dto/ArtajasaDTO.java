@@ -4,7 +4,7 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-public class ArtajasaInquiryDTO {
+public class ArtajasaDTO {
     private String type;
     private String bookingid;
     private String customer_name;
@@ -13,11 +13,12 @@ public class ArtajasaInquiryDTO {
     private Double amount;
     private String productid;
     private String trxid;
+
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date trx_date;
+
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date notification_datetime;
-
     private String vaid;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private Date booking_datetime;

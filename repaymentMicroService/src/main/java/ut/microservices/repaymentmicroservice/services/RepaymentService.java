@@ -27,6 +27,7 @@ import ut.microservices.repaymentmicroservice.models.CustomerLoanData;
 import ut.microservices.repaymentmicroservice.models.CustomerLoanInstallmentRepayment;
 import ut.microservices.repaymentmicroservice.models.CustomerLoanRepayment;
 import ut.microservices.repaymentmicroservice.models.CustomerPrimaryData;
+import ut.microservices.repaymentmicroservice.models.CustomerStaticVaActiveLoan;
 import ut.microservices.repaymentmicroservice.models.CustomerVaHistory;
 import ut.microservices.repaymentmicroservice.models.LogDokuAlfa;
 import ut.microservices.repaymentmicroservice.models.LogDokuBca;
@@ -47,6 +48,7 @@ public class RepaymentService {
     IGenericDAO<CustomerPrimaryData> custPrimaryDataDAO;
     IGenericDAO<VaArtajasa> vaArtajasaDAO;
     IGenericDAO<LogsArtajasa> logsArtajasaDAO;
+    IGenericDAO<CustomerStaticVaActiveLoan> custStaticVaActiveLoanDAO;
 
     @Autowired
     public void setApplicantDataDAO(IGenericDAO<ApplicantData> applicantDataDAO){
@@ -106,6 +108,12 @@ public class RepaymentService {
     public void setLogsArtajasaDAO(IGenericDAO<LogsArtajasa> logsArtajasaDAO) {
         this.logsArtajasaDAO = logsArtajasaDAO;
         logsArtajasaDAO.setClazz(LogsArtajasa.class);
+    }
+
+    @Autowired
+    public void setCustomerStaticVaActiveLoanDAO(IGenericDAO<CustomerStaticVaActiveLoan> custStaticVaActiveLoanDAO) {
+        this.custStaticVaActiveLoanDAO = custStaticVaActiveLoanDAO;
+        custStaticVaActiveLoanDAO.setClazz(CustomerStaticVaActiveLoan.class);
     }
     
     @Autowired
@@ -250,16 +258,20 @@ public class RepaymentService {
             va.setStatus(0);
             customerVaHistoryDAO.save(va);
 
+            ApplicationData apli = applicationDataDAO.findByTwoColumns("LoanApplicationID", cld.getLoanApplicationID(), "ApplicationApplicantID", cld.getApplicantID().toString()).get(0);
+
             // Add is_installment logic
-            // if(($apli->apli_is_installment == "Y"){}
-            if(userdata.containsKey("CustomerLoanInstallmentRepaymentID")){
-                CustomerLoanInstallmentRepayment clir = clirDAO.findValueByColumn("CustomerLoanInstallmentRepaymentID",userdata.get("CustomerLoanInstallmentRepaymentID")).get(0);
-                clir.setRepaymentType(userdata.get("paymentType"));
-                clir.setRepaymentDate(new java.util.Date(Calendar.getInstance().getTime().getTime()));
-                clir.setRepaymentAmount(Double.parseDouble(userdata.get("AmountToPay")));
-                clir.setVtransStatus("P");
-                clir.setStatus("D");
-                clirDAO.update(clir);
+            if(apli.getIsInstallment().equals("Y")){
+                
+                if(userdata.containsKey("CustomerLoanInstallmentRepaymentID")){
+                    CustomerLoanInstallmentRepayment clir = clirDAO.findValueByColumn("CustomerLoanInstallmentRepaymentID",userdata.get("CustomerLoanInstallmentRepaymentID")).get(0);
+                    clir.setRepaymentType(userdata.get("paymentType"));
+                    clir.setRepaymentDate(new java.util.Date(Calendar.getInstance().getTime().getTime()));
+                    clir.setRepaymentAmount(Double.parseDouble(userdata.get("AmountToPay")));
+                    clir.setVtransStatus("P");
+                    clir.setStatus("D");
+                    clirDAO.update(clir);
+                }
             }
                 
             CustomerLoanRepayment repay = custLoanRepaymentDAO.findByApplicantId(userdata.get("ApplicantID")).get(0);
@@ -307,7 +319,6 @@ public class RepaymentService {
             dokuPaymentService.setVAInquiryResponse(requestdata, objLog);
             response = dokuPaymentService.getResponse();
 
-            //return ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body(inquiryResp);      
         }
         else{
             response.put("status", false);
@@ -581,7 +592,7 @@ public class RepaymentService {
     
     public HashMap<String, Object> getArtajasaInquiry(HashMap<String, String> requestdata) throws Exception {
         HashMap<String, Object> inquiryResp = new HashMap<>();
-        // result = this.checkVAExistanceAndCreateVAForArtajasa(requestdata,artajasaPaymentService.getBillerBin(), "atm_bersama");
+        // boolean result = this.checkVAExistanceAndCreateVAForArtajasa(requestdata,artajasaPaymentService.getBillerBin(), "atm_bersama");
         LogsArtajasa logArtajasa = new LogsArtajasa();
         if(true){ // result
             
@@ -620,6 +631,28 @@ public class RepaymentService {
         }
         return inquiryResp;
     }
+
+    // public boolean checkVAExistanceAndCreateVAForArtajasa(HashMap<String, Object> rawResponse, String bin, String repaymentType) throws Exception{
+    //     boolean isVaGenerated =false;
+    //     String mobile_No = rawResponse.get("vaid").toString().substring(bin.length());
+    //     CustomerStaticVaActiveLoan va_active_status = custStaticVaActiveLoanDAO.findByVANumber(rawResponse.get("vaid").toString()).get(0);
+
+    //     if(va_active_status == null){
+    //         CustomerVaHistory vaNumberData = customerVaHistoryDAO.findByVANumber(rawResponse.get("vaid").toString()).get(0);
+
+    //         if(vaNumberData == null){
+
+    //         }
+    //         else{
+    //             isVaGenerated = true;
+    //         }
+            
+    //     }
+    //     else{
+    //         //Insert the loan details to Static VA loan table.
+
+    //     }
+    // }
 
     public String loanDataForReconcile(String VaNumber) throws Exception {
         CustomerVaHistory cVaHistory = customerVaHistoryDAO.findValueByColumn("VaNumber", VaNumber).get(0);

@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.text.SimpleDateFormat; 
@@ -37,7 +38,7 @@ public class ArtajasaPaymentService {
     IGenericDAO<CustomerPrimaryData> custPrimaryDataDAO;
     IGenericDAO<CustomerVaHistory> customerVaHistoryDAO;
     IGenericDAO<CustomerLoanRepayment> custLoanRepaymentDAO;
-    IGenericDAO<CustomerLoanInstallmentRepayment> clirDAO;
+    IGenericDAO<CustomerLoanInstallmentRepayment> custLoanInstallmentRepaymentDAO;
     IGenericDAO<VaArtajasa> vaArtajasaDAO;
     IGenericDAO<LogsArtajasa> logsArtajasaDAO;
 
@@ -84,9 +85,9 @@ public class ArtajasaPaymentService {
     }
 
     @Autowired
-    public void setCustLoanInstallmentDAO(IGenericDAO<CustomerLoanInstallmentRepayment> clirDAO) {
-        this.clirDAO = clirDAO;
-        clirDAO.setClazz(CustomerLoanInstallmentRepayment.class);
+    public void setCustLoanInstallmentDAO(IGenericDAO<CustomerLoanInstallmentRepayment> custLoanInstallmentRepaymentDAO) {
+        this.custLoanInstallmentRepaymentDAO = custLoanInstallmentRepaymentDAO;
+        custLoanInstallmentRepaymentDAO.setClazz(CustomerLoanInstallmentRepayment.class);
     }
 
     @Autowired
@@ -155,10 +156,18 @@ public class ArtajasaPaymentService {
 
 	public String getSignatureBiller() {
 		if(this.isLive){
-			return DigestUtils.md5Hex(this.secretKeyBillerProd + this.usernameBillerProd); // add md5 hashing
+			return DigestUtils.md5Hex(this.secretKeyBillerProd + this.usernameBillerProd); 
 		}else{
 			return DigestUtils.md5Hex(this.secretKeyBiller + this.usernameBiller); 
 		}
+    }
+
+    public String getBillerBin(){
+		if(this.isLive){
+			return this.artajasaCode + this.artajasaPrefixVaProd; 
+		}else{
+			return this.artajasaCode + this.artajasaPrefixVaDev; 
+		}        
     }
 
     public HashMap<String, String> getStaticVARequest() {
@@ -397,9 +406,7 @@ public class ArtajasaPaymentService {
             CustomerLoanData cld = custLoanDataDAO.findValueByColumn("ApplicantID", va.getApplicantID()).get(0);
             CustomerPrimaryData borrower = custPrimaryDataDAO.findValueByColumn("ApplicantID", cld.getApplicantID().toString()).get(0);
 
-
-            ApplicationData apli = applicationDataDAO.findBy("LoanApplicationID", cld.getLoanApplicationID(), "ApplicationApplicantID", cld.getApplicantID().toString()).get(0);
-
+            ApplicationData apli = applicationDataDAO.findByTwoColumns("LoanApplicationID", cld.getLoanApplicationID(), "ApplicationApplicantID", cld.getApplicantID().toString()).get(0);
             
             System.out.println(va.getAmountToPay().compareTo(Double.parseDouble(String.valueOf(requestdata.get("amount")))));
 
@@ -432,9 +439,26 @@ public class ArtajasaPaymentService {
                 if(!clr.getVtransactionStatus().equals("Y") && !clr.getClrStatus().equals("Y")){
                     String status = (requestdata.get("type").equals("eqnotification")) ? "Y" : "D";
 
-                    // if(apli.getIsInstallment().equals("Y")){
+                    if(apli.getIsInstallment().equals("Y")){
+                        List<CustomerLoanInstallmentRepayment> clir = custLoanInstallmentRepaymentDAO.findInstallmentRepayment(clr.getId().toString());
 
-                    // }else{
+                        if(clir.size() != 0){
+                            //Partial payment payoff using Artajasa
+                            // if(clir.get(0).getPartialStatus().equals("Y")){
+                                // add installmentPartialPayment()
+                            // }else{
+                                va.setLoanIndex(clir.get(0).getIndexOfInstallment());
+                                customerVaHistoryDAO.update(va);
+                            // }
+
+                            clr.setRepaymentType("atm_bersama");
+                            clr.setRepaymentDate(new Date());
+                            clr.setRepaymentAmount(va.getAmountToPay());
+                            clr.setVtransactionStatus(status);
+                            clr.setClrStatus(status);
+                            custLoanRepaymentDAO.update(clr);
+                        }
+                    }else{
                         Integer mctsId = cld.getCusStatusID() == 2 ? 3 : cld.getCusStatusID();
                         String cldStatus = (requestdata.get("type").equals("eqnotification")) ? "Y" : "N";
                         if(clr.getPartialStatus().equals("Y")){
@@ -456,7 +480,7 @@ public class ArtajasaPaymentService {
                         clr.setVtransactionStatus(status);
                         clr.setClrStatus(status);
                         custLoanRepaymentDAO.update(clr);
-                    // }
+                    }
 
                     // If Repayment Success
 	                // if ($requestdata.get("type").equals("reqnotification")) {  
