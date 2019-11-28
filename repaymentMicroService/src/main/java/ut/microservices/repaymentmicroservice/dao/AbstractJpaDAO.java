@@ -6,9 +6,10 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
-// @SuppressWarnings("unchecked")
+@SuppressWarnings("unchecked")
 @Transactional
 public abstract class AbstractJpaDAO<T extends Serializable> {
 
@@ -71,13 +72,19 @@ public abstract class AbstractJpaDAO<T extends Serializable> {
          return entityManager.createQuery("from "+clazz.getName()+" a where a."+column+"='"+value+"'").getResultList();
      }
 
-     public List<T> findBy(String column1, String value1, String column2, String value2){
-      return entityManager.createQuery("from "+ clazz.getName()+" a  where a."+column1+"='"+value1+"' and a."+column2+"='"+value2+"'").getResultList();
+     public List<T> findByTwoColumns(String column1, String value1, String column2, String value2){
+      return entityManager.createQuery("from "+ clazz.getName()+" a  where a."+column1+"='"+value1+"' and a."+column2+"='"+value2+"'" +"order by 1 DESC").getResultList();
     }
 
      public List<T> findInstallmentRepayment(String value){
-      return entityManager.createQuery("from "+clazz.getName()+" a where a.CustomerLoanRepaymentID ='"+value+"'"+ "and a.VtransStatus = 'P' and a.Status ='D' LIMIT 1").getResultList();
+      return entityManager.createQuery("from "+clazz.getName()+" a where a.CustomerLoanRepaymentID ='"+value+"'"+ "and a.VtransStatus = 'P' and a.Status ='D' LIMIT 1").setMaxResults(1).getResultList();
      }
 
 
+     
+     public List<T> findByJoin(){
+        return entityManager.createQuery("FROM "+clazz.getName()+" a LEFT JOIN ApplicantData b on a.ApplicationApplicantID = b.ApplicantID").getResultList();
+     }
+
+     
 }

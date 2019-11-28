@@ -22,8 +22,8 @@ public class CustomerLoanInstallmentRepayment implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
-    private Integer	ID;
+    @Column(name = "CustomerLoanInstallmentRepaymentID")
+    private Integer	CustomerLoanInstallmentRepaymentID;
 
     @Column(name="CustomerLoanRepaymentID")
     @JsonProperty(value="CustomerLoanRepaymentID")

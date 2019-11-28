@@ -63,11 +63,11 @@ public class InstallmentService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public void insertInstallmentLoanRepayment(ApplicationData applicationData){
+    public void insertInstallmentLoanRepayment(ApplicationData applicationData, CustomerLoanRepayment clr){
         CustomerLoanInstallmentRepayment clir = new CustomerLoanInstallmentRepayment();
-        // clir.setCustomerLoanRepaymentID();
+        clir.setCustomerLoanRepaymentID(clr.getId());
         clir.setIndexOfInstallment(1);
-        // clir.setDueDate();
+        clir.setDueDate(applicationData.getLoanDueDateTime());
         clirDAO.save(clir);
         
     } 
