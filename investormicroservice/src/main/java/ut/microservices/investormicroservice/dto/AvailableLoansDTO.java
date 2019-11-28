@@ -6,16 +6,9 @@ public class AvailableLoansDTO {
     private String loanAmount;
     private String loanTenor;
     private String applicationID;
-    private String button;
     
 
-    public String getButton() {
-        return button;
-    }
 
-    public void setButton(String btn) {
-        button = btn;
-    }
 
     public String getID() {
         return ID;

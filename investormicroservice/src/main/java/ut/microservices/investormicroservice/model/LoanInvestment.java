@@ -33,6 +33,9 @@ public class LoanInvestment implements Serializable {
     @Column(name="ApplicationID")
     private Integer applicationID;
 
+    @Column(name="ApplicantID")
+    private Integer applicantID;
+
    
     @Column(name="InvestorID")
     private Integer investorID;

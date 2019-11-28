@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -29,6 +28,7 @@ import ut.microservices.repaymentmicroservice.models.CustomerLoanInstallmentRepa
 import ut.microservices.repaymentmicroservice.models.CustomerLoanRepayment;
 import ut.microservices.repaymentmicroservice.models.CustomerPrimaryData;
 import ut.microservices.repaymentmicroservice.models.CustomerVaHistory;
+import ut.microservices.repaymentmicroservice.models.LogDokuAlfa;
 import ut.microservices.repaymentmicroservice.models.LogDokuBca;
 import ut.microservices.repaymentmicroservice.models.LogsArtajasa;
 import ut.microservices.repaymentmicroservice.models.VaArtajasa;
@@ -161,20 +161,20 @@ public class RepaymentService {
         GenerateVaDTO result = new GenerateVaDTO();
 
         CustomerLoanRepayment clr = custLoanRepaymentDAO.findValueByColumn("LoanApplicationID",userdata.get("LoanApplicationID")).get(0);       
-        Map<String , Map<String, Object>> lamsData= this.loanDataFromLAMS(clr.getLoanApplicationID().toString());
-        // ApplicantData apliData =applicantDataDAO.findValueByColumn("ApplicantID", clr.getApplicantID().toString()).get(0);
+        // Map<String , Map<String, Object>> lamsData= this.loanDataFromLAMS(clr.getLoanApplicationID().toString());
+        ApplicantData apliData =applicantDataDAO.findValueByColumn("ApplicantID", clr.getApplicantID().toString()).get(0);
         userdata.put("TransactionID", "2131");
         userdata.put("CustomerID", "12");
         // String data = objectMapper.writeValueAsString(lamsData);
-        userdata.put("phoneNumber", lamsData.get("ApplicantData").get("MobileNumber").toString());
+        userdata.put("phoneNumber", apliData.getMobileNumber());
         userdata.put("paymentType", userdata.get("paymentType"));
         userdata.put("ApplicantID", clr.getApplicantID());
         userdata.put("AmountToPay", clr.getRepaymentAmount().toString());
-        userdata.put("ktp", lamsData.get("ApplicantData").get("PersonalIDNumber").toString());
+        userdata.put("ktp", apliData.getPersonalIDNumber());
 
 		// check for duplicate va existence
 		if(this.isDuplicateVa(userdata.get("phoneNumber"))){
-			result.setResponse("duplicate");
+            result.setResponse("Duplicate- Va already created!");
 			// result.setMessage("pAlert1", "You already have an active Virtual Account number. You can choose another payment method after your Virtual Account number is expired.");
 			return result;
 		}
@@ -218,9 +218,9 @@ public class RepaymentService {
             // Map<String , Map<String, Object>> lamsData= this.loanDataFromLAMS(userdata.get("LoanApplicationID"));
             // $cld = CustomerLoanData::find($data['cld_id']);
             CustomerLoanData cld = custLoanDataDAO.findValueByColumn("LoanApplicationID", userdata.get("LoanApplicationID")).get(0);
-            // CustomerPrimaryData borrower = custPrimaryDataDAO.findValueByColumn("ApplicantID", cld.getApplicantID().toString()).get(0);
-            // userdata.put("emailAddress", borrower.getEmailAddress());
-            // userdata.put("fullName", borrower.getFullName());
+            CustomerPrimaryData borrower = custPrimaryDataDAO.findValueByColumn("ApplicantID", cld.getApplicantID().toString()).get(0);
+            userdata.put("emailAddress", borrower.getEmailAddress());
+            userdata.put("fullName", borrower.getFullName());
 
             String paymentType = userdata.get("paymentType").toUpperCase();    
 
@@ -276,7 +276,7 @@ public class RepaymentService {
             }
 
             
-            result.setResponse("BCA VA Created Successfully: " + va.getVaNumber().toString());
+            result.setResponse("Doku VA Created Successfully: " + va.getVaNumber().toString());
             result.setloanAppId(repay.getLoanApplicationID());
             result.setVaNumber(va.getVaNumber().toString());
             result.setRepaymentAmount(va.getVaCreatedOutstandingAmt());
@@ -291,9 +291,16 @@ public class RepaymentService {
 
     // Doku Alfa and BCA Inquiry data
     public HashMap<String, Object> getDokuInquiry(HashMap<String, String> requestdata) throws Exception {
-        // String inquiryResp[];
         HashMap<String, Object> response = new HashMap<>();
-		if(this.validateBin(requestdata.get("PAYMENTCODE").toString(), dokuPaymentService.getBcaBin().toString())){
+
+        if(this.validateBin(requestdata.get("PAYMENTCODE").toString(), dokuPaymentService.getAlfaBin().toString())){
+            LogDokuAlfa objLog = new LogDokuAlfa();
+
+            // this.checkVAExistanceAndCreateVA($_POST,dokuPaymentService.getBcaBin(),"doku");			
+            // dokuPaymentService.setVAInquiryResponse(requestdata, objLog);
+            response = dokuPaymentService.getResponse();    
+        }
+		else if(this.validateBin(requestdata.get("PAYMENTCODE").toString(), dokuPaymentService.getBcaBin().toString())){
             LogDokuBca objLog = new LogDokuBca();
 
             // this.checkVAExistanceAndCreateVA($_POST,dokuPaymentService.getBcaBin(),"doku-bca");			
@@ -302,9 +309,10 @@ public class RepaymentService {
 
             //return ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body(inquiryResp);      
         }
-
-        response.put("status", HttpStatus.BAD_REQUEST);
-        response.put("message", "doku inquiry failed");
+        else{
+            response.put("status", false);
+            response.put("message", "doku inquiry failed");
+        }
         
 		return response;
     }
@@ -571,15 +579,15 @@ public class RepaymentService {
         return result;          
     }
     
-    public ResponseEntity getArtajasaInquiry(HashMap<String, String> requestdata) throws Exception {
-
+    public HashMap<String, Object> getArtajasaInquiry(HashMap<String, String> requestdata) throws Exception {
+        HashMap<String, Object> inquiryResp = new HashMap<>();
         // result = this.checkVAExistanceAndCreateVAForArtajasa(requestdata,artajasaPaymentService.getBillerBin(), "atm_bersama");
         LogsArtajasa logArtajasa = new LogsArtajasa();
         if(true){ // result
             
             artajasaPaymentService.setInquiryResponse(requestdata, logArtajasa);
-            HashMap<String, String> inquiryResp = artajasaPaymentService.getInquiryResponse();
-            return ResponseEntity.ok().contentType(MediaType.APPLICATION_XML).body(inquiryResp);      
+            inquiryResp = artajasaPaymentService.getInquiryResponse();
+           
         }
         else{
             String headResp = "<?xml version='1.0'?>\n";
@@ -596,6 +604,9 @@ public class RepaymentService {
 
             String xml = headResp + Resp + footResp;
             
+            inquiryResp.put("status", false);
+            inquiryResp.put("message", xml);
+
             logArtajasa.setVaNumber(null);
             logArtajasa.setLogAppID(null);
             logArtajasa.setVaRequest(requestdata.toString());
@@ -603,13 +614,11 @@ public class RepaymentService {
             logArtajasa.setVaReqDatetime(new Date());
             logArtajasa.setVaRespDatetime(new Date());
             logsArtajasaDAO.save(logArtajasa);
-            HttpHeaders headers = new HttpHeaders();
+
             // return ResponseEntity.ok(xml).contentType(MediaType.APPLICATION_XML_VALUE);
-            return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_XML).body(xml);      
+            // return ResponseEntity.ok().headers(headers).contentType(MediaType.APPLICATION_XML).body(xml);      
         }
-        
-      
-        // return null;
+        return inquiryResp;
     }
 
     public String loanDataForReconcile(String VaNumber) throws Exception {

@@ -1,6 +1,7 @@
 package ut.microservices.repaymentmicroservice.services;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,28 +21,50 @@ import ut.microservices.repaymentmicroservice.models.*;
 @Transactional
 public class DokuPaymentService {
 
-	//Standard Currency Code for IDR
-	final int PAY_CURRENCY = 360;
-	//Shared key from DOKU merchant 
-	final String SHARED_KEY = "848xymdHV9GR";
-
+    private final boolean isLive = false;
     private final boolean isBcaLive = false;
+
+    //Payment Type Sent to Alfa
+    private final int PAY_CHANNEL = 35;
+    //Payment Type Sent to BCA
+    private final int BCA_PAY_CHANNEL = 29;
+
+    private final int MALL_ID_DEV = 4549;
+    private final int BCA_MALL_ID_DEV = 4549;
+    
+    private final String prefixVaDev = "88888402";
+    private final String prefixVaProd = "88888184";
+
     private final String bcaPrefixVaDev = "39991";
     private final String bcaPrefixVaProd = "10813";
     
-    private final int BCA_PAY_CHANNEL = 29;
-	private final int BCA_MALL_ID_DEV = 4549;
-
-	//CHAIN MERCHANT
+    //CHAIN MERCHANT
+    private final int CHAIN_MERCHANT = 0;
     private final int BCA_CHAIN_MERCHANT = 0;
+
+    //Standard Currency Code for IDR
+	final int PAY_CURRENCY = 360;
+	//Shared key from DOKU merchant 
+    final String SHARED_KEY = "848xymdHV9GR";
     
+    private int mallId;
     private int bcamallId;
 
 	HashMap<String, String> data = new HashMap<>();
-	
+    
+    IGenericDAO<ApplicationData> applicationDataDAO;
     IGenericDAO<CustomerVaHistory> customerVaHistoryDAO;
+    IGenericDAO<CustomerLoanData> customerLoanDataDAO;
+    IGenericDAO<CustomerPrimaryData> custPrimaryDataDAO;
     IGenericDAO<CustomerLoanRepayment> custLoanRepaymentDAO;
+    IGenericDAO<CustomerLoanInstallmentRepayment> custLoanInstallmentRepaymentDAO;
 	IGenericDAO<LogDokuBca> logDokuBcaDAO;
+
+    @Autowired
+    public void setApplicationDataDAO(IGenericDAO<ApplicationData> applicationDataDAO){
+        this.applicationDataDAO = applicationDataDAO;
+        applicationDataDAO.setClazz(ApplicationData.class);
+    }
 
     @Autowired
     public void setCustomerVaHistoryDAO(IGenericDAO<CustomerVaHistory> customerVaHistoryDAO) {
@@ -50,11 +73,29 @@ public class DokuPaymentService {
     }
 
     @Autowired
+    public void setCustomerLoanDataDAO(IGenericDAO<CustomerLoanData> customerLoanDataDAO) {
+        this.customerLoanDataDAO = customerLoanDataDAO;
+        customerLoanDataDAO.setClazz(CustomerLoanData.class);
+    }
+
+    @Autowired
+    public void setCustPrimaryDataDAO(IGenericDAO<CustomerPrimaryData> custPrimaryDataDAO) {
+        this.custPrimaryDataDAO = custPrimaryDataDAO;
+        custPrimaryDataDAO.setClazz(CustomerPrimaryData.class);
+    }
+
+    @Autowired
     public void setCustLoanRepaymentDAO(IGenericDAO<CustomerLoanRepayment> custLoanRepaymentDAO) {
         this.custLoanRepaymentDAO = custLoanRepaymentDAO;
         custLoanRepaymentDAO.setClazz(CustomerLoanRepayment.class);
     }
 
+    @Autowired
+    public void setCustLoanInstallmentRepaymentDAO(IGenericDAO<CustomerLoanInstallmentRepayment> custLoanInstallmentRepaymentDAO) {
+        this.custLoanInstallmentRepaymentDAO = custLoanInstallmentRepaymentDAO;
+        custLoanInstallmentRepaymentDAO.setClazz(CustomerLoanInstallmentRepayment.class);
+    }
+    
     @Autowired
     public void setLogDokuBcaDAO(IGenericDAO<LogDokuBca> logDokuBcaDAO) {
         this.logDokuBcaDAO = logDokuBcaDAO;
@@ -66,6 +107,28 @@ public class DokuPaymentService {
 	
 	HashMap<String, Object> inqResponse = new HashMap<>();
 
+    // Set Doku Alfa request data for generateDokuVA - VA generation
+    public void setRequest(HashMap<String, String> userdata) {
+		if (userdata.isEmpty()) {
+			// log to debug_result - data is empty in Alfa request
+			return;
+		}
+		String generatedVaNumber = this.setDokuAlfaVANumber(userdata.get("phoneNumber"));
+
+		// Add logic to check registered virtual number existance
+			
+		this.data.put("mall_id", this.getBcaMallId());
+		this.data.put("chain_merchant", String.valueOf(CHAIN_MERCHANT));
+		this.data.put("payment_channel", String.valueOf(PAY_CHANNEL));
+		this.data.put("payment_code", generatedVaNumber);
+		this.data.put("status_type", "I");
+		this.data.put("words", "");
+		// this.data.put("email_address", userdata.get("emailAddress"));
+		this.data.put("loan_app_id", userdata.get("LoanApplicationID"));
+		this.data.put("amount", userdata.get("AmountToPay"));
+		// this.data.put("signature", this.setSignature());        
+    }
+    
 	// Set BCA request data for generateDokuVA - VA generation
 	public void setBCARequest(HashMap<String, String> userdata) {
 
@@ -75,7 +138,7 @@ public class DokuPaymentService {
 		}
 		String generatedVaNumber = this.setBcaVANumber(userdata.get("phoneNumber"));
 
-		// Ad dlogic to check registered virtual number existance
+		// Add logic to check registered virtual number existance
 			
 		this.data.put("mall_id", this.getBcaMallId());
 		this.data.put("chain_merchant", String.valueOf(BCA_CHAIN_MERCHANT));
@@ -87,7 +150,14 @@ public class DokuPaymentService {
 		this.data.put("loan_app_id", userdata.get("LoanApplicationID"));
 		this.data.put("amount", userdata.get("AmountToPay"));
 		// this.data.put("signature", this.setSignature());
-	}
+    }
+    
+	private String setDokuAlfaVANumber(String phoneNumber) {
+		if (this.isLive) {
+			return this.prefixVaProd + phoneNumber;
+		}
+		return this.prefixVaDev + phoneNumber;
+	}    
 
 	private String setBcaVANumber(String phoneNumber) {
 		if (this.isBcaLive) {
@@ -117,12 +187,13 @@ public class DokuPaymentService {
             objLog.setInquiryRespDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
             logDokuBcaDAO.save(objLog);
 
-            inqResponse.put("status", HttpStatus.EXPECTATION_FAILED);
-			inqResponse.put("message", "Invalid data");
+            inqResponse.put("status", false);
+            inqResponse.put("message", "Invalid data");
+            return;
         }
 
 		CustomerVaHistory vaNumberData = customerVaHistoryDAO.findByVANumber(requestdata.get("PAYMENTCODE")).get(0);
-		
+
 		if(vaNumberData == null){
 			System.out.println("VA data is empty for Inquiry");
             objLog.setVaNumber(requestdata.get("PAYMENTCODE"));
@@ -134,11 +205,39 @@ public class DokuPaymentService {
             objLog.setInquiryRespDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
             logDokuBcaDAO.save(objLog);
 
-            inqResponse.put("status", HttpStatus.EXPECTATION_FAILED);
-			inqResponse.put("message", "Invalid VA number");
+            inqResponse.put("status", false);
+            inqResponse.put("message", "Invalid VA number");
+            return;
 		}
-		
-        if(vaNumberData.getStatus() == 0 && !vaNumberData.getIsVaActive().equals("Y")){
+        
+        CustomerLoanData cld = customerLoanDataDAO.findValueByColumn("ApplicantID", vaNumberData.getApplicantID()).get(0);
+        CustomerPrimaryData borrower = custPrimaryDataDAO.findValueByColumn("ApplicantID", cld.getApplicantID().toString()).get(0);
+        CustomerLoanRepayment clr = custLoanRepaymentDAO.findValueByColumn("ApplicantID",cld.getApplicantID().toString()).get(0);  
+        String customerLoanRepaymentStatus = clr.getClrStatus();
+
+        ApplicationData apli = applicationDataDAO.findBy("LoanApplicationID", cld.getLoanApplicationID(), "ApplicantID", cld.getApplicantID().toString()).get(0);
+        if(apli.getIsInstallment().equals("Y")){
+            CustomerLoanInstallmentRepayment clir = custLoanInstallmentRepaymentDAO.findValueByColumn("CustomerLoanRepaymentID", clr.getId().toString()).get(0);
+            customerLoanRepaymentStatus = clir.getStatus();
+        }
+
+        //this transaction is already being paid
+        if(vaNumberData.getStatus() == 1 && customerLoanRepaymentStatus.equals("Y")){
+            xml = headResp + paidResp + footResp;
+
+            objLog.setVaNumber(requestdata.get("PAYMENTCODE"));
+            objLog.setLogAppID(clr.getLoanApplicationID());
+            objLog.setInquiryRequest(objectMapper.writeValueAsString(requestdata));
+            objLog.setInquiryReqDatetime(new Date());
+            objLog.setInquiryResponse(xml);
+            objLog.setInquiryRespDatetime(new Date());           
+            logDokuBcaDAO.save(objLog);
+
+            inqResponse.put("status", false);
+            inqResponse.put("message",xml);
+            return;
+        }
+        else if(vaNumberData.getStatus() == 0 && !customerLoanRepaymentStatus.equals("Y")){
 
             //Updating the generated Transmerchant id in CustomerVaHistory
             String randTransId = RandomStringUtils.randomAlphanumeric(10);
@@ -157,7 +256,7 @@ public class DokuPaymentService {
             nPaidResp += "<PURCHASECURRENCY>" + this.PAY_CURRENCY +"</PURCHASECURRENCY>\n";
             nPaidResp += "<SESSIONID>" + DigestUtils.shaHex(RandomStringUtils.randomAlphanumeric(32)) +"</SESSIONID>\n";
             nPaidResp += "<ADDITIONALDATA>UangTeman</ADDITIONALDATA>\n";
-            CustomerLoanRepayment clr = custLoanRepaymentDAO.findValueByColumn("ApplicantID",vaNumberData.getApplicantID()).get(0);    
+            // CustomerLoanRepayment clr = custLoanRepaymentDAO.findValueByColumn("ApplicantID",vaNumberData.getApplicantID()).get(0);    
 
             objLog.setVaNumber(requestdata.get("PAYMENTCODE"));
             objLog.setLogAppID(clr.getLoanApplicationID());
@@ -167,7 +266,7 @@ public class DokuPaymentService {
             objLog.setInquiryResponse(xml);
             logDokuBcaDAO.save(objLog);
 
-            inqResponse.put("status", HttpStatus.OK);
+            inqResponse.put("status", true);
             inqResponse.put("message",xml);
 
         }else{
@@ -180,7 +279,7 @@ public class DokuPaymentService {
             objLog.setInquiryRespDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
             logDokuBcaDAO.save(objLog);
 
-            inqResponse.put("status", HttpStatus.EXPECTATION_FAILED);
+            inqResponse.put("status", false);
             inqResponse.put("message", headResp + failResp + footResp);
 
         }
@@ -193,31 +292,31 @@ public class DokuPaymentService {
 		return this.inqResponse;
 	}
 
+    public String getMallId() {
+		return String.valueOf(this.mallId = MALL_ID_DEV);
+    }
+    
 	public String getBcaMallId() {
 		return String.valueOf(this.bcamallId = BCA_MALL_ID_DEV);
 	}
 
+    public String getAlfaBin() {
+		return (this.isLive) ? this.prefixVaProd : this.prefixVaDev;
+    }
+    
 	public String getBcaBin() {
 		return (this.isBcaLive) ? this.bcaPrefixVaProd : this.bcaPrefixVaDev;
 	}
 
 	private String setSignature() {
-		return this.data.get("email_address") + "-" + this.data.get("loan_app_id") + "-" + this.data.get("amount");
-		// return md5(this.data.get("email_address") + "-" +
-		// this.data.get("loan_app_id") + "-" + this.data.get("amount"));
-	}
-
-	public void setRequest(HashMap<String, String> userdata) {
+		return DigestUtils.md5Hex(this.data.get("email_address") + "-" + this.data.get("loan_app_id") + "-" + this.data.get("amount"));
 	}
 
 	public HashMap<String, String> getRequest() {
 		return this.data;
 	}
 
-	public int getAlfaBin() {
-		return 0;
-		// return (this.isLive) ? this.prefixVaProd : this.prefixVaDev;
-	}
+
 
 
 	

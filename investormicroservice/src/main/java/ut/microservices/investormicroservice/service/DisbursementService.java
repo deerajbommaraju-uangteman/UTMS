@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import ut.microservices.investormicroservice.dto.ApplicationDataDTO;
 import ut.microservices.investormicroservice.model.ApplicantData;
 import ut.microservices.investormicroservice.model.DigisignAgreement;
 import ut.microservices.investormicroservice.model.LoanInvestment;
@@ -50,12 +51,7 @@ public class DisbursementService {
 
     public void disburseLoan(DigisignAgreement digisignAgreement) throws Exception {
         LoanInvestment loan=loanInvestmentDAO.findBy("applicationID", Integer.toString(digisignAgreement.getApplicationID())).get(0);
-        String url=baseUrl+loan.getLoanAppID();
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
-        JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
-        JsonNode jnApplicantData = jsonNode.get("ApplicantData");
-        ApplicantData applicantData =  objectMapper.readValue(jnApplicantData.toString(),ApplicantData.class);
+        ApplicantData applicantData = this.getApplicantData(loan.getLoanAppID());
         applicantDataDAO.save(applicantData);
 
         databaseService.insertRecordToLogsCIMBNiaga(applicantData,loan,digisignAgreement);
@@ -65,4 +61,31 @@ public class DisbursementService {
         //Need to Uncomment following method Call in production
         cronJobService.loanDisbursed(loan.getLoanAppID(),loan.getLoanAmount());
     }
+
+    public ApplicantData getApplicantData(String loanAppID) throws Exception{
+        String url=baseUrl+loanAppID;
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+        JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
+        JsonNode jnApplicantData = jsonNode.get("ApplicantData");
+        return objectMapper.readValue(jnApplicantData.toString(),ApplicantData.class);
+    }
+
+	public ApplicationDataDTO getApplicationDataDTO(String loanAppID) throws Exception{
+        String url=baseUrl+loanAppID;
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+        JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
+        JsonNode jnApplicationData = jsonNode.get("ApplicationData");
+        return objectMapper.readValue(jnApplicationData.toString(),ApplicationDataDTO.class);
+	}
+
+    // public ApplicationData getApplicationData(String loanAppID) throws Exception{
+    //     String url=baseUrl+loanAppID;
+    //     RestTemplate restTemplate = new RestTemplate();
+    //     ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+    //     JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
+    //     JsonNode jnApplicantData = jsonNode.get("ApplicationData");
+    //     return objectMapper.readValue(jnApplicantData.toString(),ApplicationData.class);
+    // }
 }

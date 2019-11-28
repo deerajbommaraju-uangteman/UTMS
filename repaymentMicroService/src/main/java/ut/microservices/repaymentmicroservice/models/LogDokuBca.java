@@ -44,10 +44,12 @@ public class LogDokuBca implements Serializable{
     private String	InquiryResponse;
 
     @Column(name="InquiryReqDatetime", nullable=true)
+    @Temporal(TemporalType.TIMESTAMP)
     @JsonProperty(value="InquiryReqDatetime")
     private Date InquiryReqDatetime;
 
     @Column(name="InquiryRespDatetime", nullable=true)
+    @Temporal(TemporalType.TIMESTAMP)
     @JsonProperty(value="InquiryRespDatetime")
     private Date InquiryRespDatetime;
 

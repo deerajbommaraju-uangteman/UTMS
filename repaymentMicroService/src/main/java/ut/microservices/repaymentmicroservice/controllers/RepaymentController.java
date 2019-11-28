@@ -19,7 +19,7 @@ import ut.microservices.repaymentmicroservice.services.RepaymentService;
 
 @RestController
 @RequestMapping("/user")
-public class RepaymentCtrl {
+public class RepaymentController {
 
     @Autowired
 	private RepaymentService repaymentService;

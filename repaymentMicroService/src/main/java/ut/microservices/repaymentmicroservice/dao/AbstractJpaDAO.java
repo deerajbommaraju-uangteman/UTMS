@@ -60,7 +60,9 @@ public abstract class AbstractJpaDAO<T extends Serializable> {
      }
 
    //   public List<T> findByLoanId(String LoanApplicationID) {
-   //      System.out.println(LoanApplicationID);
+   //    TypedQuery<ApplicationData> q = em.createQuery("SELECT a FROM " + clazz.getName() + " a JOIN "+clazz.getName()+" b ON a.id = i.order.id WHERE i.id = :itemId", PurchaseOrder.class);
+   //    q.setParameter("itemId", item2.getId());
+   //    q.getSingleResult();
    //      return  entityManager.createQuery( "from " + clazz.getName() + " e " + " where " + " e.LoanApplicationID='"+ LoanApplicationID + "'").getResultList(); 
    //   }
 
@@ -68,5 +70,14 @@ public abstract class AbstractJpaDAO<T extends Serializable> {
          System.out.println(clazz.getName()+"::"+column+"::"+value+"::");
          return entityManager.createQuery("from "+clazz.getName()+" a where a."+column+"='"+value+"'").getResultList();
      }
+
+     public List<T> findBy(String column1, String value1, String column2, String value2){
+      return entityManager.createQuery("from "+ clazz.getName()+" a  where a."+column1+"='"+value1+"' and a."+column2+"='"+value2+"'").getResultList();
+    }
+
+     public List<T> findInstallmentRepayment(String value){
+      return entityManager.createQuery("from "+clazz.getName()+" a where a.CustomerLoanRepaymentID ='"+value+"'"+ "and a.VtransStatus = 'P' and a.Status ='D' LIMIT 1").getResultList();
+     }
+
 
 }

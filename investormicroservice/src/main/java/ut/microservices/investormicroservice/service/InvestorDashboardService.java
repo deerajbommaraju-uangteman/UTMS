@@ -61,7 +61,7 @@ public class InvestorDashboardService {
     this.loanInvestmentDAO.setClazz(LoanInvestment.class);
   }
 
-  public ResponseDTO<LoansDTO> getLoans() {
+  public ResponseDTO<LoansDTO> getAllLoans() {
     List<LoanInvestment> fundingLoansList = loanInvestmentDAO.findAll();
     List<LoanInvestment> loansList = sortWithInvestorPreference(fundingLoansList);
     return responseBodyService.getLoanResponseBody(loansList);
@@ -75,7 +75,7 @@ public class InvestorDashboardService {
 
   private List<LoanInvestment> sortWithInvestorPreference(List<LoanInvestment> fundingLoansList) {
     //TODO
-    //Short list loans according to Investor Preferences
+    //Short list the loans according to Investor Preferences
     return fundingLoansList;
   }
 

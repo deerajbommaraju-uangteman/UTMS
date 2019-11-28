@@ -4,18 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 
 public class ResponseDTO<T> {
-    private List<T> rows;
+    private List<T> data;
     private List<ColumnDTO> columns;
     private List<ButtonDTO> button;
     private HashMap<String,String> additionalData;
 
-    public List<T> getRows() {
-        return rows;
-    }
 
-    public void setRows(List<T> rows) {
-        this.rows = rows;
-    }
 
     public List<ColumnDTO> getColumns() {
         return columns;
@@ -39,6 +33,14 @@ public class ResponseDTO<T> {
 
     public void setAdditionalData(HashMap<String, String> additionalData) {
         this.additionalData = additionalData;
+    }
+
+    public List<T> getData() {
+        return data;
+    }
+
+    public void setData(List<T> data) {
+        this.data = data;
     }
 
 }

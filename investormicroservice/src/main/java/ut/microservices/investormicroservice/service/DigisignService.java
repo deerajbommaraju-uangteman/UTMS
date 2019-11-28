@@ -3,9 +3,7 @@ package ut.microservices.investormicroservice.service;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import javax.transaction.Transactional;
 
@@ -14,9 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import ut.microservices.investormicroservice.dto.ButtonDTO;
-import ut.microservices.investormicroservice.dto.ColumnDTO;
-import ut.microservices.investormicroservice.dto.DigisignDocumentsDTO;
+import ut.microservices.investormicroservice.dto.LenderDocumentsDTO;
 import ut.microservices.investormicroservice.dto.ResponseDTO;
 import ut.microservices.investormicroservice.model.DigisignAgreement;
 import ut.microservices.investormicroservice.model.InvestorFundingHistory;
@@ -39,6 +35,9 @@ public class DigisignService {
 
   @Autowired
   NotificationService notificationService;
+
+  @Autowired
+  ResponseBodyService responseBodyService;
 
   IGenericDAO<LoanInvestment> loanInvestmentDAO;
   IGenericDAO<InvestorVAHistory> investorVAHistoryDAO;
@@ -77,9 +76,9 @@ public class DigisignService {
     return true; 
   }
 
-  public ResponseDTO<DigisignDocumentsDTO> digisignDocuments(String investorID) throws Exception{
-    List<DigisignAgreement> documentsList=digisignAgreementDAO.findBy("investorID",investorID);
-    return getDigisignDocumentsResponseBody(documentsList);
+  public ResponseDTO<LenderDocumentsDTO> getAllLenderDocuments(String investorID) throws Exception{
+    List<InvestorFundingHistory> investorFundingHistory=investorFundingHistoryDAO.findBy("investorID", investorID, "txnStatus", "1");
+    return responseBodyService.getLenderDocumentsResponseBody(investorFundingHistory);
   }
 
   public void lenderSignedDocument(HashMap<String,String> documentID) throws Exception {
@@ -121,64 +120,111 @@ public class DigisignService {
         disbursementService.disburseLoan(digisignAgreement);
       }
     }
+    else{
+      //TODO
+      //Return Exception Response
+      //Document with specified ID is not available in DB
+    }
   }
   public void customerSignedDocument(String documentID) throws Exception {
     boolean disburse=false;
-    DigisignAgreement digisignAgreement=digisignAgreementDAO.findBy("documentID",documentID).get(0);
-    digisignAgreement.setUserSignedAt(new Date());
-    if(digisignAgreement.getStatusAgreement().equalsIgnoreCase("L")){
-      digisignAgreement.setStatusAgreement("S");
-      if(digisignAgreement.getStatusLenderAgreement()=="S"){
-        disburse=true;
+    if(isDocumentGenerated(documentID)){
+      DigisignAgreement digisignAgreement=digisignAgreementDAO.findBy("documentID",documentID).get(0);
+      digisignAgreement.setUserSignedAt(new Date());
+      if(digisignAgreement.getStatusAgreement().equalsIgnoreCase("L")){
+        digisignAgreement.setStatusAgreement("S");
+        if(digisignAgreement.getStatusLenderAgreement()=="S"){
+          disburse=true;
+        }
+      }
+      digisignAgreementDAO.update(digisignAgreement);
+      //for now we are not checking all sign
+      if(!disburse){
+        //Disburse Loan
+        disbursementService.disburseLoan(digisignAgreement);
       }
     }
-    digisignAgreementDAO.update(digisignAgreement);
-    //for now we are checking all sign
-    if(!disburse){
-      //Disburse Loan
-      disbursementService.disburseLoan(digisignAgreement);
+    else{
+      //TODO
+      //Return Exception Response
+      //Document with specified ID is not available in DB
     }
   }
 
-  private ResponseDTO<DigisignDocumentsDTO> getDigisignDocumentsResponseBody(List<DigisignAgreement> documentsList) {
-    Iterator<DigisignAgreement> iterator=documentsList.iterator();
-    ResponseDTO<DigisignDocumentsDTO> response=new ResponseDTO<DigisignDocumentsDTO>();
-    List<DigisignDocumentsDTO> rows=new LinkedList<DigisignDocumentsDTO>();
-    int key=0;
+  public HashMap<String, Object> getTransactionStatus(List<InvestorVAHistory> investorVAHistoryList) {
+    HashMap<String,Object> transactionStatus=new HashMap<String,Object>();
+    int agreementCreationCount=0;
+    int lenderUTSignedCount=0;
+    int lenderBorrowerSignedCount=0;
+    int expiredDocumentCount=0;
+    Double fundedAmount=0.0;
+    Iterator<InvestorVAHistory> iterator=investorVAHistoryList.iterator();
+    
     while(iterator.hasNext()){
-      key++;
-      DigisignAgreement document=iterator.next();
-      DigisignDocumentsDTO digisignDocumentsDTO=new DigisignDocumentsDTO();
-      digisignDocumentsDTO.setKey(Integer.toString(key));
-      digisignDocumentsDTO.setApplicationID(Integer.toString(document.getApplicationID()));
-      digisignDocumentsDTO.setDocumentLenderID(document.getDocumentLenderID());
-      if(document.getStatusLenderAgreement().equalsIgnoreCase("S")){
-        digisignDocumentsDTO.setLenderAgreementStatus("Signed");
-      }
-      else{
-        digisignDocumentsDTO.setLenderAgreementStatus("UnSigned");
-      }
-      rows.add(digisignDocumentsDTO);
-    }
+      InvestorVAHistory vaHistory=iterator.next();
+      fundedAmount+=vaHistory.getLoanAmount();
+      if(isDocumentGenerated(vaHistory.getApplicationID())){
+        DigisignAgreement agreement=digisignAgreementDAO.findBy("applicationID", Integer.toString(vaHistory.getApplicationID()), "investorID", Integer.toString(vaHistory.getInvestorID())).get(0);
+        agreementCreationCount++;
 
-    response.setRows(rows);
-    HashMap<String,String> tableColumns=new HashMap<String,String>();
-    tableColumns.put("applicationID", "Application ID");
-    tableColumns.put("documentLenderID", "Lender Document ID");
-    tableColumns.put("lenderAgreementStatus", "Lender Document Status");
-    List<ColumnDTO> columns=new LinkedList<ColumnDTO>();
-    for(Map.Entry<String,String> entry : tableColumns.entrySet()){
-      ColumnDTO columnDTO=new ColumnDTO();
-      columnDTO.setKey(entry.getKey());
-      columnDTO.setTitle(entry.getValue());
-      columnDTO.setDataIndex(entry.getKey());
-      columns.add(columnDTO);
+        //TODO
+        //If one Document is Expired then both documents are considered as Expired
+        if(isDocumentExpired(agreement)){
+          expiredDocumentCount++;
+        }
+        else{
+          if(agreement.getStatusAgreement().equalsIgnoreCase("L") || agreement.getStatusAgreement().equalsIgnoreCase("S")){
+            lenderBorrowerSignedCount++;
+          }
+          if(agreement.getLenderSignedAt()!=null || agreement.getStatusLenderAgreement().equalsIgnoreCase("S")){
+            lenderUTSignedCount++;
+          }
+        }
+      }
     }
-    response.setColumns(columns);
-    List<ButtonDTO> buttons=new LinkedList<ButtonDTO>();
-    ButtonDTO buttonDTO=new ButtonDTO();
-    buttons.add(buttonDTO);
-    response.setButton(buttons);
-    return response;
+    transactionStatus.put("totalLoans",investorVAHistoryList.size());
+    transactionStatus.put("totalFundAmount",fundedAmount);
+    transactionStatus.put("agreementCreationCount",agreementCreationCount);
+    transactionStatus.put("lenderBorrowerSignedCount",lenderBorrowerSignedCount);
+    transactionStatus.put("lenderUTSignedCount",lenderUTSignedCount);
+    transactionStatus.put("expiredDocumentCount",expiredDocumentCount);
+    return transactionStatus;
   }
+
+
+// 
+
+  public boolean isDocumentExpired(DigisignAgreement digisignAgreement) {
+    if(digisignAgreement.getExpiredAt().before(new Date()) && digisignAgreement.getUserSignedAt()==null){
+      return true;
+    }
+    return false;
+  }
+  public boolean isDocumentGenerated(Integer applicationID){
+    List<DigisignAgreement> agreementList=digisignAgreementDAO.findBy("applicationID", Integer.toString(applicationID));
+    if(agreementList.isEmpty()){
+      return false;
+    }
+    DigisignAgreement agreement=agreementList.get(0);
+    if(agreement.getStatusAgreement().equalsIgnoreCase("F") && agreement.getStatusLenderAgreement().equalsIgnoreCase("F")){
+      return false;
+    }
+    return true;
+  }
+
+  public boolean isDocumentGenerated(String documentID){
+    List<DigisignAgreement> agreementList=digisignAgreementDAO.findBy("documentID", documentID);
+    if(agreementList.isEmpty()){
+      agreementList=digisignAgreementDAO.findBy("documentLenderID", documentID);
+      if(agreementList.isEmpty()){
+        return false;
+      }
+    }
+    DigisignAgreement agreement=agreementList.get(0);
+    if(agreement.getStatusAgreement().equalsIgnoreCase("F") && agreement.getStatusLenderAgreement().equalsIgnoreCase("F")){
+      return false;
+    }
+    return true;
+  }
+ 
 }

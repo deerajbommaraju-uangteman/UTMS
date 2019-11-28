@@ -1,11 +1,12 @@
 package ut.microservices.repaymentmicroservice.services;
 
+import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import java.text.SimpleDateFormat; 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,10 @@ import ut.microservices.repaymentmicroservice.configurations.ServicesConfig;
 import ut.microservices.repaymentmicroservice.dao.IGenericDAO;
 import ut.microservices.repaymentmicroservice.models.ApplicantData;
 import ut.microservices.repaymentmicroservice.models.ApplicationData;
+import ut.microservices.repaymentmicroservice.models.CustomerLoanData;
 import ut.microservices.repaymentmicroservice.models.CustomerLoanInstallmentRepayment;
 import ut.microservices.repaymentmicroservice.models.CustomerLoanRepayment;
+import ut.microservices.repaymentmicroservice.models.CustomerPrimaryData;
 import ut.microservices.repaymentmicroservice.models.CustomerVaHistory;
 import ut.microservices.repaymentmicroservice.models.LogsArtajasa;
 import ut.microservices.repaymentmicroservice.models.VaArtajasa;
@@ -30,6 +33,8 @@ public class ArtajasaPaymentService {
 
     IGenericDAO<ApplicantData> applicantDataDAO;
     IGenericDAO<ApplicationData> applicationDataDAO;
+    IGenericDAO<CustomerLoanData> custLoanDataDAO;
+    IGenericDAO<CustomerPrimaryData> custPrimaryDataDAO;
     IGenericDAO<CustomerVaHistory> customerVaHistoryDAO;
     IGenericDAO<CustomerLoanRepayment> custLoanRepaymentDAO;
     IGenericDAO<CustomerLoanInstallmentRepayment> clirDAO;
@@ -46,6 +51,18 @@ public class ArtajasaPaymentService {
     public void setApplicationDataDAO(IGenericDAO<ApplicationData> applicationDataDAO) {
         this.applicationDataDAO = applicationDataDAO;
         applicationDataDAO.setClazz(ApplicationData.class);
+    }
+
+    @Autowired
+    public void setCustLoanDataDAO(IGenericDAO<CustomerLoanData> custLoanDataDAO) {
+        this.custLoanDataDAO = custLoanDataDAO;
+        custLoanDataDAO.setClazz(CustomerLoanData.class);
+    }
+
+    @Autowired
+    public void setCustPrimaryDataDAO(IGenericDAO<CustomerPrimaryData> custPrimaryDataDAO) {
+        this.custPrimaryDataDAO = custPrimaryDataDAO;
+        custPrimaryDataDAO.setClazz(CustomerPrimaryData.class);
     }
 
     @Autowired
@@ -100,7 +117,7 @@ public class ArtajasaPaymentService {
 
     public HashMap<String, String> data = new HashMap<>();
 
-    public HashMap<String, String> inquiryResponse = new HashMap<>();
+    public HashMap<String, Object> inquiryResponse = new HashMap<>();
 
     public void setStaticVARequest(HashMap<String, String> userdata) {
         if (userdata.isEmpty()) {
@@ -177,14 +194,14 @@ public class ArtajasaPaymentService {
             logArtajasa.setVaRespDatetime(new Date());
             logsArtajasaDAO.save(logArtajasa);
 
-            this.inquiryResponse.put("status","false");
+            this.inquiryResponse.put("status", false);
             this.inquiryResponse.put("message", xml);
 
 			return ;
         }
 
         // signature mismatch during inquiry request
-        if(requestdata.get("signature") != this.getSignatureBiller()){
+        if(!requestdata.get("signature").equals(this.getSignatureBiller())){
 
             Resp += "<ack>"+ ServicesConfig.ILLEGAL_SIGNATURE_INQ_REQUEST_01 +"</ack>\n";
             Resp += "<bookingid>NULL</bookingid>\n";
@@ -193,7 +210,7 @@ public class ArtajasaPaymentService {
             Resp += "<max_amount>0</max_amount>\n";
             Resp += "<productid>NULL</productid>\n";
             Resp += "<signature>" + this.getSignatureBiller() +"</signature>\n";
-
+            System.out.println("signature:"+this.getSignatureBiller());
             String xml = headResp + Resp + footResp;
             
             logArtajasa.setVaNumber(null);
@@ -204,13 +221,13 @@ public class ArtajasaPaymentService {
             logArtajasa.setVaRespDatetime(new Date());
             logsArtajasaDAO.save(logArtajasa);
 
-            this.inquiryResponse.put("status","false");
+            this.inquiryResponse.put("status", false);
             this.inquiryResponse.put("message", xml);
 
 			return ;
         }
 
-		CustomerVaHistory vaNumberData = customerVaHistoryDAO.findByVANumber(requestdata.get("va")).get(0);
+		CustomerVaHistory vaNumberData = customerVaHistoryDAO.findByVANumber(requestdata.get("vaid")).get(0);
         
         // when va is not found
 		if(vaNumberData == null){ 
@@ -224,7 +241,7 @@ public class ArtajasaPaymentService {
 
             String xml = headResp + Resp + footResp;
             
-            logArtajasa.setVaNumber(requestdata.get("va"));
+            logArtajasa.setVaNumber(requestdata.get("vaid"));
             logArtajasa.setLogAppID(null);
             logArtajasa.setVaRequest(requestdata.toString());
             logArtajasa.setVaResponse(xml);
@@ -258,7 +275,7 @@ public class ArtajasaPaymentService {
                 logsArtajasaDAO.save(logArtajasa);
     
                 return ;   
-            }else if(vaNumberData.getStatus() == 0 && !vaNumberData.getIsVaActive().equals("Y")){
+            }else if(vaNumberData.getStatus() == 0 && vaNumberData.getIsVaActive().equals("Y")){
                 // not yet paid 
                 Resp += "<ack>"+ ServicesConfig.TRANSACTION_SUCCESS_00 +"</ack>\n";
                 Resp += "<bookingid>" + vaa.getBookingID() + "</bookingid>\n";
@@ -298,15 +315,170 @@ public class ArtajasaPaymentService {
                 logArtajasa.setVaRespDatetime(new Date());
                 logsArtajasaDAO.save(logArtajasa);
 
-                this.inquiryResponse.put("status", "false");
+                this.inquiryResponse.put("status", false);
                 this.inquiryResponse.put("message", xml);
             }
 
         }
     }
 
-    public HashMap<String, String> getInquiryResponse() {
+    public HashMap<String, Object> getInquiryResponse() {
 		return this.inquiryResponse;
-	}
+    }
+    
+    public String setAsArtajasaPaid(HashMap<String, String> requestdata) throws Exception {
+        Date NotifReqDatetime = new Date();
+        String headResp = "<?xml version='1.0'?>\n";
+        headResp += "<return>\n";
+        String footResp = "</return>\n";
+        String Resp = "<type>resnotification</type>\n";
+        
+        if(requestdata.isEmpty()){
+            LogsArtajasa logsArtajasa = new LogsArtajasa();
 
+            Resp += "<ack>05</ack>\n";
+            Resp += "<bookingid>" + requestdata.get("bookingid") + "</bookingid>\n";
+            Resp += "<signature>" + requestdata.get("signature") +"</signature>\n";
+            String xml = headResp + Resp + footResp; 
+
+            System.out.println("Request Data is empty for Artajasa Notify");
+            logsArtajasa.setVaNumber(null);
+            logsArtajasa.setLogAppID(null);
+            logsArtajasa.setNotifyRequest(objectMapper.writeValueAsString(requestdata));
+            logsArtajasa.setNotifyReqDatetime(new Date());
+            logsArtajasa.setNotifyResponse(xml);
+            logsArtajasa.setNotifyRespDatetime(new Date());
+            logsArtajasaDAO.save(logsArtajasa);
+			return xml;
+        }
+        VaArtajasa vaArtajasa = vaArtajasaDAO.findValueByColumn("BookingID", requestdata.get("bookingid")).get(0);
+        CustomerVaHistory paymentCodeData = customerVaHistoryDAO.findValueByColumn("ID", vaArtajasa.getCvhID().toString()).get(0);
+        CustomerVaHistory va = customerVaHistoryDAO.findByVANumber(paymentCodeData.getVaNumber()).get(0);
+
+        if(va == null){
+            LogsArtajasa logsArtajasa = new LogsArtajasa();
+
+            Resp += "<ack>76</ack>\n";
+            Resp += "<bookingid>" + requestdata.get("bookingid") + "</bookingid>\n";
+            Resp += "<signature>" + requestdata.get("signature") +"</signature>\n";
+            String xml = headResp + Resp + footResp; 
+
+            logsArtajasa.setVaNumber(null);
+            logsArtajasa.setLogAppID(null);
+            logsArtajasa.setNotifyRequest(objectMapper.writeValueAsString(requestdata));
+            logsArtajasa.setNotifyReqDatetime(new Date());
+            logsArtajasa.setNotifyResponse(xml);
+            logsArtajasa.setNotifyRespDatetime(new Date());
+            logsArtajasaDAO.save(logsArtajasa);
+			return xml;
+
+        }
+
+        if(va.getStatus() == 1){
+            LogsArtajasa logsArtajasa = new LogsArtajasa();
+
+            Resp += "<ack>78</ack>\n";
+            Resp += "<bookingid>" + requestdata.get("bookingid") + "</bookingid>\n";
+            Resp += "<signature>" + requestdata.get("signature") +"</signature>\n";
+            String xml = headResp + Resp + footResp; 
+
+            logsArtajasa.setVaNumber(null);
+            logsArtajasa.setLogAppID(null);
+            logsArtajasa.setNotifyRequest(objectMapper.writeValueAsString(requestdata));
+            logsArtajasa.setNotifyReqDatetime(new Date());
+            logsArtajasa.setNotifyResponse(xml);
+            logsArtajasa.setNotifyRespDatetime(new Date());
+            logsArtajasaDAO.save(logsArtajasa);
+			return xml;            
+        }
+
+        if(requestdata.get("type").equals("reqnotification") && requestdata.containsKey("amount")){
+
+            CustomerLoanData cld = custLoanDataDAO.findValueByColumn("ApplicantID", va.getApplicantID()).get(0);
+            CustomerPrimaryData borrower = custPrimaryDataDAO.findValueByColumn("ApplicantID", cld.getApplicantID().toString()).get(0);
+
+
+            ApplicationData apli = applicationDataDAO.findBy("LoanApplicationID", cld.getLoanApplicationID(), "ApplicationApplicantID", cld.getApplicantID().toString()).get(0);
+
+            
+            System.out.println(va.getAmountToPay().compareTo(Double.parseDouble(String.valueOf(requestdata.get("amount")))));
+
+            // amount not matched
+            if(va.getAmountToPay().compareTo(Double.parseDouble(String.valueOf(requestdata.get("amount")))) != 0){
+                LogsArtajasa logsArtajasa = logsArtajasaDAO.findValueByColumn("LogAppID", cld.getLoanApplicationID()).get(0);
+              
+                Resp += "<ack>13</ack>\n";
+                Resp += "<bookingid>" + requestdata.get("bookingid") + "</bookingid>\n";
+                Resp += "<signature>" + requestdata.get("signature") +"</signature>\n";
+                String xml = headResp + Resp + footResp; 
+    
+                logsArtajasa.setNotifyRequest(objectMapper.writeValueAsString(requestdata));
+                logsArtajasa.setNotifyReqDatetime(new Date());
+                logsArtajasa.setNotifyResponse(xml);
+                logsArtajasa.setNotifyRespDatetime(new Date());
+                logsArtajasaDAO.update(logsArtajasa);
+                return xml; 
+            }
+
+            if(requestdata.get("type").equals("reqnotification")) va.setStatus(1); 
+            va.setPaymentTime(new Date());
+            va.setVaTransMerchantID(requestdata.get("bookingid"));
+            DateFormat df = new SimpleDateFormat("yyyy-mm-dd hh:mm:ss"); 
+            va.setNotifiedTime(df.parse(requestdata.get("notification_datetime")));
+            customerVaHistoryDAO.update(va);
+
+            CustomerLoanRepayment clr = custLoanRepaymentDAO.findValueByColumn("LoanApplicationID",cld.getLoanApplicationID()).get(0);  
+            if(!clr.getRepaymentType().equals("manual_transfer")){
+                if(!clr.getVtransactionStatus().equals("Y") && !clr.getClrStatus().equals("Y")){
+                    String status = (requestdata.get("type").equals("eqnotification")) ? "Y" : "D";
+
+                    // if(apli.getIsInstallment().equals("Y")){
+
+                    // }else{
+                        Integer mctsId = cld.getCusStatusID() == 2 ? 3 : cld.getCusStatusID();
+                        String cldStatus = (requestdata.get("type").equals("eqnotification")) ? "Y" : "N";
+                        if(clr.getPartialStatus().equals("Y")){
+                            // resPartPayday = partialPaymentService.paydayPartialPayment(clr, apli, va, resp, cld);
+                        }else{
+                            va.setLoanIndex(0);
+                            customerVaHistoryDAO.update(va);
+                        }
+
+                        cld.setCusStatusID(mctsId);
+                        cld.setStatus(cldStatus);
+                        custLoanDataDAO.update(cld);
+
+                        clr.setRepaymentType("atm_bersama");
+                        clr.setRepaymentDate(new Date());
+                        clr.setRepaymentAmount(va.getAmountToPay());
+                        // clr.setMcsId(clc.getMcsID);
+                        // clr.setMctsId(mctsID);
+                        clr.setVtransactionStatus(status);
+                        clr.setClrStatus(status);
+                        custLoanRepaymentDAO.update(clr);
+                    // }
+
+                    // If Repayment Success
+	                // if ($requestdata.get("type").equals("reqnotification")) {  
+
+                    Resp += "<ack>13</ack>\n";
+                    Resp += "<bookingid>" + requestdata.get("bookingid") + "</bookingid>\n";
+                    Resp += "<signature>" + requestdata.get("signature") +"</signature>\n";
+                    String xml = headResp + Resp + footResp; 
+        
+                    LogsArtajasa logsArtajasa = logsArtajasaDAO.findValueByColumn("LogAppID", cld.getLoanApplicationID()).get(0);
+                    if(logsArtajasa != null){
+                        logsArtajasa.setNotifyRequest(objectMapper.writeValueAsString(requestdata));
+                        logsArtajasa.setNotifyReqDatetime(new Date());
+                        logsArtajasa.setNotifyResponse(xml);
+                        logsArtajasa.setNotifyRespDatetime(new Date());
+                        logsArtajasaDAO.update(logsArtajasa);
+                        return xml;                         
+                    }
+                } 
+            }
+        }
+        return "Failed to do artajasa payment";
+    }
 }
+

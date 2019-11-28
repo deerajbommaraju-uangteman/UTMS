@@ -17,9 +17,11 @@ import ut.microservices.investormicroservice.dto.AvailableLoansDTO;
 import ut.microservices.investormicroservice.dto.DetailedTransactionReportDTO;
 import ut.microservices.investormicroservice.dto.DigisignDocumentsDTO;
 import ut.microservices.investormicroservice.dto.InvestorFundedLoansDTO;
+import ut.microservices.investormicroservice.dto.LenderDocumentsDTO;
 import ut.microservices.investormicroservice.dto.LoansDTO;
 import ut.microservices.investormicroservice.dto.ResponseDTO;
 import ut.microservices.investormicroservice.dto.TransactionReportDTO;
+import ut.microservices.investormicroservice.service.BulkSignService;
 import ut.microservices.investormicroservice.service.CronjobService;
 import ut.microservices.investormicroservice.service.DigisignService;
 import ut.microservices.investormicroservice.service.InvestorDashboardService;
@@ -41,6 +43,9 @@ public class InvestorController {
     DigisignService digisignService;
 
     @Autowired
+    BulkSignService bulkSignService;
+
+    @Autowired
     TransactionReportService transactionReportService;
 
     @Autowired
@@ -58,18 +63,23 @@ public class InvestorController {
         return "Testing";
     }
 
-    @CrossOrigin
-    @PostMapping("/approveLoan")
-    public String approveLoan(@RequestBody String param)
-            throws Exception {
-        HashMap<String,String> map=objectMapper.readValue(param,HashMap.class);
-        return investorDashboardservice.approveLoan(map.get("loanAppID"), Double.parseDouble(map.get("loanAmount")), Integer.parseInt(map.get("ApplicationID")), Integer.parseInt(map.get("loanTenor")));
-    }
+
+    /*
+    Investor Home Page
+    */
+
+
+    // @CrossOrigin
+    // @PostMapping("/approveLoan")
+    // public String approveLoan(@RequestBody String param) throws Exception {
+    //     HashMap<String,String> map=objectMapper.readValue(param,HashMap.class);
+    //     return investorDashboardservice.approveLoan(map.get("loanAppID"), Double.parseDouble(map.get("loanAmount")), Integer.parseInt(map.get("ApplicationID")), Integer.parseInt(map.get("loanTenor")));
+    // }
 
     @CrossOrigin
-    @GetMapping("/loans")
-    public @ResponseBody ResponseDTO<LoansDTO> getLoans() throws Exception{
-      return investorDashboardservice.getLoans();
+    @GetMapping("/all-loans")
+    public @ResponseBody ResponseDTO<LoansDTO> getAllLoans() throws Exception{
+      return investorDashboardservice.getAllLoans();
     }
 
     @CrossOrigin
@@ -83,7 +93,6 @@ public class InvestorController {
     public void fundAllLoan(){
         investorDashboardservice.fundAllLoan();
     }
-
 
     @CrossOrigin
     @PostMapping("fundLoan")
@@ -104,30 +113,30 @@ public class InvestorController {
     }
 
     @CrossOrigin
+    @GetMapping("generate-VA")
+    public @ResponseBody String generateVA(@RequestBody String param) throws Exception{
+        return vaGenerationService.generateVA(param);
+    }
+
+    /*
+    Investor Funding Page
+    */
+
+    @CrossOrigin
     @PostMapping("receipt-uploaded")
     public void receiptUploaded(@RequestBody String param) throws Exception{
         paymentService.receiptUploaded(param);
     }
 
     @CrossOrigin
-    @GetMapping("investor-documents")
-    public @ResponseBody ResponseDTO<DigisignDocumentsDTO> digisignDocuments() throws Exception{
-        String investorID="1";
-        return digisignService.digisignDocuments(investorID);
+    @PostMapping("payment-received")
+    public void paymentReceivedFromBank(@RequestBody String param) throws Exception{
+        paymentService.paymentReceivedFromBank(param);
     }
 
-    @CrossOrigin
-    @GetMapping("transaction-report")
-    public @ResponseBody ResponseDTO<TransactionReportDTO> transactionReport() throws Exception{
-        String investorID="1";
-        return transactionReportService.transactionReport(investorID);
-    }
-
-    @CrossOrigin
-    @GetMapping("detailed-transaction-report")
-    public @ResponseBody ResponseDTO<DetailedTransactionReportDTO> detailedTransactionReport(@RequestBody String vaNumber) throws Exception{
-        return transactionReportService.detailedTransactionReport(vaNumber);
-    }
+    /*
+    Investor Documents
+    */
 
     @CrossOrigin
     @PostMapping("lender-signed-document")
@@ -142,9 +151,41 @@ public class InvestorController {
     }
 
     @CrossOrigin
-    @PostMapping("payment-received")
-    public void paymentReceivedFromBank(@RequestBody String param) throws Exception{
-        paymentService.paymentReceivedFromBank(param);
+    @PostMapping("lender-UT-bulkSign")
+    public void lenderUTDocumentBulkSign(String vaNumber) throws Exception{
+        bulkSignService.lenderUTDocumentBulkSign(vaNumber);
+    }
+
+    @CrossOrigin
+    @PostMapping("lender-Borrower-bulkSign")
+    public void lenderBorrowerDocumentBulkSign(String vaNumber) throws Exception{
+        bulkSignService.lenderBorrowerDocumentBulkSign(vaNumber);
+    }
+
+    @CrossOrigin
+    @GetMapping("bulkSign-page")
+    public @ResponseBody ResponseDTO<LenderDocumentsDTO> getAllLenderDocuments() throws Exception{
+        String investorID="1";
+        return digisignService.getAllLenderDocuments(investorID);
+    }
+
+    
+
+    /*
+    Transaction Report
+    */
+    @CrossOrigin
+    @GetMapping("transaction-report")
+    public @ResponseBody ResponseDTO<TransactionReportDTO> transactionReport() throws Exception{
+        String investorID="1";
+        return transactionReportService.transactionReport(investorID);
+    }
+
+    @CrossOrigin
+    @PostMapping("detailed-transaction-report")
+    public @ResponseBody ResponseDTO<DetailedTransactionReportDTO> detailedTransactionReport(String vaNumber) throws Exception{
+        System.out.println(vaNumber);
+       return transactionReportService.detailedTransactionReport(vaNumber);
     }
 
 }

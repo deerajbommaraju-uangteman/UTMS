@@ -5,6 +5,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 
 @Entity
@@ -26,7 +27,7 @@ public class DigisignAgreement implements Serializable {
     private String documentID ;
 
     @Column(name="ApplicantID")
-    private Long applicantID;
+    private Integer applicantID;
 
     @Column(name="ApplicationID")
     private Integer applicationID;
@@ -90,8 +91,13 @@ public class DigisignAgreement implements Serializable {
 
     @PrePersist
     protected void onCreated() {
-        createdAt = new Date() ;
-        updatedAt = new Date() ;
+        Date date=new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, 5);
+        Date expireDate=cal.getTime();;
+        createdAt = date;
+        updatedAt = date;
+        expiredAt =expireDate;
     }
 
     @PreUpdate
