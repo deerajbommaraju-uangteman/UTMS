@@ -1,5 +1,8 @@
 package ut.microservices.investormicroservice.service;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 import javax.transaction.Transactional;
@@ -80,7 +83,8 @@ public class DatabaseService {
         InvestorFundingHistory investorFundingHistory=new InvestorFundingHistory();
         investorFundingHistory.setInvestorID(investorID);
         investorFundingHistory.setInvestorVaNumber(Integer.toString(vaNumber));
-        investorFundingHistory.setFundTxnNumber("FundingTxtNumber");
+        DateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss");
+        investorFundingHistory.setFundTxnNumber("INVF"+investorID+dateFormat.format(new Date()));
         investorFundingHistory.setTxnStatus(0);
         investorFundingHistoryDAO.save(investorFundingHistory);
       }
@@ -89,6 +93,7 @@ public class DatabaseService {
         loanInvestment.setLoanAmount((Double)loanData.get("loanAmount"));
         loanInvestment.setLoanAppID((String)loanData.get("loanAppID"));
         loanInvestment.setApplicationID((Integer)loanData.get("ApplicationID"));
+        loanInvestment.setApplicantID((Integer)loanData.get("ApplicantID"));
         loanInvestment.setLoanTenor((Integer)loanData.get("loanTenor"));
         loanInvestment.setState("N");
         loanInvestment.setInvestorID(01);
@@ -101,13 +106,14 @@ public class DatabaseService {
         //TODO
         //loanAppID is used in future purpose
         //Calling LAMS endpoint to get applicant data
+        LoanInvestment loanInvestment=loanInvestmentDAO.findBy("loanAppID",loanAppID).get(0);
         DigisignAgreement digisignAgreement=new DigisignAgreement();
         digisignAgreement.setApplicationID(applicationID);
         digisignAgreement.setInvestorID(investorID);
         digisignAgreement.setDocumentID(applicationID+""+001);
         digisignAgreement.setDocumentLenderID(applicationID+""+investorID);
-        digisignAgreement.setApplicantID(Long.valueOf(001));//For now..Assuming ApplicantID is received from applicantData
-        digisignAgreement.setDuLenderEmailUser("lenderemail@gmail.com");//For now....Assuming lenderemail  is received from Lender 
+        digisignAgreement.setApplicantID(loanInvestment.getApplicantID());
+        digisignAgreement.setDuLenderEmailUser("lenderemail@gmail.com");//For now....Assuming lenderemail
         digisignAgreement.setStatusAgreement("D");//Always Document initial status is D
         digisignAgreement.setStatusLenderAgreement("D");//Always Document initial status is D
         digisignAgreementDAO.save(digisignAgreement);

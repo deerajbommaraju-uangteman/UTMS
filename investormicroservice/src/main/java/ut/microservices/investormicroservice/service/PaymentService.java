@@ -119,6 +119,7 @@ public class PaymentService {
     investorFundingHistoryDAO.update(investorFundingHistory);
     //TODO
     // Need to return Success status
-      return null;
+    //Need to add Exception Response if vaNumber is not available
+    return null;
     }
 }

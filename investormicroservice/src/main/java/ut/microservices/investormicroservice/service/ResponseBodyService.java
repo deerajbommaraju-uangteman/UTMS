@@ -1,31 +1,53 @@
 package ut.microservices.investormicroservice.service;
 
+import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import ut.microservices.investormicroservice.dto.ApplicationDataDTO;
 import ut.microservices.investormicroservice.dto.AvailableLoansDTO;
 import ut.microservices.investormicroservice.dto.ButtonDTO;
 import ut.microservices.investormicroservice.dto.ColumnDTO;
 import ut.microservices.investormicroservice.dto.DetailedTransactionReportDTO;
+import ut.microservices.investormicroservice.dto.DigisignDocumentsDTO;
 import ut.microservices.investormicroservice.dto.InvestorFundedLoansDTO;
+import ut.microservices.investormicroservice.dto.LenderDocumentsDTO;
 import ut.microservices.investormicroservice.dto.LoansDTO;
 import ut.microservices.investormicroservice.dto.ResponseDTO;
 import ut.microservices.investormicroservice.dto.TransactionReportDTO;
+import ut.microservices.investormicroservice.model.ApplicantData;
+import ut.microservices.investormicroservice.model.DigisignAgreement;
 import ut.microservices.investormicroservice.model.InvestorFundingHistory;
 import ut.microservices.investormicroservice.model.InvestorVAHistory;
 import ut.microservices.investormicroservice.model.LoanInvestment;
+import ut.microservices.investormicroservice.repository.IGenericDAO;
 
 @Service
 public class ResponseBodyService {
 
+  IGenericDAO<InvestorVAHistory> investorVAHistoryDAO;
+
     @Autowired
     TransactionReportService transactionReportService;
+
+    @Autowired
+    DisbursementService disbursementService;
+
+    @Autowired
+    DigisignService digisignService;
+
+    @Autowired
+  public void setInvestorVAHistoryDAO(IGenericDAO<InvestorVAHistory> investorVAHistoryDAO) {
+    this.investorVAHistoryDAO = investorVAHistoryDAO;
+    this.investorVAHistoryDAO.setClazz(InvestorVAHistory.class);
+  }
 
     public ResponseDTO<LoansDTO> getLoanResponseBody(List<LoanInvestment> loansList) {
         Iterator<LoanInvestment> iterator=loansList.iterator();
@@ -59,7 +81,7 @@ public class ResponseBodyService {
           }
           rows.add(loansDTO);
         }
-        response.setRows(rows);
+        response.setData(rows);
     
         //Preparing Column data
         HashMap<String,String> tableColumns=new HashMap<String,String>();
@@ -109,7 +131,7 @@ public class ResponseBodyService {
           availableLoansDTO.setLoanTenor(Integer.toString(loan.getLoanTenor()));
           rows.add(availableLoansDTO);
         }
-        response.setRows(rows);
+        response.setData(rows);
     
         //Preparing Column data
         HashMap<String,String> tableColumns=new HashMap<String,String>();
@@ -161,7 +183,7 @@ public class ResponseBodyService {
           totalAmount+=loan.getLoanAmount();
           rows.add(investorFundedLoansDTO);
         }
-        response.setRows(rows);
+        response.setData(rows);
     
         //Preparing Columns Data
         HashMap<String,String> tableColumns=new HashMap<String,String>();
@@ -189,7 +211,6 @@ public class ResponseBodyService {
       }
 
 	public ResponseDTO<TransactionReportDTO> getTransactionReportResponseBody(List<InvestorFundingHistory> fundingHistoryList) {
-        //TODO
         Iterator<InvestorFundingHistory> iterator=fundingHistoryList.iterator();
         ResponseDTO<TransactionReportDTO> response=new ResponseDTO<TransactionReportDTO>();
         List<TransactionReportDTO> rows=new LinkedList<TransactionReportDTO>();
@@ -209,7 +230,7 @@ public class ResponseBodyService {
           }
           rows.add(transactionReportDTO);
         }
-        response.setRows(rows);
+        response.setData(rows);
         HashMap<String,String> tableColumns=new HashMap<String,String>();
         tableColumns.put("fundTxnNumber", "Txn ID");
         tableColumns.put("vaNumber", "VA Number");
@@ -229,9 +250,165 @@ public class ResponseBodyService {
         return response;
 	}
 
-	public ResponseDTO<DetailedTransactionReportDTO> getDetailedTransactionReportResponseBody(List<InvestorVAHistory> investorVAHistoryList) {
-    //TODO 
-		return null;
-	}
+	public ResponseDTO<DetailedTransactionReportDTO> getDetailedTransactionReportResponseBody(List<InvestorVAHistory> investorVAHistoryList) throws Exception {
+    Iterator<InvestorVAHistory> iterator=investorVAHistoryList.iterator();
+    ResponseDTO<DetailedTransactionReportDTO> response=new ResponseDTO<DetailedTransactionReportDTO>();
+    List<DetailedTransactionReportDTO> rows=new LinkedList<DetailedTransactionReportDTO>();
+    while(iterator.hasNext()){
+      InvestorVAHistory investorVAHistory=iterator.next();
+      ApplicantData applicantData=disbursementService.getApplicantData(investorVAHistory.getLoanAppID());
+      ApplicationDataDTO applicationDataDTO=disbursementService.getApplicationDataDTO(investorVAHistory.getLoanAppID());
+
+      DetailedTransactionReportDTO detailedTransactionReportDTO=new DetailedTransactionReportDTO();
+      detailedTransactionReportDTO.setLoanAppID(investorVAHistory.getLoanAppID());
+      detailedTransactionReportDTO.setLoanAmount(investorVAHistory.getLoanAmount());
+      detailedTransactionReportDTO.setApplicantName(applicantData.getFullName());
+      detailedTransactionReportDTO.setLoanDuration(applicationDataDTO.getLoanDaysLength());
+      if(applicationDataDTO.getIsInstallment().equalsIgnoreCase("Y")){
+        detailedTransactionReportDTO.setLoanType("Installment Loan");
+      }
+      else{
+        detailedTransactionReportDTO.setLoanType("PayDay Loan");
+      }
+      HashMap<String,String> loanStatus=transactionReportService.getLoanStatus(investorVAHistory);
+      detailedTransactionReportDTO.setOperation(loanStatus.get("operation"));
+      detailedTransactionReportDTO.setRemarks(loanStatus.get("remarks"));
+      detailedTransactionReportDTO.setStatus(loanStatus.get("status"));
+      rows.add(detailedTransactionReportDTO);
+    }
+    response.setData(rows);
+    HashMap<String,String> tableColumns=new HashMap<String,String>();
+    tableColumns.put("loanAppID", "Loan ID");
+    tableColumns.put("applicantName", "Applicant Name");
+    tableColumns.put("loanAmount", "Loan Amount");
+    tableColumns.put("loanType", "Loan Type");
+    tableColumns.put("loanDuration", "Loan Duration");
+    tableColumns.put("Status", "Status");
+    tableColumns.put("operation", "Operation");
+    tableColumns.put("Remarks", "Remarks");
+    List<ColumnDTO> columns=new LinkedList<ColumnDTO>();
+    for(Map.Entry<String,String> entry : tableColumns.entrySet()){
+      ColumnDTO columnDTO=new ColumnDTO();
+      columnDTO.setKey(entry.getKey());
+      columnDTO.setTitle(entry.getValue());
+      columnDTO.setDataIndex(entry.getKey());
+      columns.add(columnDTO);
+    }
+    response.setColumns(columns);
+    return response;
+  }
+  
+  public ResponseDTO<DigisignDocumentsDTO> getDigisignDocumentsResponseBody(List<DigisignAgreement> documentsList) {
+    Iterator<DigisignAgreement> iterator=documentsList.iterator();
+    ResponseDTO<DigisignDocumentsDTO> response=new ResponseDTO<DigisignDocumentsDTO>();
+    List<DigisignDocumentsDTO> rows=new LinkedList<DigisignDocumentsDTO>();
+    int key=0;
+    while(iterator.hasNext()){
+      key++;
+      DigisignAgreement document=iterator.next();
+      DigisignDocumentsDTO digisignDocumentsDTO=new DigisignDocumentsDTO();
+      digisignDocumentsDTO.setKey(Integer.toString(key));
+      digisignDocumentsDTO.setApplicationID(Integer.toString(document.getApplicationID()));
+      digisignDocumentsDTO.setDocumentLenderID(document.getDocumentLenderID());
+      if(document.getStatusLenderAgreement().equalsIgnoreCase("S")){
+        digisignDocumentsDTO.setLenderAgreementStatus("Signed");
+      }
+      else{
+        digisignDocumentsDTO.setLenderAgreementStatus("UnSigned");
+      }
+      rows.add(digisignDocumentsDTO);
+    }
+
+    response.setData(rows);
+    HashMap<String,String> tableColumns=new HashMap<String,String>();
+    tableColumns.put("applicationID", "Application ID");
+    tableColumns.put("documentLenderID", "Lender Document ID");
+    tableColumns.put("lenderAgreementStatus", "Lender Document Status");
+    List<ColumnDTO> columns=new LinkedList<ColumnDTO>();
+    for(Map.Entry<String,String> entry : tableColumns.entrySet()){
+      ColumnDTO columnDTO=new ColumnDTO();
+      columnDTO.setKey(entry.getKey());
+      columnDTO.setTitle(entry.getValue());
+      columnDTO.setDataIndex(entry.getKey());
+      columns.add(columnDTO);
+    }
+    response.setColumns(columns);
+    List<ButtonDTO> buttons=new LinkedList<ButtonDTO>();
+    ButtonDTO buttonDTO=new ButtonDTO();
+    buttons.add(buttonDTO);
+    response.setButton(buttons);
+    //TODO
+    //Need to insert additional data like VA Number and Total customer count in reponse
+    return response;
+  }
+
+public ResponseDTO<LenderDocumentsDTO> getLenderDocumentsResponseBody(
+	List<InvestorFundingHistory> investorFundingHistory) {
+  Iterator<InvestorFundingHistory> iterator=investorFundingHistory.iterator();
+  ResponseDTO<LenderDocumentsDTO> response=new ResponseDTO<LenderDocumentsDTO>();
+  List<LenderDocumentsDTO> rows=new LinkedList<LenderDocumentsDTO>();
+  while(iterator.hasNext()){
+    InvestorFundingHistory fundingTransaction=iterator.next();
+    List<InvestorVAHistory> investorVAHistoryList=investorVAHistoryDAO.findBy("vaNumber", fundingTransaction.getInvestorVaNumber(),"status","1");
+    if(investorVAHistoryList.isEmpty()){
+      continue;
+    }
+    LenderDocumentsDTO lenderDocumentsDTO=new LenderDocumentsDTO();
+    lenderDocumentsDTO.setTransactionID(fundingTransaction.getFundTxnNumber());
+    lenderDocumentsDTO.setVaNumber(fundingTransaction.getInvestorVaNumber());
+    lenderDocumentsDTO.setTransactionDate(fundingTransaction.getUpdatedAt());;
+    HashMap<String,Object> transactionStatus=digisignService.getTransactionStatus(investorVAHistoryList);
+    String lenderUTStatus="";
+    String lenderBorrowerStatus="";
+    NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.US);
+    lenderDocumentsDTO.setFundingAmount(nf.format((Double)transactionStatus.get("totalFundAmount")));
+    lenderDocumentsDTO.setTotalLoans((Integer)transactionStatus.get("totalLoans"));
+    if((Integer)transactionStatus.get("agreementCreationCount")==0){
+      lenderUTStatus+="Agreements not created";
+      lenderBorrowerStatus+="Agreements not created";
+    }
+    else{
+      if((Integer)transactionStatus.get("totalLoans")!=(Integer)transactionStatus.get("agreementCreationCount")){
+        Integer temp=(Integer)transactionStatus.get("totalLoans")-(Integer)transactionStatus.get("agreementCreationCount");
+        lenderUTStatus=lenderUTStatus+temp+" agreements not created ";
+        lenderBorrowerStatus=lenderBorrowerStatus+temp+" agreements not created ";
+      }
+      if((Integer)transactionStatus.get("expiredDocumentCount")>0){
+        Integer temp=(Integer)transactionStatus.get("expiredDocumentCount");
+        lenderUTStatus=lenderUTStatus+" Expired Documents : "+temp;
+        lenderBorrowerStatus=lenderBorrowerStatus+" Expired Documents : "+temp;
+      }
+      if((Integer)transactionStatus.get("lenderUTSignedCount")>0){
+        Integer temp=(Integer)transactionStatus.get("lenderUTSignedCount");
+        lenderUTStatus=lenderUTStatus+" Signed Documents : "+temp;
+      }
+      if((Integer)transactionStatus.get("lenderBorrowerSignedCount")>0){
+        Integer temp=(Integer)transactionStatus.get("lenderBorrowerSignedCount");
+        lenderBorrowerStatus=lenderBorrowerStatus+" Signed Documents : "+temp;
+      }
+      Integer needToSignLenderBorrower=(Integer)transactionStatus.get("agreementCreationCount")-(Integer)transactionStatus.get("expiredDocumentCount")-(Integer)transactionStatus.get("lenderBorrowerSignedCount");
+      Integer needToSignLenderUT=(Integer)transactionStatus.get("agreementCreationCount")-(Integer)transactionStatus.get("expiredDocumentCount")-(Integer)transactionStatus.get("lenderUTSignedCount");
+      if(needToSignLenderBorrower>0){
+        lenderDocumentsDTO.setShowLenderBorrowerSign(true);
+        lenderBorrowerStatus=lenderBorrowerStatus+" Need to sign : "+needToSignLenderBorrower;
+      }
+      else{
+        lenderDocumentsDTO.setShowLenderBorrowerSign(false);
+      }
+      if(needToSignLenderUT>0){
+        lenderDocumentsDTO.setShowLenderUTSign(true);
+        lenderUTStatus=lenderUTStatus+" Need to sign : "+needToSignLenderUT;
+      }
+      else{
+        lenderDocumentsDTO.setShowLenderUTSign(false);
+      }
+    }
+    lenderDocumentsDTO.setLenderUTAgreementsStatus(lenderUTStatus);
+    lenderDocumentsDTO.setLenderBorrrowerAgreementsStatus(lenderBorrowerStatus);
+    rows.add(lenderDocumentsDTO);
+  }
+  response.setData(rows);
+	return response;
+}
     
 }
