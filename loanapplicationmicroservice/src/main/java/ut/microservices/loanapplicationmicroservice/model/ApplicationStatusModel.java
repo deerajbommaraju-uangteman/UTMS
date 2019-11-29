@@ -55,13 +55,14 @@ public class ApplicationStatusModel implements Serializable{
     @Column(name = "CreateAt")
     private Date CreateAt;
 
-    public void setApplicationStatus(ApplicationStatusModel model){
-        this.ApplicationID=model.ApplicationID;
-        this.LoanApplicationID=model.LoanApplicationID;
-        this.BoID=model.BoID;
-        this.PreviousCodeID=model.PreviousCodeID;
-        this.StatusID=model.StatusID;
-        this.PreviousApplicationStatus=model.PreviousApplicationStatus;
-        this.ApplicationStatus=model.ApplicationStatus;
+    public void setApplicationStatusData(Integer ApplicationID, String LoanApplicationID, Integer BoID, Integer PreviousCodeID,  
+    String PreviousApplicationStatus, Integer CodeID, String ApplicationStatus){
+        this.ApplicationID=ApplicationID;
+        this.ApplicationStatus=ApplicationStatus;
+        this.BoID=BoID;
+        this.CodeID=CodeID;
+        this.LoanApplicationID=LoanApplicationID;
+        this.PreviousApplicationStatus=PreviousApplicationStatus;
+        this.PreviousCodeID=PreviousCodeID;
     }
 }

@@ -31,11 +31,18 @@ public class DVServices {
 
     IGenericDAO<ApplicantData> applicantDAO;
     IGenericDAO<ApplicationData> applicationDAO;
+    IGenericDAO<ApplicationStatusModel> applicationStatusDAO;
     
     @Autowired
     public void setApplicantDAO(IGenericDAO<ApplicantData> DAOToSet) {
         applicantDAO = DAOToSet;
         applicantDAO.setClazz(ApplicantData.class);
+    }
+
+    @Autowired
+    public void setApplicationStatusDAO(IGenericDAO<ApplicationStatusModel> DAOToSet) {
+        applicationStatusDAO = DAOToSet;
+        applicationStatusDAO.setClazz(ApplicationStatusModel.class);
     }
 
     @Autowired
@@ -132,6 +139,9 @@ public class DVServices {
         ApplicationData applicationData=applicationDAO.findValueByColumn("ApplicationID",ApplicationID).get(0);
         applicationData.setStatus("ST");
         applicationDAO.updateOne(applicationData);
+        ApplicationStatusModel applicationStatus=new ApplicationStatusModel();
+        applicationStatus.setApplicationStatusData(Integer.parseInt(ApplicationID), applicationData.getLoanApplicationID(), 0, 3, "DV", 3, "ST");
+        applicationStatusDAO.save(applicationStatus);
         HashMap<String,Object> map=new HashMap<String,Object>();
         map.put("loanAppID", applicationData.getLoanApplicationID());
         map.put("loanAmount",applicationData.getLoanAmount());
@@ -144,6 +154,10 @@ public class DVServices {
         ApplicationData applicationData=applicationDAO.findValueByColumn("ApplicationID",ApplicationID).get(0);
         applicationData.setStatus("T");
         applicationDAO.updateOne(applicationData);
+        ApplicationStatusModel applicationStatus=new ApplicationStatusModel();
+        applicationStatus.setApplicationStatusData(Integer.parseInt(ApplicationID), applicationData.getLoanApplicationID(), 0, 3, "DV", 92, "T");
+        applicationStatusDAO.save(applicationStatus);
+        
     }
 
     public ResponseDTO<ApplicationDTO> getApplicationResponseBody(List<ApplicationData> applicationList) {
@@ -187,5 +201,7 @@ public class DVServices {
         response.setButton(buttons);
         return response;
       }
+
+      
       
 }

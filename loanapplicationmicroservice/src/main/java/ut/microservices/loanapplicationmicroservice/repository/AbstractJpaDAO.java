@@ -55,6 +55,15 @@ public abstract class AbstractJpaDAO<T extends Serializable> {
     return getCurrentSession().createQuery("from "+clazz.getName()+" a where a."+column+"='"+value+"'").getResultList();
    }
    
+    public T findValueByColumnSingleEntity(String column, String value){
+        //System.out.println(clazz.getName()+"::"+column+"::"+value+"::");
+        return (T) getCurrentSession().createQuery("from " + clazz.getName() + " a where a." + column + "='" + value + "'").getSingleResult();
+    }
+
+    public List<T> findValueByColumnOrder(String column, String value,String sortedColumn, String orderType){
+        //System.out.println(clazz.getName()+"::"+column+"::"+value+"::");
+        return getCurrentSession().createQuery("from "+clazz.getName()+" a where a."+column+"='"+value+"' order by"+sortedColumn+" "+orderType).getResultList();
+    }
    @Transactional
    public Serializable save(T entity){
       return getCurrentSession().save(entity);

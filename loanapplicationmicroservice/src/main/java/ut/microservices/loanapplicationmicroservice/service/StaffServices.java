@@ -1,21 +1,31 @@
 package ut.microservices.loanapplicationmicroservice.service;
 
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Iterator;
-import ut.microservices.loanapplicationmicroservice.dto.*;
-import ut.microservices.loanapplicationmicroservice.model.*;
-import ut.microservices.loanapplicationmicroservice.repository.*;
+import ut.microservices.loanapplicationmicroservice.dto.ApplicationDTO;s
+import ut.microservices.loanapplicationmicroservice.dto.ApplicationNotesDTO;
+import ut.microservices.loanapplicationmicroservice.dto.ButtonDTO;
+import ut.microservices.loanapplicationmicroservice.dto.ColumnDTO;
+import ut.microservices.loanapplicationmicroservice.dto.ResponseDTO;
+import ut.microservices.loanapplicationmicroservice.model.ApplicantData;
+import ut.microservices.loanapplicationmicroservice.model.ApplicationData;
+import ut.microservices.loanapplicationmicroservice.model.ApplicationNotesModel;
+import ut.microservices.loanapplicationmicroservice.model.ApplicationScheduleProcessModel;
+import ut.microservices.loanapplicationmicroservice.model.ApplicationStatusModel;
+import ut.microservices.loanapplicationmicroservice.repository.IGenericDAO;
 
 /**
  * StaffServices
@@ -28,6 +38,20 @@ public class StaffServices {
 
     IGenericDAO<ApplicantData> applicantDAO;
     IGenericDAO<ApplicationData> applicationDAO;
+    IGenericDAO<ApplicationStatusModel> applicationStatusDAO;
+    IGenericDAO<ApplicationScheduleProcessModel> applicationScheduleProcessDAO;
+
+    @Autowired
+    public void setApplicationStatusDAO(IGenericDAO<ApplicationStatusModel> DAOToSet) {
+        applicationStatusDAO = DAOToSet;
+        applicationStatusDAO.setClazz(ApplicationStatusModel.class);
+    }
+
+    @Autowired
+    public void setApplicationScheduleDAO(IGenericDAO<ApplicationScheduleProcessModel> DAOToSet) {
+        applicationScheduleProcessDAO = DAOToSet;
+        applicationScheduleProcessDAO.setClazz(ApplicationScheduleProcessModel.class);
+    }
 
     @Autowired
     public void setApplicantDAO(IGenericDAO<ApplicantData> DAOToSet) {
@@ -65,6 +89,10 @@ public class StaffServices {
         applicationData.setStatus("A");
         applicationDAO.updateOne(applicationData);
         HashMap<String,Object> map=new HashMap<String,Object>();
+        ApplicationStatusModel applicationStatus=new ApplicationStatusModel();
+        applicationStatus.setApplicationStatusData(Integer.parseInt(ApplicationID), applicationData.getLoanApplicationID(), 0, 3, "DV", 3, "ST");
+        applicationStatusDAO.save(applicationStatus);
+        
         map.put("loanAppID", applicationData.getLoanApplicationID());
         map.put("loanAmount",applicationData.getLoanAmount());
         map.put("ApplicationID",applicationData.getApplicationID());
@@ -76,6 +104,10 @@ public class StaffServices {
         ApplicationData applicationData=applicationDAO.findValueByColumn("ApplicationID",ApplicationID).get(0);
         applicationData.setStatus("T");
         applicationDAO.updateOne(applicationData);
+        ApplicationStatusModel applicationStatus=new ApplicationStatusModel();
+        applicationStatus.setApplicationStatusData(Integer.parseInt(ApplicationID), applicationData.getLoanApplicationID(), 0, 3, "DV", 3, "ST");
+        applicationStatusDAO.save(applicationStatus);
+        
     }
 
     public ResponseDTO<ApplicationDTO> getResponseBody(List<ApplicationData> applicationList) {
@@ -129,6 +161,20 @@ public class StaffServices {
         List<ApplicationNotesModel> ApplicationNotesList = applicationNotesDAO.findValueByColumn("ApplicationID", applicationID);
         
         return getApplicationNotesResponseBody(ApplicationNotesList);
+    }
+
+    public String ChangeApplicationStatus(String ApplicationID){
+      List<ApplicationData> applicationDataList = applicationDAO.findValueByColumn("ApplicationID",ApplicationID);
+      if(applicationDataList.size()>0){
+        ApplicationData applicationData = applicationDataList.get(0);
+        List<ApplicationScheduleProcessModel> applicationScheduleList = applicationScheduleProcessDAO.findValueByColumnOrder("ApplicationID", applicationData.getLoanApplicationID(), "ApplicationScheduleProcessID", "desc");
+        ApplicationScheduleProcessModel applicationSchedule = applicationScheduleList.get(0);
+        applicationSchedule.setScheduleDate(new Date());
+        applicationScheduleProcessDAO.updateOne(applicationSchedule);
+        return "success";
+      }else{
+        return "fail";
+      }
     }
 
     public ResponseDTO<ApplicationNotesDTO> getApplicationNotesResponseBody(List<ApplicationNotesModel> applicationList) {

@@ -41,11 +41,19 @@ public class LoanApplicationService {
     IGenericDAO<TempApplicantDataModel> tempApplicantDAO;
     IGenericDAO<ApplicantData> applicantDAO;
     IGenericDAO<ApplicationData> applicationDAO;
+    IGenericDAO<CreFeatureSetModel> creFeatureSetDAO;
+    IGenericDAO<ApplicationStatusModel> applicationStatusDAO;
 
     @Autowired
     public void setApplicantDAO(IGenericDAO<ApplicantData> DAOToSet) {
         applicantDAO = DAOToSet;
         applicantDAO.setClazz(ApplicantData.class);
+    }
+
+    @Autowired
+    public void setApplicationStatusDAO(IGenericDAO<ApplicationStatusModel> DAOToSet) {
+        applicationStatusDAO = DAOToSet;
+        applicationStatusDAO.setClazz(ApplicationStatusModel.class);
     }
 
     @Autowired
@@ -58,6 +66,12 @@ public class LoanApplicationService {
     public void setTempDAO(IGenericDAO<TempApplicantDataModel> DAOToSet) {
         tempApplicantDAO = DAOToSet;
         tempApplicantDAO.setClazz(TempApplicantDataModel.class);
+    }
+
+    @Autowired
+    public void setcreFeatureSetDAO(IGenericDAO<CreFeatureSetModel> DAOToSet) {
+        creFeatureSetDAO = DAOToSet;
+        creFeatureSetDAO.setClazz(CreFeatureSetModel.class);
     }
 
     @Autowired
@@ -78,27 +92,19 @@ public class LoanApplicationService {
         TempApplicantDataModel applicantData = applicantList.get(0);
         applicantData.setformData(application);
         tempApplicantDAO.updateOne(applicantData);
-        if(application.getFormID().equals("form9")){
-        Boolean CRE_accept = this.CRECheck();
-        if(CRE_accept){
+        if(application.getFormID().equals("form10")){
+        //Boolean CRE_accept = this.CRECheck();
+        // if(CRE_accept){
             int applicantID=this.newApplicationReceived(applicantData);
             applicantData.setApplicantID(applicantID);
             tempApplicantDAO.updateOne(applicantData);
             return "Application Saved Successfully";
-            }
+            // }
+
         }
         return application.getID().toString();
     }
-    public boolean CRECheck(){
-        Random r=new Random();
-        int value=r.nextInt(5);
-        if(value>=3){
-            return true;
-        }else{
-            return false;
-        }
-    }
-
+    
     public int newApplicationReceived(TempApplicantDataModel application) {
         //System.out.println("before object mapper"+ application);
         try {
@@ -116,8 +122,27 @@ public class LoanApplicationService {
             applicationData.setApplicationApplicantID(applicantID);
             applicationData.setLoanStartDateTime(Calendar.getInstance().getTime());
             applicationData.setLoanDueDateTime(Calendar.getInstance().getTime());
-            applicationData.setStatus("DV");
+            applicationData.setStatus("D");
             String applicationID= applicationDAO.save(applicationData).toString();
+            ApplicationStatusModel applicationStatus=new ApplicationStatusModel();
+            applicationStatus.setApplicationStatusData(Integer.parseInt(applicationID), applicationData.getLoanApplicationID(), 0, 0, "", 1, "D");
+            applicationStatusDAO.save(applicationStatus);
+            Boolean creCheck = this.CRECheck(application); 
+            if(creCheck){
+                applicationData.setStatus("DV");
+                applicationDAO.save(applicationData);
+                applicationStatus=new ApplicationStatusModel();
+                applicationStatus.setApplicationStatusData(Integer.parseInt(applicationID), applicationData.getLoanApplicationID(), 0, 1, "D", 2, "DV");
+                applicationStatusDAO.save(applicationStatus);
+            
+            }else{
+                applicationData.setStatus("R");
+                applicationDAO.save(applicationData);
+                applicationStatus=new ApplicationStatusModel();
+                applicationStatus.setApplicationStatusData(Integer.parseInt(applicationID), applicationData.getLoanApplicationID(), 0, 1, "D", 91, "R");
+                applicationStatusDAO.save(applicationStatus);
+            
+            }
             return applicantID;
         }  catch (Exception e) {
             e.printStackTrace();
@@ -125,6 +150,43 @@ public class LoanApplicationService {
 		return 0;
     }
     
+    public boolean CRECheck(TempApplicantDataModel applicantData) {
+        List<CreFeatureSetModel> creFeatureSetList= creFeatureSetDAO.findValueByColumn("ApplicantID", applicantData.getApplicantID().toString());
+        if(creFeatureSetList.isEmpty()) {
+            int gender = applicantData.getGender().equals("M")?0:1;
+            int maritalStatus=0;
+            switch (applicantData.getMaritalStatus().toString()){
+                case "married":
+                maritalStatus = 0;
+                break;
+            case "single":
+                maritalStatus = 1;
+                break;
+            case "divorced":
+                maritalStatus = 2;
+                break;
+            case "widowed":
+                maritalStatus = 3;
+                break;
+            }
+            CreFeatureSetModel creFeatureSet=new CreFeatureSetModel();
+            creFeatureSet.setApplicantID(applicantData.getApplicantID());
+            creFeatureSet.setAge(applicantData.getAge());
+            creFeatureSet.setSex(gender);
+            creFeatureSet.setMaritalStatus(maritalStatus);
+            creFeatureSet.setEducation(applicantData.getEducation());
+            creFeatureSet.setNetIncome(applicantData.getMonthlyIncome());
+            creFeatureSet.setDependents(Integer.parseInt(applicantData.getDependents()));
+            creFeatureSetDAO.save(creFeatureSet);
+        }
+        Random r=new Random();
+        int value=r.nextInt(5);
+        if(value>=3){
+            return true;
+        }else{
+            return false;
+        }
+    }
 
     public String getApplicationData(String ApplicationID) throws JsonProcessingException {
         HashMap<String, Object> data = new HashMap<String, Object>();
@@ -158,6 +220,11 @@ public class LoanApplicationService {
         // System.out.println(result);
         //save to ApplicantData
         return "failed";
+    }
+
+    public String PostApplicationStatusData(ApplicationStatusDTO ApplicationStatus) throws JsonProcessingException {
+        
+        return "success";
     }
 
 }

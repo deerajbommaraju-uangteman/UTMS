@@ -26,6 +26,13 @@ public class ManagerServices {
 
     IGenericDAO<ApplicantData> applicantDAO;
     IGenericDAO<ApplicationData> applicationDAO;
+    IGenericDAO<ApplicationStatusModel> applicationStatusDAO;
+
+    @Autowired
+    public void setApplicationStatusDAO(IGenericDAO<ApplicationStatusModel> DAOToSet) {
+        applicationStatusDAO = DAOToSet;
+        applicationStatusDAO.setClazz(ApplicationStatusModel.class);
+    }
 
     @Autowired
     public void setApplicantDAO(IGenericDAO<ApplicantData> DAOToSet) {
@@ -69,10 +76,15 @@ public class ManagerServices {
         ApplicationData applicationData=applicationDAO.findValueByColumn("ApplicationID",ApplicationID).get(0);
         applicationData.setStatus("I");
         applicationDAO.updateOne(applicationData);
+        ApplicationStatusModel applicationStatus=new ApplicationStatusModel();
+        applicationStatus.setApplicationStatusData(Integer.parseInt(ApplicationID), applicationData.getLoanApplicationID(), 0, 3, "DV", 3, "ST");
+        applicationStatusDAO.save(applicationStatus);
+        
         HashMap<String,Object> map=new HashMap<String,Object>();
         map.put("loanAppID", applicationData.getLoanApplicationID());
         map.put("loanAmount",applicationData.getLoanAmount());
         map.put("ApplicationID",applicationData.getApplicationID());
+        map.put("ApplicantID",applicationData.getApplicationApplicantID());
         map.put("loanTenor",applicationData.getLoanDaysLength());
         kafkaTemplate.send("loanApproved",objectMapper.writeValueAsString(map));
     }
@@ -81,6 +93,10 @@ public class ManagerServices {
         ApplicationData applicationData=applicationDAO.findValueByColumn("ApplicationID",ApplicationID).get(0);
         applicationData.setStatus("T");
         applicationDAO.updateOne(applicationData);
+        ApplicationStatusModel applicationStatus=new ApplicationStatusModel();
+        applicationStatus.setApplicationStatusData(Integer.parseInt(ApplicationID), applicationData.getLoanApplicationID(), 0, 3, "DV", 3, "ST");
+        applicationStatusDAO.save(applicationStatus);
+        
     }
 
     public ResponseDTO<ApplicationDTO> getResponseBody(List<ApplicationData> applicationList) {

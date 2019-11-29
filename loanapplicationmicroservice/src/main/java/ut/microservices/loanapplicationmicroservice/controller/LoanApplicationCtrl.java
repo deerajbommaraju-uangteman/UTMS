@@ -1,9 +1,13 @@
 package ut.microservices.loanapplicationmicroservice.controller;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.assertj.core.util.Arrays;
+import org.hibernate.mapping.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import ut.microservices.loanapplicationmicroservice.dto.ApplicationStatusDTO;
 import ut.microservices.loanapplicationmicroservice.model.*;
 import ut.microservices.loanapplicationmicroservice.service.*;
 
@@ -39,6 +44,16 @@ public class LoanApplicationCtrl {
   public @ResponseBody String getApplicationData(@PathVariable String ApplicationID) throws JsonProcessingException {
 
     return loanApplicationService.getApplicationData(ApplicationID); 
+  }
+  
+  @CrossOrigin
+  @PostMapping(path = "/saveApplicationStatusData")
+  public @ResponseBody String PostApplicationStatusData(@RequestBody String ApplicationID) throws IOException {
+    System.out.println("kdhsadshha"+ApplicationID);
+    ObjectMapper obj = new ObjectMapper();
+    ApplicationStatusDTO aps=obj.readValue(ApplicationID, ApplicationStatusDTO.class);
+    
+    return ApplicationID;//loanApplicationService.getApplicationData(ApplicationID); 
   }
   
   @CrossOrigin

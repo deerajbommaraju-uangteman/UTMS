@@ -17,4 +17,6 @@ public interface IGenericDAO<T extends Serializable> {
     T findOne(int ID);
     void setClazz(Class< T > clazzToSet);
     List<T> findValueByColumn(String columnName, String value);
+    List<T> findValueByColumnOrder(String column, String value,String sortedColumn, String orderType);
+    T findValueByColumnSingleEntity(String column, String value);    
 }

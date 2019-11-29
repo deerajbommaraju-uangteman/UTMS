@@ -436,6 +436,38 @@ public class TempApplicantDataModel implements Serializable{
     @JsonProperty(value="FormID",required=true)
     private String FormID;
 
+    @Column(name = "ExpenditurePerMonth", nullable = true)
+    @JsonProperty(value="expenditurePerMonth",required=true)
+    private String ExpenditurePerMonth;
+    
+    @Column(name = "TypeOfWork", nullable = true)
+    @JsonProperty(value="typeOfWork",required=true)
+    private String TypeOfWork;
+    
+    @Column(name = "IndustrySector", nullable = true)
+    @JsonProperty(value="industrySector",required=true)
+    private String IndustrySector;
+    
+    @Column(name = "WorkByYear", nullable = true)
+    @JsonProperty(value="workByYear",required=true)
+    private String WorkByYear;
+    
+    @Column(name = "WorkByMonth", nullable = true)
+    @JsonProperty(value="workByMonth",required=true)
+    private String WorkByMonth;
+    
+    @Column(name = "WorkPosition", nullable = true)
+    @JsonProperty(value="workPosition",required=true)
+    private String WorkPosition;
+    
+    @Column(name = "KprInstallments", nullable = true)
+    @JsonProperty(value="kprInstallments",required=true)
+    private String KprInstallments;
+    
+    @Column(name = "Dependents", nullable = true)
+    @JsonProperty(value="dependents",required=true)
+    private String Dependents;
+    
     public void setformData(TempApplicantDataModel formData){
         System.out.println(formData.getFormID().toString());
         switch (formData.getFormID().toString()) {
@@ -491,6 +523,17 @@ public class TempApplicantDataModel implements Serializable{
                 this.setEmployerVillage(formData.getEmployerVillage());
                 this.setEmployerPostalCode(formData.getEmployerPostalCode());
                 break;
+            case "form10":
+                this.setExpenditurePerMonth(formData.getExpenditurePerMonth());
+                this.setMonthlyIncome(formData.getMonthlyIncome());
+                this.setTypeOfWork(formData.getTypeOfWork());
+                this.setIndustrySector(formData.getIndustrySector());
+                this.setWorkByYear(formData.getWorkByYear());
+                this.setWorkByMonth(formData.getWorkByMonth());
+                this.setWorkPosition(formData.getWorkPosition());
+                this.setKprInstallments(formData.getKprInstallments());
+                this.setDependents(formData.getDependents());
+                break;    
         }
     }
 }

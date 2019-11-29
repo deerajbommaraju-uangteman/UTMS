@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import net.minidev.json.JSONObject;
 import ut.microservices.loanapplicationmicroservice.model.*;
 import ut.microservices.loanapplicationmicroservice.dto.*;
 import ut.microservices.loanapplicationmicroservice.service.*;
@@ -45,7 +47,12 @@ import ut.microservices.loanapplicationmicroservice.service.*;
     @PostMapping(path = "/testcurl")
     public String testcurl(@RequestBody String data){
         System.out.println("test::"+data);
-        return "FAIL";
+        JSONObject obj = new JSONObject();
+        String ocr_message = "test message";
+        String result = "FAIL";
+        obj.put("ocr_message", ocr_message);
+        obj.put("result", result);
+        return obj.toJSONString();
     }
 
     @CrossOrigin
@@ -101,6 +108,12 @@ import ut.microservices.loanapplicationmicroservice.service.*;
     @PostMapping(path = "/staffViewNotes")
     public ResponseDTO<ApplicationNotesDTO> staffViewNotes(@RequestBody String applicationID) throws Exception {
         return staffService.staffViewNotes(applicationID);
+    }
+
+    @CrossOrigin
+    @PostMapping(path = "/staffChangeApplicationStatus")
+    public String staffChangeApplicationStatus(@RequestBody String applicationID) throws Exception {
+        return staffService.ChangeApplicationStatus(applicationID);
     }
 
     @CrossOrigin
