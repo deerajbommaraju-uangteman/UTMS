@@ -1,6 +1,7 @@
 package ut.microservices.repaymentmicroservice.services;
 
 import java.util.HashMap;
+import java.util.List;
 
 import javax.transaction.Transactional;
 
@@ -21,6 +22,7 @@ import ut.microservices.repaymentmicroservice.models.CustomerVaHistory;
 import ut.microservices.repaymentmicroservice.models.LogDokuBca;
 import ut.microservices.repaymentmicroservice.models.LogsArtajasa;
 import ut.microservices.repaymentmicroservice.models.VaArtajasa;
+import ut.microservices.repaymentmicroservice.models.views.GetVAPaymentDetails;
 
 @Service
 @Transactional
@@ -37,6 +39,7 @@ public class BorrowerService {
     IGenericDAO<VaArtajasa> vaArtajasaDAO;
     IGenericDAO<LogsArtajasa> logsArtajasaDAO;
     IGenericDAO<CustomerStaticVaActiveLoan> custStaticVaActiveLoanDAO;
+    IGenericDAO<GetVAPaymentDetails> getVAPaymentDetailsDAO;
 
     @Autowired
     public void setApplicantDataDAO(IGenericDAO<ApplicantData> applicantDataDAO){
@@ -104,6 +107,13 @@ public class BorrowerService {
         custStaticVaActiveLoanDAO.setClazz(CustomerStaticVaActiveLoan.class);
     }
     
+            
+    @Autowired
+    public void setVAPaymentDetailsDAO(IGenericDAO<GetVAPaymentDetails> getVAPaymentDetailsDAO){
+        this.getVAPaymentDetailsDAO = getVAPaymentDetailsDAO;
+        getVAPaymentDetailsDAO.setClazz(GetVAPaymentDetails.class);
+    }
+
     @Autowired
     private DokuPaymentService dokuPaymentService;
 
@@ -135,6 +145,14 @@ public class BorrowerService {
     }
 
     public void getOutstanding(String LoanApplicationID){
+
+    }
+
+    public void getVAPaymentDetails(String applicationID){
+        List<GetVAPaymentDetails> cld= getVAPaymentDetailsDAO.findAll();
+        
+        // CustomerVaHistory va = customerVaHistoryDAO.findActiveVAByApplicantID(applicantID);
+
 
     }
 }

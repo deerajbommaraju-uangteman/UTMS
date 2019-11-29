@@ -22,10 +22,9 @@ public abstract class AbstractJpaDAO<T extends Serializable> {
        this.clazz = clazzToSet;
     }
 
-   //  public List< T > findAll(){
-   //     return entityManager.createQuery( "from " + clazz.getName() )
-   //      .getResultList();
-   //  }
+    public List< T > findAll(){
+      return entityManager.createQuery( "from " + clazz.getName()).getResultList();
+    }
   
     public void save( T entity ){
       entityManager.persist( entity );
@@ -54,6 +53,10 @@ public abstract class AbstractJpaDAO<T extends Serializable> {
         return  entityManager.createQuery( "from " + clazz.getName() + " e " + " where " + " e.VaNumber='"+ VaNumber + "'" + "and "+ "e.Status = '0'" + "and " +"e.IsVaActive= 'Y' order by e.ID desc").getResultList(); 
         // q.setParameter("today", date);
      }
+
+     public List<T> findActiveVAByApplicantID(String applicantID) {
+        return  entityManager.createQuery( "from " + clazz.getName() + " e " + " where " + " e.ApplicantID='"+ applicantID + "'" + "and "+ "e.Status = '0'" + "and " +"e.IsVaActive= 'Y' order by e.ID desc").getResultList(); 
+      }
 
      public List<T> findVAInLogs(String VaNumber) {
         return  entityManager.createQuery( "from " + clazz.getName() + " e " + " where " + " e.VaNumber='"+ VaNumber + "'").getResultList(); 

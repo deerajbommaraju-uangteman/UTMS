@@ -213,7 +213,7 @@ public class ApplicationData implements Serializable{
     @JsonProperty(value="TransactionID",required=true)
     private String TransactionID;
     
-    @Column(name = "ApplicantID1")
+    @Column(name = "ApplicantID")
     @JsonProperty(value="ApplicantID",required=true)
     private Integer ApplicantID;
     

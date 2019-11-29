@@ -18,6 +18,7 @@ import ut.microservices.repaymentmicroservice.dto.CustomerRepaymentHomePageDTO;
 import ut.microservices.repaymentmicroservice.dto.GenerateVaDTO;
 import ut.microservices.repaymentmicroservice.models.ApplicantData;
 import ut.microservices.repaymentmicroservice.models.ApplicationData;
+import ut.microservices.repaymentmicroservice.services.CimbSoapService;
 import ut.microservices.repaymentmicroservice.services.RepaymentService;
 
 
@@ -27,15 +28,18 @@ public class RepaymentController {
 
     @Autowired
     private RepaymentService repaymentService;
+
+    @Autowired 
+    private CimbSoapService cimbSoapService;
     
     IGenericDAO<ApplicationData> applicationDataDAO;
-
+    
     @Autowired
     public void setApplicationDataDAO(IGenericDAO<ApplicationData> applicationDataDAO){
         this.applicationDataDAO = applicationDataDAO;
         applicationDataDAO.setClazz(ApplicationData.class);
     }
-    
+           
 	@CrossOrigin
     @PostMapping(value = "/postLoginDetails")
     public @ResponseBody CustomerRepaymentHomePageDTO postCustomerLogin(@RequestBody HashMap<String, String> param) throws Exception{
@@ -45,7 +49,7 @@ public class RepaymentController {
     @CrossOrigin
     @PostMapping("/makeLoanRepayment")
     public @ResponseBody GenerateVaDTO makeLoanRepayment(@RequestBody HashMap<String, String> userdata) throws Exception{
-		 return repaymentService.makeLoanRepayment(userdata);
+         return repaymentService.makeLoanRepayment(userdata);
   }
 
     @CrossOrigin
@@ -54,5 +58,10 @@ public class RepaymentController {
         return repaymentService.loanDataForReconcile(VaNumber);
     }
 
+    @CrossOrigin
+    @PostMapping(path = "/testdata")
+    public @ResponseBody String getCimbInquiryResponse() throws Exception{
+		return cimbSoapService.getCimbInquiryResponse();
+  }
 
 }

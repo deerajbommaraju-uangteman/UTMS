@@ -23,6 +23,6 @@ public class ServicesConfig {
 
 
     // services
-    DateFormat dateformat = new SimpleDateFormat("yyyy-mm-dd"); 
-    // public static final Date services_fee_live = dateformat.parse("2019-02-22");
+    DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd"); 
+    // public Date services_fee_live = fmt.parse("2019-02-22");
 }
