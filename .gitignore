@@ -29,3 +29,5 @@ ui/node_modules/
 investorMicroService/target/m2e-wtp/web-resources/META-INF/MANIFEST.MF
 *.cmd
 *.jar
+Authentication/spring-boot-jwt-JPA/.classpath
+Authentication/spring-boot-jwt-JPA/.project
