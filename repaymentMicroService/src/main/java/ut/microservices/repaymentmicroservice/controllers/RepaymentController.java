@@ -54,10 +54,5 @@ public class RepaymentController {
         return repaymentService.loanDataForReconcile(VaNumber);
     }
 
-    @CrossOrigin
-    @PostMapping("/testdata")
-    public @ResponseBody List<ApplicationData> testData() throws Exception{
-        return applicationDataDAO.findByJoin();
-  }
 
 }

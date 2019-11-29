@@ -15,5 +15,5 @@ public interface IGenericDAO<T extends Serializable> {
     List<T> findVAInLogs(String VaNumber);
     List<T> findValueByColumn(String column, String value);
     List<T> findInstallmentRepayment(String value);
-    List<T> findByJoin();    
+    // List<T> findByJoin();    
  }

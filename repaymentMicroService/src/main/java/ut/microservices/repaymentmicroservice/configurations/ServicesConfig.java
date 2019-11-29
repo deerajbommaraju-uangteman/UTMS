@@ -1,5 +1,9 @@
 package ut.microservices.repaymentmicroservice.configurations;
 
+import java.text.DateFormat;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -16,4 +20,9 @@ public class ServicesConfig {
     public static final String INVALID_TO_ACCOUNT_76 = "76";
     public static final String ALREADY_PAID_78 = "78";
     public static final String TRANSACTION_SUCCESS_00 = "00";
+
+
+    // services
+    DateFormat dateformat = new SimpleDateFormat("yyyy-mm-dd"); 
+    // public static final Date services_fee_live = dateformat.parse("2019-02-22");
 }

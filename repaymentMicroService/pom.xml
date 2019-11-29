@@ -105,6 +105,13 @@
 			<groupId>wsdl4j</groupId>
 			<artifactId>wsdl4j</artifactId>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework.ws/spring-ws-core -->
+		<dependency>
+			<groupId>org.springframework.ws</groupId>
+			<artifactId>spring-ws-core</artifactId>
+			<version>3.0.8.RELEASE</version>
+		</dependency>
+	
 	</dependencies>
 
 	<dependencyManagement>
@@ -139,7 +146,7 @@
 				</executions>
 				<configuration>
 					<!-- The package of your generated sources -->
-					<schemaDirectory>${project.basedir}/src/main/resources/static/</schemaDirectory>
+					<schemaDirectory>${project.basedir}/src/main/resources/</schemaDirectory>
 					<outputDirectory>${project.basedir}/src/main/java</outputDirectory>
 					<clearOutputDir>false</clearOutputDir>					
 				</configuration>

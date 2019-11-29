@@ -5,7 +5,6 @@ import java.util.HashMap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,17 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import cimb3rdparty.billpaymentws.InquiryRq;
-import cimb3rdparty.billpaymentws.InquiryRs;
 import ut.microservices.repaymentmicroservice.dto.ArtajasaDTO;
 import ut.microservices.repaymentmicroservice.services.CallbackService;
 
-import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
-import org.springframework.ws.server.endpoint.annotation.RequestPayload;
-import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
-
 @RestController
-@Endpoint
 @RequestMapping("/repayment")
 public class CallbackController {
 
@@ -62,14 +54,5 @@ public class CallbackController {
       return new ResponseEntity<>(callbackService.getCallbackNotifyData(data), HttpStatus.OK);
    }   
 
-   @PostMapping(value = "/cimb/virtual-account", consumes = MediaType.APPLICATION_XML_VALUE)
-   @PayloadRoot(namespace = NAMESPACE_URI, localPart = "StudentDetailsRequest")
-   @ResponsePayload
-   public InquiryRs getCIMBInquiryData(@RequestPayload InquiryRq requestData){
-      InquiryRs response = new InquiryRs();
-      response.setAmount(1000);
-      response.setPaidAmount(1000);
-      return response;
-   //   callbackService.getCIMBInquiryData(requestData);
-   }
+
 }

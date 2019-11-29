@@ -79,12 +79,9 @@ public abstract class AbstractJpaDAO<T extends Serializable> {
      public List<T> findInstallmentRepayment(String value){
       return entityManager.createQuery("from "+clazz.getName()+" a where a.CustomerLoanRepaymentID ='"+value+"'"+ "and a.VtransStatus = 'P' and a.Status ='D' LIMIT 1").setMaxResults(1).getResultList();
      }
-
-
-     
-     public List<T> findByJoin(){
-        return entityManager.createQuery("FROM "+clazz.getName()+" a LEFT JOIN ApplicantData b on a.ApplicationApplicantID = b.ApplicantID").getResultList();
-     }
-
+  
+   //   public List<T> findByJoin(){
+   //      return entityManager.createQuery("FROM "+clazz.getName()+" a LEFT JOIN ApplicantData b on a.ApplicationApplicantID = b.ApplicantID").getResultList();
+   //   }
      
 }

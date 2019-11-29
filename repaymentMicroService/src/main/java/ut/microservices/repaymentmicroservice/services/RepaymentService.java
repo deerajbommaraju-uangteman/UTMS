@@ -471,7 +471,7 @@ public class RepaymentService {
             // log to save customer va
             va.setTransactionID(transId);
             va.setCustomerID(cld.getID());
-            va.setApplicantID(userdata.get("TransactionID"));
+            va.setApplicantID(userdata.get("ApplicantID"));
             va.setVaNumber(response.get("payment_code"));
             va.setAmountToPay(Double.parseDouble(userdata.get("AmountToPay")));
             va.setVaCreatedOutstandingAmt(Double.parseDouble(userdata.get("AmountToPay")));
@@ -658,7 +658,17 @@ public class RepaymentService {
         CustomerVaHistory cVaHistory = customerVaHistoryDAO.findValueByColumn("VaNumber", VaNumber).get(0);
         CustomerLoanRepayment custLoanRepayment = custLoanRepaymentDAO.findValueByColumn("ApplicantID", cVaHistory.getApplicantID()).get(0);
         CustomerLoanData custLoanData = custLoanDataDAO.findValueByColumn("ApplicantID",cVaHistory.getApplicantID()).get(0);
+        ApplicantData applicantData = applicantDataDAO.findValueByColumn("ApplicantID", custLoanData.getApplicantID().toString()).get(0);
+        ApplicationData apliData = applicationDataDAO.findValueByColumn("ApplicationApplicantID", custLoanData.getApplicantID().toString()).get(0);
+
         HashMap<String, Object> data = new HashMap<>();
+        if(apliData.getIsInstallment().equals("Y")){
+            CustomerLoanInstallmentRepayment clir = clirDAO.findValueByColumn("CustomerLoanRepaymentID", custLoanRepayment.getId().toString()).get(0);
+            data.put("CustomerLoanInstallmentRepayment", clir);
+        }
+        
+        data.put("ApplicationData", apliData);
+        data.put("ApplicantData", applicantData);
         data.put("CustomerLoanRepayment", custLoanRepayment);
         data.put("CustomerVaHistory", cVaHistory);
         data.put("CustomerLoanData", custLoanData);
