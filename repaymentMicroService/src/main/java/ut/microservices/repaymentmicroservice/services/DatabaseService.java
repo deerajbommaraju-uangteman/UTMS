@@ -124,10 +124,10 @@ public class DatabaseService {
 
         this.postDisbusementSaveDetails(dataMap.get("LoanApplicationID").toString());
 
-        // ApplicationData apliData = applicationDataDAO.findValueByColumn("ApplicationID", dataMap.get("ApplicationID").toString()).get(0);       
-        // if(apliData.getIsInstallment().equals("Y")){        
-        //     installmentService.insertInstallmentLoanRepayment(apliData);
-        // }
+        ApplicationData apliData = applicationDataDAO.findValueByColumn("ApplicationID", dataMap.get("ApplicationID").toString()).get(0);       
+        if(apliData.getIsInstallment().equals("Y")){        
+            installmentService.insertInstallmentLoanRepayment(apliData, clr);
+        }
     
         ack.acknowledge();
     }
@@ -149,9 +149,12 @@ public class DatabaseService {
         cld.setStatus("N");
         custLoanDataDAO.save(cld);
 
+        // String brwId = Float.toHexString((float) lamsData.get("ApplicantData").get("PersonalIDNumber"));
+
         //save details to CustomerPrimaryData
         CustomerPrimaryData  cd= new CustomerPrimaryData();
         cd.setApplicantID((int) lamsData.get("ApplicantData").get("applicantID"));
+        // cd.setBorrowerID(brwId);
         cd.setFullName(lamsData.get("ApplicantData").get("Fullname").toString());
         cd.setGender(lamsData.get("ApplicantData").get("Gender").toString());
         cd.setEmailAddress(lamsData.get("ApplicantData").get("EmailAddress").toString());

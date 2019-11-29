@@ -25,3 +25,7 @@ reconcileMicroService/target/
 reconcileMicroService/.classpath
 reconcileMicroService/.factorypath
 reconcileMicroService/.project
+ui/node_modules/
+investorMicroService/target/m2e-wtp/web-resources/META-INF/MANIFEST.MF
+*.cmd
+*.jar

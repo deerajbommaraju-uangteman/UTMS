@@ -55,13 +55,13 @@ public class CallbackService {
                 logsCallbackDAO.save(logs);
                 switch(data.get("vendor")){
                     case "Dokualfa":
-                        response = repaymentService.getDokuInquiry(data);
+                        return repaymentService.getDokuInquiry(data);
 
                     case "Dokubca" :
-                        response = repaymentService.getDokuInquiry(data);
+                        return repaymentService.getDokuInquiry(data);
 
                     case "Artajasa" :
-                        response = repaymentService.getArtajasaInquiry(data);   
+                        return repaymentService.getArtajasaInquiry(data);   
                                              
                     // default : 
                     //     response.put("status", HttpStatus.BAD_REQUEST);

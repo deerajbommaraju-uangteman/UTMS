@@ -1,6 +1,7 @@
 package ut.microservices.repaymentmicroservice.controllers;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -12,8 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import ut.microservices.repaymentmicroservice.dao.IGenericDAO;
 import ut.microservices.repaymentmicroservice.dto.CustomerRepaymentHomePageDTO;
 import ut.microservices.repaymentmicroservice.dto.GenerateVaDTO;
+import ut.microservices.repaymentmicroservice.models.ApplicantData;
+import ut.microservices.repaymentmicroservice.models.ApplicationData;
 import ut.microservices.repaymentmicroservice.services.RepaymentService;
 
 
@@ -22,8 +26,16 @@ import ut.microservices.repaymentmicroservice.services.RepaymentService;
 public class RepaymentController {
 
     @Autowired
-	private RepaymentService repaymentService;
+    private RepaymentService repaymentService;
+    
+    IGenericDAO<ApplicationData> applicationDataDAO;
 
+    @Autowired
+    public void setApplicationDataDAO(IGenericDAO<ApplicationData> applicationDataDAO){
+        this.applicationDataDAO = applicationDataDAO;
+        applicationDataDAO.setClazz(ApplicationData.class);
+    }
+    
 	@CrossOrigin
     @PostMapping(value = "/postLoginDetails")
     public @ResponseBody CustomerRepaymentHomePageDTO postCustomerLogin(@RequestBody HashMap<String, String> param) throws Exception{
@@ -41,7 +53,6 @@ public class RepaymentController {
     public @ResponseBody String loanDataForReconcile(@PathVariable String VaNumber) throws Exception {
         return repaymentService.loanDataForReconcile(VaNumber);
     }
-
 
 
 }

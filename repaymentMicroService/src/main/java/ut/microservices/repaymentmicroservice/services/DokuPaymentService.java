@@ -58,7 +58,8 @@ public class DokuPaymentService {
     IGenericDAO<CustomerPrimaryData> custPrimaryDataDAO;
     IGenericDAO<CustomerLoanRepayment> custLoanRepaymentDAO;
     IGenericDAO<CustomerLoanInstallmentRepayment> custLoanInstallmentRepaymentDAO;
-	IGenericDAO<LogDokuBca> logDokuBcaDAO;
+    IGenericDAO<LogDokuBca> logDokuBcaDAO;
+    IGenericDAO<VaFirstPay> vaFirstPayDAO;
 
     @Autowired
     public void setApplicationDataDAO(IGenericDAO<ApplicationData> applicationDataDAO){
@@ -100,6 +101,12 @@ public class DokuPaymentService {
     public void setLogDokuBcaDAO(IGenericDAO<LogDokuBca> logDokuBcaDAO) {
         this.logDokuBcaDAO = logDokuBcaDAO;
         logDokuBcaDAO.setClazz(LogDokuBca.class);
+    }
+    
+    @Autowired
+    public void setVaFirstPayDAO(IGenericDAO<VaFirstPay> vaFirstPayDAO) {
+        this.vaFirstPayDAO = vaFirstPayDAO;
+        vaFirstPayDAO.setClazz(VaFirstPay.class);
 	}
 
 	@Autowired
@@ -168,6 +175,8 @@ public class DokuPaymentService {
 
 	public void setVAInquiryResponse(HashMap<String, String> requestdata, LogDokuBca objLog) throws Exception{
 
+        Date dateRequest = new Date();
+
         // Set XML Format for Inquiry response
         String headResp = "<?xml version='1.0'?>\n";
         headResp += "<INQUIRY_RESPONSE>\n";
@@ -181,8 +190,8 @@ public class DokuPaymentService {
             objLog.setVaNumber(null);
             objLog.setLogAppID(null);
             objLog.setInquiryRequest(objectMapper.writeValueAsString(requestdata));
-            objLog.setInquiryReqDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
-            // objLog.setInquiryReqDatetime(currentdate.format(d));
+            objLog.setInquiryReqDatetime(dateRequest);
+            objLog.setInquiryRespDatetime(new Date());
             objLog.setInquiryResponse(xml);
             objLog.setInquiryRespDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
             logDokuBcaDAO.save(objLog);
@@ -199,8 +208,8 @@ public class DokuPaymentService {
             objLog.setVaNumber(requestdata.get("PAYMENTCODE"));
             objLog.setLogAppID(null);
             objLog.setInquiryRequest(objectMapper.writeValueAsString(requestdata));
-            objLog.setInquiryReqDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
-            // objLog.setInquiryReqDatetime(currentdate.format(d));
+            objLog.setInquiryReqDatetime(dateRequest);
+            objLog.setInquiryRespDatetime(new Date());
             objLog.setInquiryResponse(xml);
             objLog.setInquiryRespDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
             logDokuBcaDAO.save(objLog);
@@ -215,7 +224,7 @@ public class DokuPaymentService {
         CustomerLoanRepayment clr = custLoanRepaymentDAO.findValueByColumn("ApplicantID",cld.getApplicantID().toString()).get(0);  
         String customerLoanRepaymentStatus = clr.getClrStatus();
 
-        ApplicationData apli = applicationDataDAO.findBy("LoanApplicationID", cld.getLoanApplicationID(), "ApplicantID", cld.getApplicantID().toString()).get(0);
+        ApplicationData apli = applicationDataDAO.findByTwoColumns("LoanApplicationID", cld.getLoanApplicationID(), "ApplicantID", cld.getApplicantID().toString()).get(0);
         if(apli.getIsInstallment().equals("Y")){
             CustomerLoanInstallmentRepayment clir = custLoanInstallmentRepaymentDAO.findValueByColumn("CustomerLoanRepaymentID", clr.getId().toString()).get(0);
             customerLoanRepaymentStatus = clir.getStatus();
@@ -228,9 +237,9 @@ public class DokuPaymentService {
             objLog.setVaNumber(requestdata.get("PAYMENTCODE"));
             objLog.setLogAppID(clr.getLoanApplicationID());
             objLog.setInquiryRequest(objectMapper.writeValueAsString(requestdata));
-            objLog.setInquiryReqDatetime(new Date());
+            objLog.setInquiryReqDatetime(dateRequest);
+            objLog.setInquiryRespDatetime(new Date());
             objLog.setInquiryResponse(xml);
-            objLog.setInquiryRespDatetime(new Date());           
             logDokuBcaDAO.save(objLog);
 
             inqResponse.put("status", false);
@@ -244,7 +253,14 @@ public class DokuPaymentService {
             vaNumberData.setVaTransMerchantID(randTransId);
             customerVaHistoryDAO.update(vaNumberData);
 
-            String signature = this.getBcaMallId() + this.SHARED_KEY + randTransId;
+            String signature = this.getBcaMallId() + this.SHARED_KEY + randTransId; // add vaNumberData.getAmountToPay() and DigestUtils.shaHex()
+
+            // add record to VaFirstPay
+            VaFirstPay fpay = new VaFirstPay();
+            fpay.setCvhID(vaNumberData.getID());
+            fpay.setIDOrder(randTransId);
+            fpay.setSignature(signature);
+            vaFirstPayDAO.save(fpay);
 
             // Inquiry response for unpaid loan
             String nPaidResp = "<PAYMENTCODE>" + requestdata.get("PAYMENTCODE") + "</PAYMENTCODE>\n";
@@ -261,7 +277,8 @@ public class DokuPaymentService {
             objLog.setVaNumber(requestdata.get("PAYMENTCODE"));
             objLog.setLogAppID(clr.getLoanApplicationID());
             objLog.setInquiryRequest(objectMapper.writeValueAsString(requestdata));
-            // objLog.setInquiryReqDatetime(currentdate.format(now));
+            objLog.setInquiryReqDatetime(dateRequest);
+            objLog.setInquiryRespDatetime(new Date());
             xml = headResp + nPaidResp + footResp;
             objLog.setInquiryResponse(xml);
             logDokuBcaDAO.save(objLog);
@@ -274,9 +291,9 @@ public class DokuPaymentService {
             objLog.setVaNumber(requestdata.get("PAYMENTCODE"));
             objLog.setLogAppID(null);
             objLog.setInquiryRequest(objectMapper.writeValueAsString(requestdata));
-            objLog.setInquiryReqDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
             objLog.setInquiryResponse(headResp + failResp + footResp);
-            objLog.setInquiryRespDatetime(new java.util.Date(Calendar.getInstance().getTime().getTime()));
+            objLog.setInquiryReqDatetime(dateRequest);
+            objLog.setInquiryRespDatetime(new Date());
             logDokuBcaDAO.save(objLog);
 
             inqResponse.put("status", false);
