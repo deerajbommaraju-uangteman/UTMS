@@ -1,9 +1,11 @@
 package ut.microservices.repaymentmicroservice.controllers;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,10 +16,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import ut.microservices.repaymentmicroservice.dao.IGenericDAO;
+import ut.microservices.repaymentmicroservice.dto.BorrowerLoanDetailsDTO;
 import ut.microservices.repaymentmicroservice.dto.CustomerRepaymentHomePageDTO;
 import ut.microservices.repaymentmicroservice.dto.GenerateVaDTO;
 import ut.microservices.repaymentmicroservice.models.ApplicantData;
 import ut.microservices.repaymentmicroservice.models.ApplicationData;
+import ut.microservices.repaymentmicroservice.services.BorrowerService;
 import ut.microservices.repaymentmicroservice.services.CimbSoapService;
 import ut.microservices.repaymentmicroservice.services.RepaymentService;
 
@@ -32,6 +36,9 @@ public class RepaymentController {
     @Autowired 
     private CimbSoapService cimbSoapService;
     
+    @Autowired
+    private BorrowerService borrowerService;
+
     IGenericDAO<ApplicationData> applicationDataDAO;
     
     @Autowired
@@ -59,9 +66,15 @@ public class RepaymentController {
     }
 
     @CrossOrigin
-    @PostMapping(path = "/testdata")
-    public @ResponseBody String getCimbInquiryResponse() throws Exception{
-		return cimbSoapService.getCimbInquiryResponse();
+    @PostMapping(value = "/testdata", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public @ResponseBody BorrowerLoanDetailsDTO getVAPaymentDetails(@RequestBody HashMap<String, String> data) throws Exception{
+		return borrowerService.getVAPaymentDetails(data.get("applicationID"));
   }
+
+  @CrossOrigin
+  @PostMapping(value = "/testdata1")
+  public @ResponseBody Date getCimbInquiryResponse(){
+      return cimbSoapService.getCimbInquiryResponse();
+}
 
 }

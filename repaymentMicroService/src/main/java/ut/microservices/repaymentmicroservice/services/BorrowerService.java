@@ -1,5 +1,6 @@
 package ut.microservices.repaymentmicroservice.services;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -8,21 +9,15 @@ import javax.transaction.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import ut.microservices.repaymentmicroservice.dao.IGenericDAO;
-import ut.microservices.repaymentmicroservice.models.ApplicantData;
-import ut.microservices.repaymentmicroservice.models.ApplicationData;
-import ut.microservices.repaymentmicroservice.models.CustomerLoanData;
-import ut.microservices.repaymentmicroservice.models.CustomerLoanInstallmentRepayment;
-import ut.microservices.repaymentmicroservice.models.CustomerLoanRepayment;
-import ut.microservices.repaymentmicroservice.models.CustomerPrimaryData;
-import ut.microservices.repaymentmicroservice.models.CustomerStaticVaActiveLoan;
-import ut.microservices.repaymentmicroservice.models.CustomerVaHistory;
-import ut.microservices.repaymentmicroservice.models.LogDokuBca;
-import ut.microservices.repaymentmicroservice.models.LogsArtajasa;
-import ut.microservices.repaymentmicroservice.models.VaArtajasa;
-import ut.microservices.repaymentmicroservice.models.views.GetVAPaymentDetails;
+import ut.microservices.repaymentmicroservice.dto.BorrowerLoanDetailsDTO;
+import ut.microservices.repaymentmicroservice.dto.GetOutstandingDTO;
+import ut.microservices.repaymentmicroservice.dto.InstallmentDetailsDTO;
+import ut.microservices.repaymentmicroservice.models.*;
+import ut.microservices.repaymentmicroservice.models.views.*;
 
 @Service
 @Transactional
@@ -40,7 +35,8 @@ public class BorrowerService {
     IGenericDAO<LogsArtajasa> logsArtajasaDAO;
     IGenericDAO<CustomerStaticVaActiveLoan> custStaticVaActiveLoanDAO;
     IGenericDAO<GetVAPaymentDetails> getVAPaymentDetailsDAO;
-
+    IGenericDAO<GetOutStandingDataView> getOutStandingDataViewDAO;
+    
     @Autowired
     public void setApplicantDataDAO(IGenericDAO<ApplicantData> applicantDataDAO){
         this.applicantDataDAO = applicantDataDAO;
@@ -115,24 +111,26 @@ public class BorrowerService {
     }
 
     @Autowired
-    private DokuPaymentService dokuPaymentService;
+    public void setOutStandingDataViewDAO(IGenericDAO<GetOutStandingDataView> getOutStandingDataViewDAO){
+        this.getOutStandingDataViewDAO = getOutStandingDataViewDAO;
+        getOutStandingDataViewDAO.setClazz(GetOutStandingDataView.class);
+    }
 
     @Autowired
-    private CimbNiagaPaymentService cimbPaymentService;
+    private LoanOutstandingService loanOutstandingService;
 
-    @Autowired
-    private ArtajasaPaymentService artajasaPaymentService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    // @Value("${new java.text.SimpleDateFormat('${yyyy-mm-dd}').parse('${services_fee_live.live_date}')}")
+    // private Date SERVICE_FEE_LIVE_DATE;
 
     public void getBorrowerIndex(HashMap<String, Object> authData){
-        CustomerLoanData cld = custLoanDataDAO.findValueByColumn("ApplicantID", authData.get("BorrowerID").toString()).get(0);
+        CustomerLoanData cld = custLoanDataDAO.findValueByColumn("ApplicantID", authData.get("BorrowerID").toString()).get(0); // authData.get("CldID")
 
         ApplicationData apli = applicationDataDAO.findValueByColumn("ApplicationApplicantID", authData.get("BorrowerID").toString()).get(0);
 
-        if(apli.getIsInstallment().equals("Y")){
-
+        // Installment loan get outstanding details
+        if(apli.getIsInstallment() != null && apli.getIsInstallment().equals("Y")){
+            // Date service_fee_live = \Config.get("services.services_fee_live.live_date");
+            this.getOutstanding(apli.getLoanApplicationID());
 
         }
         else{
@@ -144,15 +142,81 @@ public class BorrowerService {
         }
     }
 
-    public void getOutstanding(String LoanApplicationID){
+    public GetOutstandingDTO<InstallmentDetailsDTO> getOutstanding(String loanApplicationID){
+        GetOutstandingDTO<InstallmentDetailsDTO> response = new GetOutstandingDTO<InstallmentDetailsDTO>();
+        List<GetOutStandingDataView> dataList = getOutStandingDataViewDAO.findValueByColumn("CldLoanApplicationID", loanApplicationID);
 
+        if(dataList.size() > 0){
+            GetOutStandingDataView loanData = dataList.get(0);
+
+            if(loanData !=null && loanData.getIsInstallment().equals("N")){
+                loanOutstandingService.getLoanOutstandingDetails(loanData.getCldLoanApplicationID(), loanData.getCldLoanAmount(), loanData.getCldLoanStartDatetime(), loanData.getCldLoanDueDatetime(), loanData.getCldPromoCode(), true);
+
+                CustomerLoanRepayment clr = custLoanRepaymentDAO.findValueByColumn("LoanApplicationID", loanApplicationID).get(0);
+            }
+            else{
+                // installment loan logic
+            }
+        }else{
+            response.setMessage("Loan ID is not yet disbursed");
+        }
+        return response;
     }
 
-    public void getVAPaymentDetails(String applicationID){
-        List<GetVAPaymentDetails> cld= getVAPaymentDetailsDAO.findAll();
+    // get payment details
+    public BorrowerLoanDetailsDTO getVAPaymentDetails(String applicationID){
         
-        // CustomerVaHistory va = customerVaHistoryDAO.findActiveVAByApplicantID(applicantID);
+        BorrowerLoanDetailsDTO resultdata = new BorrowerLoanDetailsDTO();
+        ApplicationData apliData = applicationDataDAO.findValueByColumn("ApplicationID", applicationID).get(0);
+        GetVAPaymentDetails cld= getVAPaymentDetailsDAO.findValueByColumn("CldApplicantID", apliData.getApplicationApplicantID().toString()).get(0);
 
+        List<CustomerVaHistory> vaList = customerVaHistoryDAO.findActiveVAByApplicantID(cld.getCldApplicantID().toString());
+        List<CustomerLoanRepayment> clrList = custLoanRepaymentDAO.findValueByColumn("LoanApplicationID", cld.getApliLoanApplicationID());
 
+        if(vaList.size() > 0){
+            CustomerVaHistory va = vaList.get(0);
+            resultdata.setVaNumber(va.getVaNumber());
+            resultdata.setRepayAmount(va.getAmountToPay());
+            
+        }else{ 
+            // redirect to user/installment?apli_id=
+        }
+
+        if(clrList.size() >0){
+            CustomerLoanRepayment clr = clrList.get(0);
+            if(cld.getIsInstallment() != null && cld.getIsInstallment().equalsIgnoreCase("N")){
+                resultdata.setPaymentMethod(clr.getRepaymentType());
+                resultdata.setLoanType(4);
+
+                if(!clr.getVtransactionStatus().equals("P")) {
+                    this.getLoanHistory();
+                }
+            
+            }
+            else{
+
+                // if(cld.getCldStatus().equals("Y"))  redirect to user/installment?apli_id=
+            }
+
+            List<CustomerLoanInstallmentRepayment> clirList = clirDAO.findInstallmentRepayment(clr.getId());
+            if(clirList.size() >0){
+                CustomerLoanInstallmentRepayment clir = clirList.get(0);
+
+                resultdata.setPaymentMethod(clir.getRepaymentType());
+                resultdata.setLoanType(5);
+
+                // installmentService.getInstallmentLoanDetails(cld.getCldApplicantID());
+            }
+            
+        }
+
+        resultdata.setCld(cld);
+        resultdata.setLoanApplicationID(cld.getApliLoanApplicationID());
+        resultdata.setApplicationID(apliData.getApplicationID());
+        resultdata.setIsInstallment(cld.getIsInstallment());
+        return resultdata;
+    }
+
+    private void getLoanHistory() {
     }
 }

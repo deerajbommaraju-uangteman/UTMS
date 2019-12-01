@@ -440,7 +440,7 @@ public class ArtajasaPaymentService {
                     String status = (requestdata.get("type").equals("eqnotification")) ? "Y" : "D";
 
                     if(apli.getIsInstallment().equals("Y")){
-                        List<CustomerLoanInstallmentRepayment> clir = custLoanInstallmentRepaymentDAO.findInstallmentRepayment(clr.getId().toString());
+                        List<CustomerLoanInstallmentRepayment> clir = custLoanInstallmentRepaymentDAO.findInstallmentRepayment(clr.getId());
 
                         if(clir.size() != 0){
                             //Partial payment payoff using Artajasa

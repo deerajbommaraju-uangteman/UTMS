@@ -1,6 +1,7 @@
 package ut.microservices.repaymentmicroservice.dao;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 public interface IGenericDAO<T extends Serializable> {
@@ -16,6 +17,7 @@ public interface IGenericDAO<T extends Serializable> {
     List<T> findActiveVAByApplicantID(String ApplicantID);
     List<T> findVAInLogs(String VaNumber);
     List<T> findValueByColumn(String column, String value);
-    List<T> findInstallmentRepayment(String value);
+    List<T> findInstallmentRepayment(Integer value);
+    List<T> findInMrLoanScheme(Double loanAmount, Date loanStartDateTime, Integer MlsLoanIncrement);
     // List<T> findByJoin();    
  }

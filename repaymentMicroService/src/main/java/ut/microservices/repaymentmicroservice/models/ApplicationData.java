@@ -7,6 +7,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -296,12 +298,12 @@ public class ApplicationData implements Serializable{
     @JsonProperty(value="TaxIDNumber",required=true)
     private String TaxIDNumber;     
     
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name="CreatedAt",nullable = false)
-    @CreationTimestamp
     private Date CreatedAt;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name="UpdatedAt",nullable = false)
-    @CreationTimestamp
     private Date UpdatedAt;    
     
 }
