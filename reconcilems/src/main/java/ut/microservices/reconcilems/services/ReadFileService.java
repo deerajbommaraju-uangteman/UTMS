@@ -10,7 +10,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVReader;
 
 import org.apache.commons.csv.CSVFormat;
@@ -22,32 +28,94 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import ut.microservices.reconcilems.dao.IGenericDao;
+import ut.microservices.reconcilems.models.ApplicantData;
+import ut.microservices.reconcilems.models.ApplicationData;
+import ut.microservices.reconcilems.models.CustomerLoanData;
+import ut.microservices.reconcilems.models.CustomerLoanRepayment;
+import ut.microservices.reconcilems.models.CustomerVaHistory;
 import ut.microservices.reconcilems.models.GetCustomerLoanDataView;
+import ut.microservices.reconcilems.models.GetIndexView;
+import ut.microservices.reconcilems.models.GetViewDetailView;
 import ut.microservices.reconcilems.models.MrVendorFee;
 import ut.microservices.reconcilems.models.RekapPayment;
 import ut.microservices.reconcilems.models.RekapPaymentDetail;
 import ut.microservices.reconcilems.models.RekapReconcile;
-import ut.microservices.reconcilems.repository.GetCustomerLoanDataViewRepo;
 
 @Service
-public class ReadFileService{
-
+public class ReadFileService {
 
     @Autowired
-    GetCustomerLoanDataViewRepo getcustloandata;
+    ObjectMapper objectMapper;
+
+    IGenericDao<CustomerLoanData> customerLoanDataDAO;
+    @Autowired
+    public void setDaoCustomerLoanData(IGenericDao<CustomerLoanData>
+    customerLoanDataDAO) {
+    this.customerLoanDataDAO = customerLoanDataDAO;
+    customerLoanDataDAO.setClazz(CustomerLoanData.class);
+    }
+
+    IGenericDao<CustomerVaHistory> customerVaHistoryDAO;
+    public void setDaoCustomerVaHistory(IGenericDao<CustomerVaHistory>
+    customerVaHistoryDAO) {
+    this.customerVaHistoryDAO = customerVaHistoryDAO;
+    customerVaHistoryDAO.setClazz(CustomerVaHistory.class);
+    }
+
+    IGenericDao<CustomerLoanRepayment> customerLoanRepaymentDAO;
+    public void setDaoCustomerLoanRepayment(IGenericDao<CustomerLoanRepayment>
+    customerLoanRepaymentDAO) {
+    this.customerLoanRepaymentDAO = customerLoanRepaymentDAO;
+    customerLoanRepaymentDAO.setClazz(CustomerLoanRepayment.class);
+    }
+
+    IGenericDao<ApplicationData> applicationDataDAO;
+    public void setDaoApplicationData(IGenericDao<ApplicationData>
+    applicationDataDAO) {
+    this.applicationDataDAO = applicationDataDAO;
+    applicationDataDAO.setClazz(ApplicationData.class);
+    }
+
+    IGenericDao<ApplicantData> applicantDataDAO;
+    public void setDaoApplicantData(IGenericDao<ApplicantData> applicantDataDAO)
+    {
+    this.applicantDataDAO = applicantDataDAO;
+    applicantDataDAO.setClazz(ApplicantData.class);
+    }
 
     IGenericDao<GetCustomerLoanDataView> getCustomerLoanDatadao;
+
     @Autowired
     public void setDaoGetCustomerLoanDataView(IGenericDao<GetCustomerLoanDataView> daoToSet) {
         getCustomerLoanDatadao = daoToSet;
         getCustomerLoanDatadao.setClazz(GetCustomerLoanDataView.class);
     }
 
+    IGenericDao<GetIndexView> getIndexdao;
+
+    @Autowired
+    public void setDaoGetIndexView(IGenericDao<GetIndexView> daoToSet) {
+        getIndexdao = daoToSet;
+        getIndexdao.setClazz(GetIndexView.class);
+    }
+
+    IGenericDao<GetViewDetailView> getViewDetailViewdao;
+
+    @Autowired
+    public void setDaoGetViewDetailView(IGenericDao<GetViewDetailView> daoToSet) {
+        getViewDetailViewdao = daoToSet;
+        getViewDetailViewdao.setClazz(GetViewDetailView.class);
+    }
+
     IGenericDao<RekapPayment> rekapPaymentdao;
+
     @Autowired
     public void setDaoRekapPayment(IGenericDao<RekapPayment> daoToSet) {
         rekapPaymentdao = daoToSet;
@@ -55,6 +123,7 @@ public class ReadFileService{
     }
 
     IGenericDao<RekapReconcile> rekapReconciledao;
+
     @Autowired
     public void setDaoRekapReconcile(IGenericDao<RekapReconcile> daoToSet) {
         rekapReconciledao = daoToSet;
@@ -62,6 +131,7 @@ public class ReadFileService{
     }
 
     IGenericDao<MrVendorFee> mrVendorFeeDao;
+
     @Autowired
     public void setDaoMrVendorFee(IGenericDao<MrVendorFee> daoToSet) {
         mrVendorFeeDao = daoToSet;
@@ -69,6 +139,7 @@ public class ReadFileService{
     }
 
     IGenericDao<RekapPaymentDetail> rekapPaymentDetaildao;
+
     @Autowired
     public void setDaoRekapPaymentDetail(IGenericDao<RekapPaymentDetail> daoToSet) {
         rekapPaymentDetaildao = daoToSet;
@@ -94,14 +165,55 @@ public class ReadFileService{
         return worksheet;
     }
 
+    public Map<String , Map<String, Object>> loanDataFromRPYMS(String VaNumber)
+    throws Exception{
+    final String baseUrl =
+    "http://localhost:9093/user/getRepaymentData/"+VaNumber;
+    RestTemplate restTemplate = new RestTemplate();
+    ResponseEntity<String> responseEntity = restTemplate.exchange(baseUrl,
+    HttpMethod.GET, null, String.class);
+    JsonNode jn1 = objectMapper.readTree(responseEntity.getBody());
+
+    JsonNode jnapdata = jn1.get("ApplicantData");
+    ApplicantData rapdata = objectMapper.readValue(jnapdata.toString(),
+    ApplicantData.class);
+    applicantDataDAO.save(rapdata);
+
+    JsonNode jnappdata = jn1.get("ApplicationData");
+    ApplicationData rappdata = objectMapper.readValue(jnappdata.toString(),
+    ApplicationData.class);
+    applicationDataDAO.save(rappdata);
+
+    JsonNode jnLoanData = jn1.get("CustomerLoanData");
+    System.out.println("result:"+ jn1.get("CustomerLoanData"));
+    CustomerLoanData rcld = objectMapper.readValue(jnLoanData.toString(),
+    CustomerLoanData.class);
+    customerLoanDataDAO.save(rcld);
+
+    JsonNode jnVaHistory = jn1.get("CustomerVaHistory");
+    CustomerVaHistory rVaHistory = objectMapper.readValue(jnVaHistory.toString(),
+    CustomerVaHistory.class);
+    customerVaHistoryDAO.save(rVaHistory);
+
+    JsonNode jnrepayment = jn1.get("CustomerLoanRepayment");
+    CustomerLoanRepayment rrepayment =
+    objectMapper.readValue(jnrepayment.toString(), CustomerLoanRepayment.class);
+    customerLoanRepaymentDAO.save(rrepayment);
+
+    Map<String , Map<String, Object>> result = objectMapper.convertValue(jn1, new
+    TypeReference<Map<String , Map<String, Object>>>(){});
+    return result;
+    }
+
     public void parseCSV(MultipartFile file) throws FileNotFoundException, IOException {
         File saveFile = new File("D:/uploads");
         saveFile.mkdir();
         file.transferTo(new File("D:/uploads/" + file.getOriginalFilename()));
-        CSVParser parser = new CSVParser(new FileReader("D:/uploads/" + file.getOriginalFilename()),CSVFormat.DEFAULT.withHeader());
+        CSVParser parser = new CSVParser(new FileReader("D:/uploads/" + file.getOriginalFilename()),
+                CSVFormat.DEFAULT.withHeader());
         for (CSVRecord record : parser) {
             System.out.printf("%s\t%s\t%s\n", record.get(0), record.get(1), record.get(2), record.get(3),
-            record.get(4));
+                    record.get(4));
         }
         parser.close();
     }
@@ -131,7 +243,8 @@ public class ReadFileService{
                 DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
                 Date receiptDate = df.parse(df.format(sdate));
                 int checkDuplicatePayment = checkDuplicatePayment(settlementID);
-                settlementID = (checkDuplicatePayment < 10) ? settlementID + "0" + (checkDuplicatePayment + 1):(settlementID +(checkDuplicatePayment + 1));
+                settlementID = (checkDuplicatePayment < 10) ? settlementID + "0" + (checkDuplicatePayment + 1)
+                        : (settlementID + (checkDuplicatePayment + 1));
                 String description = "CIMB Payment Virtual Account Report: " + settlementID;
                 saveRekapReconcile(receiptDate, description, totalCredit, settlementID, "N");
                 MrVendorFee record = mrVendorFeeDao.findByColumn("VendorName", "CIMB").get(0);
@@ -151,7 +264,8 @@ public class ReadFileService{
                     String PaymentCode = row.getCell(1).getStringCellValue();
                     String va_transmerchant_id = row.getCell(4).getStringCellValue();
                     if (!va_transmerchant_id.isEmpty()) {
-                        saveRekapPaymentDetail(notifDate, va_transmerchant_id, idpayment, PaymentCode, amount, rekCustID, installmentIndex, clprPartialIndex);
+                        saveRekapPaymentDetail(notifDate, va_transmerchant_id, idpayment, PaymentCode, amount,
+                                rekCustID, installmentIndex, clprPartialIndex);
                     }
 
                 }
@@ -172,11 +286,13 @@ public class ReadFileService{
             String settlementID = ("BCA" + settlementDate);
             if (!checkDuplicateData(settlementID, totalCredit)) {
                 int checkDuplicatePayment = checkDuplicatePayment(settlementID);
-                settlementID = (checkDuplicatePayment < 10) ? settlementID + "0" + (checkDuplicatePayment + 1): settlementID + (checkDuplicatePayment + 1);
+                settlementID = (checkDuplicatePayment < 10) ? settlementID + "0" + (checkDuplicatePayment + 1)
+                        : settlementID + (checkDuplicatePayment + 1);
                 String description = "BCA Payment Virtual Account Report: " + settlementID;
                 System.out.println("Date   ===" + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(settlementDate));
                 DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-                Date receiptDate = df.parse(df.format(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(settlementDate)));
+                Date receiptDate = df
+                        .parse(df.format(new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").parse(settlementDate)));
                 saveRekapReconcile(receiptDate, description, totalCredit, settlementID, "N");
                 MrVendorFee record = mrVendorFeeDao.findByColumn("VendorName", "BCA").get(0);
                 double vendorfee = record.getVendorFee();
@@ -195,7 +311,8 @@ public class ReadFileService{
                     String PaymentCode = data.get(i)[6];
                     String va_transmerchant_id = data.get(i)[2];
                     if (!va_transmerchant_id.isEmpty()) {
-                        saveRekapPaymentDetail(notifDate, va_transmerchant_id, idpayment, PaymentCode, amount, rekCustID, installmentIndex, clprPartialIndex);
+                        saveRekapPaymentDetail(notifDate, va_transmerchant_id, idpayment, PaymentCode, amount,
+                                rekCustID, installmentIndex, clprPartialIndex);
                     }
                 }
             }
@@ -210,7 +327,8 @@ public class ReadFileService{
                 DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
                 Date receiptDate = df.parse(df.format(sdate));
                 int checkDuplicatePayment = checkDuplicatePayment(settlementID);
-                settlementID = (checkDuplicatePayment < 10) ? settlementID + "0" + (checkDuplicatePayment + 1) : settlementID + (checkDuplicatePayment + 1);
+                settlementID = (checkDuplicatePayment < 10) ? settlementID + "0" + (checkDuplicatePayment + 1)
+                        : settlementID + (checkDuplicatePayment + 1);
                 String description = "BCA Payment Virtual Account Report: " + settlementID;
                 saveRekapReconcile(receiptDate, description, totalCredit, settlementID, "N");
                 MrVendorFee record = mrVendorFeeDao.findByColumn("VendorName", "CIMB").get(0);
@@ -218,7 +336,8 @@ public class ReadFileService{
                 double adminfee = record.getAdminFee();
                 int count = worksheet.getPhysicalNumberOfRows() - 1;
                 double paymentfee = vendorfee * count;
-                saveRekapPayment(settlementID, receiptDate, adminfee, totalCredit, paymentfee, 3);
+                // saveRekapPayment(settlementID, receiptDate, adminfee, totalCredit,
+                // paymentfee, 3);
                 int idpayment = getOnePayment();
                 for (int i = 2; i < worksheet.getPhysicalNumberOfRows() - 1; i++) {
                     Row row = worksheet.getRow(i);
@@ -238,7 +357,8 @@ public class ReadFileService{
         }
     }
 
-    public void saveRekapReconcile(Date sdate, String description, Double totalCredit, String settlementID,String isReconcile) {
+    public void saveRekapReconcile(Date sdate, String description, Double totalCredit, String settlementID,
+            String isReconcile) {
         RekapReconcile rekapReconcile = new RekapReconcile();
         rekapReconcile.setReceiptDate(sdate);
         rekapReconcile.setDescription(description);
@@ -248,7 +368,8 @@ public class ReadFileService{
         rekapReconciledao.save(rekapReconcile);
     }
 
-    public void saveRekapPayment(String settlementID, Date sdate, Double adminfee, Double totalCredit,Double paymentfee, int vendorFeeId) {
+    public void saveRekapPayment(String settlementID, Date sdate, Double adminfee, Double totalCredit,
+            Double paymentfee, int vendorFeeId) {
         RekapPayment rekapPayment = new RekapPayment();
         rekapPayment.setSettlementID(settlementID);
         rekapPayment.setSettlementDate(sdate);
@@ -261,7 +382,8 @@ public class ReadFileService{
         rekapPaymentdao.save(rekapPayment);
     }
 
-    public void saveRekapPaymentDetail(Date notifDate, String va_transmerchant_id, int idpayment,String PaymentCode, Double amount, int rekCustID, int installmentIndex, int clprPartialIndex) {
+    public void saveRekapPaymentDetail(Date notifDate, String va_transmerchant_id, int idpayment, String PaymentCode,
+            Double amount, int rekCustID, int installmentIndex, int clprPartialIndex) {
         RekapPaymentDetail rekapPaymentDetail = new RekapPaymentDetail();
         rekapPaymentDetail.setNotifDate(notifDate);
         rekapPaymentDetail.setPaymentCode(PaymentCode);
@@ -292,15 +414,26 @@ public class ReadFileService{
     }
 
     // public void getCustomerLoanData(String vaTransMerchantId) throws Exception {
-    //     List<GetCustomerLoanDataView> usersList = getcustloandata.findAll();
-    //     System.out.println(usersList);
+    // List<GetCustomerLoanDataView> usersList = getcustloandata.findAll();
+    // System.out.println(usersList);
     // }
-    
-    public void getCustomerLoanData(String vaTransMerchantId){
-       GetCustomerLoanDataView cld = getCustomerLoanDatadao.findByColumn("VaTransactionMerchantID", vaTransMerchantId).get(0);
-       System.out.println(cld);
+
+    public void getCustomerLoanData(String vaTransMerchantId) {
+        GetCustomerLoanDataView cld = getCustomerLoanDatadao.findByColumn("VaTransactionMerchantID", vaTransMerchantId).get(0);
+        System.out.println(cld);
     }
 
+    public String getIndex() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<GetIndexView> index = getIndexdao.findAll();
+        System.out.println(index);
+        return objectMapper.writeValueAsString(index);
+    }
+
+    public void getViewDetail(String settlementId){
+        GetViewDetailView viewdetail = getViewDetailViewdao.findByColumn("SettlementID",settlementId).get(0);
+        System.out.println(viewdetail);
+     }
 
 } 
 

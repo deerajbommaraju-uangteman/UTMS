@@ -31,3 +31,4 @@ investorMicroService/target/m2e-wtp/web-resources/META-INF/MANIFEST.MF
 *.jar
 Authentication/spring-boot-jwt-JPA/.classpath
 Authentication/spring-boot-jwt-JPA/.project
+reconcilems/mvnw
