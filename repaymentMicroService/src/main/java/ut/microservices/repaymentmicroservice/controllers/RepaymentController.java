@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -57,24 +60,24 @@ public class RepaymentController {
     @PostMapping("/makeLoanRepayment")
     public @ResponseBody GenerateVaDTO makeLoanRepayment(@RequestBody HashMap<String, String> userdata) throws Exception{
          return repaymentService.makeLoanRepayment(userdata);
-  }
-
-    @CrossOrigin
-    @GetMapping(path = "/getRepaymentData/{VaNumber}")
-    public @ResponseBody String loanDataForReconcile(@PathVariable String VaNumber) throws Exception {
-        return repaymentService.loanDataForReconcile(VaNumber);
     }
 
     @CrossOrigin
-    @PostMapping(value = "/testdata", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public @ResponseBody BorrowerLoanDetailsDTO getVAPaymentDetails(@RequestBody HashMap<String, String> data) throws Exception{
-		return borrowerService.getVAPaymentDetails(data.get("applicationID"));
-  }
+    @GetMapping(path = "/getRepaymentData/{VaNumber}")
+    public @ResponseBody String loanDataForReconcile(@PathVariable String VaNumber) throws JsonProcessingException {
+        return repaymentService.loanDataForReconcile(VaNumber);
+    }
+    
+    @CrossOrigin
+    @PostMapping(value = "/postCustomerLogin")
+    public @ResponseBody BorrowerLoanDetailsDTO getVAPaymentDetails(@RequestParam HashMap<String, String> param) throws Exception{
+        return borrowerService.getVAPaymentDetails(param.get("LoanApplicationID"));
+    }
 
-  @CrossOrigin
-  @PostMapping(value = "/testdata1")
-  public @ResponseBody Date getCimbInquiryResponse(){
-      return cimbSoapService.getCimbInquiryResponse();
-}
+    @CrossOrigin
+    @PostMapping(value = "/testdata1")
+    public @ResponseBody Date getCimbInquiryResponse(){
+        return cimbSoapService.getCimbInquiryResponse();
+    }
 
 }

@@ -122,7 +122,7 @@ public class BorrowerService {
     // @Value("${new java.text.SimpleDateFormat('${yyyy-mm-dd}').parse('${services_fee_live.live_date}')}")
     // private Date SERVICE_FEE_LIVE_DATE;
 
-    public void getBorrowerIndex(HashMap<String, Object> authData){
+    public void getBorrowerIndex(HashMap<String, Object> authData) throws Exception {
         CustomerLoanData cld = custLoanDataDAO.findValueByColumn("ApplicantID", authData.get("BorrowerID").toString()).get(0); // authData.get("CldID")
 
         ApplicationData apli = applicationDataDAO.findValueByColumn("ApplicationApplicantID", authData.get("BorrowerID").toString()).get(0);
@@ -142,7 +142,7 @@ public class BorrowerService {
         }
     }
 
-    public GetOutstandingDTO<InstallmentDetailsDTO> getOutstanding(String loanApplicationID){
+    public GetOutstandingDTO<InstallmentDetailsDTO> getOutstanding(String loanApplicationID) throws Exception{
         GetOutstandingDTO<InstallmentDetailsDTO> response = new GetOutstandingDTO<InstallmentDetailsDTO>();
         List<GetOutStandingDataView> dataList = getOutStandingDataViewDAO.findValueByColumn("CldLoanApplicationID", loanApplicationID);
 
@@ -164,10 +164,10 @@ public class BorrowerService {
     }
 
     // get payment details
-    public BorrowerLoanDetailsDTO getVAPaymentDetails(String applicationID){
+    public BorrowerLoanDetailsDTO getVAPaymentDetails(String loanApplicationID){
         
         BorrowerLoanDetailsDTO resultdata = new BorrowerLoanDetailsDTO();
-        ApplicationData apliData = applicationDataDAO.findValueByColumn("ApplicationID", applicationID).get(0);
+        ApplicationData apliData = applicationDataDAO.findValueByColumn("LoanApplicationID", loanApplicationID).get(0);
         GetVAPaymentDetails cld= getVAPaymentDetailsDAO.findValueByColumn("CldApplicantID", apliData.getApplicationApplicantID().toString()).get(0);
 
         List<CustomerVaHistory> vaList = customerVaHistoryDAO.findActiveVAByApplicantID(cld.getCldApplicantID().toString());
@@ -175,6 +175,7 @@ public class BorrowerService {
 
         if(vaList.size() > 0){
             CustomerVaHistory va = vaList.get(0);
+            resultdata.setCvhId(va.getID());
             resultdata.setVaNumber(va.getVaNumber());
             resultdata.setRepayAmount(va.getAmountToPay());
             
@@ -196,16 +197,15 @@ public class BorrowerService {
             else{
 
                 // if(cld.getCldStatus().equals("Y"))  redirect to user/installment?apli_id=
-            }
+                List<CustomerLoanInstallmentRepayment> clirList = clirDAO.findInstallmentRepayment(clr.getId());
+                if(clirList.size() >0){
+                    CustomerLoanInstallmentRepayment clir = clirList.get(0);
 
-            List<CustomerLoanInstallmentRepayment> clirList = clirDAO.findInstallmentRepayment(clr.getId());
-            if(clirList.size() >0){
-                CustomerLoanInstallmentRepayment clir = clirList.get(0);
+                    resultdata.setPaymentMethod(clir.getRepaymentType());
+                    resultdata.setLoanType(5);
 
-                resultdata.setPaymentMethod(clir.getRepaymentType());
-                resultdata.setLoanType(5);
-
-                // installmentService.getInstallmentLoanDetails(cld.getCldApplicantID());
+                    // installmentService.getInstallmentLoanDetails(cld.getCldApplicantID());
+                }
             }
             
         }

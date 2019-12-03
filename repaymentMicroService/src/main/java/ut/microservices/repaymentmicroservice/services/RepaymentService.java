@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.transaction.Transactional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -616,7 +617,7 @@ public class RepaymentService {
     //     }
     // }
 
-    public String loanDataForReconcile(String VaNumber) throws Exception {
+    public String loanDataForReconcile(String VaNumber) throws JsonProcessingException {
         CustomerVaHistory cVaHistory = customerVaHistoryDAO.findValueByColumn("VaNumber", VaNumber).get(0);
         CustomerLoanRepayment custLoanRepayment = custLoanRepaymentDAO.findValueByColumn("ApplicantID", cVaHistory.getApplicantID()).get(0);
         CustomerLoanData custLoanData = custLoanDataDAO.findValueByColumn("ApplicantID",cVaHistory.getApplicantID()).get(0);
