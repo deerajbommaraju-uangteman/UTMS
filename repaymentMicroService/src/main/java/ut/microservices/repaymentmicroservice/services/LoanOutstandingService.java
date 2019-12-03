@@ -1,9 +1,11 @@
 package ut.microservices.repaymentmicroservice.services;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.Iterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,18 +46,34 @@ public class LoanOutstandingService {
         mrLoanPromoDAO.setClazz(MrLoanPromo.class);
     }    
     
-	public void getLoanOutstandingDetails(String cldLoanApplicationID, Double cldLoanAmount, Date cldLoanStartDatetime, Date cldLoanDueDatetime, String cldPromoCode, boolean isNewInterestRate) {
-
+	public void getLoanOutstandingDetails(String cldLoanApplicationID, Double cldLoanAmount, Date cldLoanStartDatetime, Date cldLoanDueDatetime, String cldPromoCode, boolean isNewInterestRate) throws Exception{
+        int calculateDays = 0;
         // Get Customer Loan Data and CUstomer Loan Repayment
         GetLoanDataView loanData = this.getLoanData(cldLoanApplicationID, "CLD");
 
         // Get total of grace period
-        HashMap<String, Object> gracePeriod = getGracePeriod(cldLoanApplicationID, "GP", cldLoanAmount, cldLoanStartDatetime, cldPromoCode);
+        HashMap<String, Object> gracePeriodObj = getGracePeriod(cldLoanApplicationID, "GP", cldLoanAmount, cldLoanStartDatetime, cldPromoCode);
         // Get  new interest rate
-        HashMap<String, Object> interest_rate = getGracePeriod(cldLoanApplicationID, "IR", cldLoanAmount, cldLoanStartDatetime, null, isNewInterestRate);
+        HashMap<String, Object> interestRateObj = getGracePeriod(cldLoanApplicationID, "IR", cldLoanAmount, cldLoanStartDatetime, null, isNewInterestRate);
         // Get interest rate from promo
-		HashMap<String, Object> interest_rate_promo = getGracePeriod(cldLoanApplicationID, "IR", cldLoanAmount, cldLoanStartDatetime, cldPromoCode);
+        HashMap<String, Object> interestRatePromoObj = getGracePeriod(cldLoanApplicationID, "IR", cldLoanAmount, cldLoanStartDatetime, cldPromoCode);
+        
+        if(loanData.getExtensionStatus().equals("Y")){
+            calculateDays = loanData.getCldLoanDaysLength() + loanData.getExtensionDay();
 
+        }else{
+            calculateDays = loanData.getCldLoanDaysLength();
+        }
+
+        SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+        long diff = new Date().getTime() - cldLoanStartDatetime.getTime();
+        long differenceDays = TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS);
+        System.out.println(differenceDays);
+
+        // Interest Rate that Used for calculating outstanding		
+		Double interestRateUsed = (cldPromoCode == null || (cldPromoCode != null && loanData.getExtensionStatus().equalsIgnoreCase("Y"))) ? Double.parseDouble(interestRateObj.get("interestRate").toString())
+                                  : Double.parseDouble(interestRatePromoObj.get("interestRate").toString());
+    
 	}
 
     private HashMap<String, Object> getGracePeriod(String cldLoanApplicationID, String type, Double cldLoanAmount, Date cldLoanStartDatetime, String cldPromoCode, boolean... isNewRate) {
