@@ -152,14 +152,14 @@ public class InvestorController {
 
     @CrossOrigin
     @PostMapping("lender-UT-bulkSign")
-    public void lenderUTDocumentBulkSign(String vaNumber) throws Exception{
-        bulkSignService.lenderUTDocumentBulkSign(vaNumber);
+    public void lenderUTDocumentBulkSign(@RequestBody HashMap<String,String> param) throws Exception{
+        bulkSignService.lenderUTDocumentBulkSign(param.get("vaNumber"));
     }
 
     @CrossOrigin
     @PostMapping("lender-Borrower-bulkSign")
-    public void lenderBorrowerDocumentBulkSign(String vaNumber) throws Exception{
-        bulkSignService.lenderBorrowerDocumentBulkSign(vaNumber);
+    public void lenderBorrowerDocumentBulkSign(@RequestBody HashMap<String,String> param) throws Exception{
+        bulkSignService.lenderBorrowerDocumentBulkSign(param.get("vaNumber"));
     }
 
     @CrossOrigin
@@ -183,9 +183,8 @@ public class InvestorController {
 
     @CrossOrigin
     @PostMapping("detailed-transaction-report")
-    public @ResponseBody ResponseDTO<DetailedTransactionReportDTO> detailedTransactionReport(String vaNumber) throws Exception{
-        System.out.println(vaNumber);
-       return transactionReportService.detailedTransactionReport(vaNumber);
+    public @ResponseBody ResponseDTO<DetailedTransactionReportDTO> detailedTransactionReport(@RequestBody HashMap<String,String> param) throws Exception{
+       return transactionReportService.detailedTransactionReport(param.get("vaNumber"));
     }
 
 }

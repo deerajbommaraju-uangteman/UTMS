@@ -85,7 +85,9 @@ public class TransactionReportService{
 
 	public HashMap<String, String> getLoanStatus(InvestorVAHistory investorVAHistory) {
         LoanInvestment loanInvestment=loanInvestmentDAO.findBy("loanAppID",investorVAHistory.getLoanAppID()).get(0);
-        List<DigisignAgreement> digisignAgreements=digisignAgreementDAO.findBy("ApplicationID",Integer.toString(loanInvestment.getApplicationID()));
+        System.out.println(investorVAHistory.getLoanAppID()+"-------"+loanInvestment.getApplicationID());
+        List<DigisignAgreement> digisignAgreements=digisignAgreementDAO.findBy("applicationID",Integer.toString(loanInvestment.getApplicationID()));
+        
         HashMap<String,String> loanStatus=new HashMap<String,String>();
         if(digisignAgreements.isEmpty()){
             if(investorVAHistory.getStatus()==0){
@@ -101,7 +103,10 @@ public class TransactionReportService{
         }
         else{
             DigisignAgreement digisignAgreement=digisignAgreements.get(0);
-            if(digisignAgreement.getStatusAgreement().equalsIgnoreCase("F") || digisignAgreement.getStatusLenderAgreement().equalsIgnoreCase("F") || digisignAgreement.getServerLenderFilePath().isEmpty() || digisignAgreement.getServerFilePath().isEmpty()){
+            //TODO:
+            //Need to replace  following if condition
+            //if(digisignAgreement.getStatusAgreement().equalsIgnoreCase("F") || digisignAgreement.getStatusLenderAgreement().equalsIgnoreCase("F") || digisignAgreement.getServerLenderFilePath()==null || digisignAgreement.getServerFilePath()==null){
+            if(digisignAgreement.getStatusAgreement().equalsIgnoreCase("F") ){
                 loanStatus.put("status","Failed");
                 loanStatus.put("operation","sendAgain");
                 loanStatus.put("remarks","Document Failed to send");

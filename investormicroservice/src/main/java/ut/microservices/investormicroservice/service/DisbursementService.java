@@ -78,14 +78,6 @@ public class DisbursementService {
         JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
         JsonNode jnApplicationData = jsonNode.get("ApplicationData");
         return objectMapper.readValue(jnApplicationData.toString(),ApplicationDataDTO.class);
-	}
-
-    // public ApplicationData getApplicationData(String loanAppID) throws Exception{
-    //     String url=baseUrl+loanAppID;
-    //     RestTemplate restTemplate = new RestTemplate();
-    //     ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
-    //     JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
-    //     JsonNode jnApplicantData = jsonNode.get("ApplicationData");
-    //     return objectMapper.readValue(jnApplicantData.toString(),ApplicationData.class);
-    // }
+    }
+   
 }

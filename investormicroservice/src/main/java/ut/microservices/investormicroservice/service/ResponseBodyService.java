@@ -256,15 +256,16 @@ public class ResponseBodyService {
     List<DetailedTransactionReportDTO> rows=new LinkedList<DetailedTransactionReportDTO>();
     while(iterator.hasNext()){
       InvestorVAHistory investorVAHistory=iterator.next();
-      ApplicantData applicantData=disbursementService.getApplicantData(investorVAHistory.getLoanAppID());
-      ApplicationDataDTO applicationDataDTO=disbursementService.getApplicationDataDTO(investorVAHistory.getLoanAppID());
+      //ApplicantData applicantData=disbursementService.getApplicantData(investorVAHistory.getLoanAppID());
+      //ApplicationDataDTO applicationDataDTO=disbursementService.getApplicationDataDTO(investorVAHistory.getLoanAppID());
 
       DetailedTransactionReportDTO detailedTransactionReportDTO=new DetailedTransactionReportDTO();
       detailedTransactionReportDTO.setLoanAppID(investorVAHistory.getLoanAppID());
       detailedTransactionReportDTO.setLoanAmount(investorVAHistory.getLoanAmount());
-      detailedTransactionReportDTO.setApplicantName(applicantData.getFullName());
-      detailedTransactionReportDTO.setLoanDuration(applicationDataDTO.getLoanDaysLength());
-      if(applicationDataDTO.getIsInstallment().equalsIgnoreCase("Y")){
+      detailedTransactionReportDTO.setApplicantName("ABC");
+      //TODO
+      detailedTransactionReportDTO.setLoanDuration(Integer.valueOf(30));
+      if("Y".equalsIgnoreCase("Y")){
         detailedTransactionReportDTO.setLoanType("Installment Loan");
       }
       else{
@@ -274,6 +275,7 @@ public class ResponseBodyService {
       detailedTransactionReportDTO.setOperation(loanStatus.get("operation"));
       detailedTransactionReportDTO.setRemarks(loanStatus.get("remarks"));
       detailedTransactionReportDTO.setStatus(loanStatus.get("status"));
+      System.out.println(detailedTransactionReportDTO);
       rows.add(detailedTransactionReportDTO);
     }
     response.setData(rows);
