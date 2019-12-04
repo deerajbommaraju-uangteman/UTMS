@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import scala.annotation.meta.param;
 import ut.microservices.investormicroservice.dto.AvailableLoansDTO;
 import ut.microservices.investormicroservice.dto.DetailedTransactionReportDTO;
-import ut.microservices.investormicroservice.dto.DigisignDocumentsDTO;
 import ut.microservices.investormicroservice.dto.InvestorFundedLoansDTO;
 import ut.microservices.investormicroservice.dto.LenderDocumentsDTO;
 import ut.microservices.investormicroservice.dto.LoansDTO;

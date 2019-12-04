@@ -5,27 +5,8 @@ import java.util.List;
 
 public class ResponseDTO<T> {
     private List<T> data;
-    private List<ColumnDTO> columns;
-    private List<ButtonDTO> button;
     private HashMap<String,String> additionalData;
 
-
-
-    public List<ColumnDTO> getColumns() {
-        return columns;
-    }
-
-    public void setColumns(List<ColumnDTO> columns) {
-        this.columns = columns;
-    }
-
-    public List<ButtonDTO> getButton() {
-        return button;
-    }
-
-    public void setButton(List<ButtonDTO> buttons) {
-        this.button = buttons;
-    }
 
     public HashMap<String, String> getAdditionalData() {
         return additionalData;

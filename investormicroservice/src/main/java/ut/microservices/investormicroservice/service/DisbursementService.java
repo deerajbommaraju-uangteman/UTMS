@@ -23,7 +23,7 @@ import ut.microservices.investormicroservice.repository.IGenericDAO;
 @Transactional
 public class DisbursementService {
 
-    private final String baseUrl = "http://localhost:9090/application-form/getApplicationData/";
+    private final String baseUrl = "http://10.15.15.56:9090/application-form/getApplicationData/";
 
     IGenericDAO<LoanInvestment> loanInvestmentDAO;
     IGenericDAO<ApplicantData> applicantDataDAO;
@@ -76,7 +76,9 @@ public class DisbursementService {
         RestTemplate restTemplate = new RestTemplate();
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
         JsonNode jsonNode = objectMapper.readTree(responseEntity.getBody());
+        System.out.println(jsonNode);
         JsonNode jnApplicationData = jsonNode.get("ApplicationData");
+        System.out.println(jnApplicationData);
         return objectMapper.readValue(jnApplicationData.toString(),ApplicationDataDTO.class);
     }
    

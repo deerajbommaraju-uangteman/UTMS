@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 
 import ut.microservices.investormicroservice.dto.ApplicationDataDTO;
 import ut.microservices.investormicroservice.dto.AvailableLoansDTO;
-import ut.microservices.investormicroservice.dto.ButtonDTO;
-import ut.microservices.investormicroservice.dto.ColumnDTO;
 import ut.microservices.investormicroservice.dto.DetailedTransactionReportDTO;
 import ut.microservices.investormicroservice.dto.DigisignDocumentsDTO;
 import ut.microservices.investormicroservice.dto.InvestorFundedLoansDTO;
@@ -81,34 +79,7 @@ public class ResponseBodyService {
           }
           rows.add(loansDTO);
         }
-        response.setData(rows);
-    
-        //Preparing Column data
-        HashMap<String,String> tableColumns=new HashMap<String,String>();
-        tableColumns.put("id", "ID");
-        tableColumns.put("loanAppID", "Loan ID");
-        tableColumns.put("loanAmount", "Loan Amount");
-        tableColumns.put("loanTenor", "Loan Tenor");
-        tableColumns.put("applicationID", "Application ID");
-        tableColumns.put("Action","Action");
-        List<ColumnDTO> columns=new LinkedList<ColumnDTO>();
-        for(Map.Entry<String,String> entry : tableColumns.entrySet()){
-          ColumnDTO columnDTO=new ColumnDTO();
-          columnDTO.setKey(entry.getKey());
-          columnDTO.setTitle(entry.getValue());
-          columnDTO.setDataIndex(entry.getKey());
-          columns.add(columnDTO);
-        }
-        response.setColumns(columns);
-    
-        //Preparing Button data
-        List<ButtonDTO> buttons=new LinkedList<ButtonDTO>();
-        ButtonDTO buttonDTO=new ButtonDTO();
-        buttonDTO.setTitle("Action");
-        buttonDTO.setKey("Action");
-        buttonDTO.setAction("Action");
-        buttons.add(buttonDTO);
-        response.setButton(buttons);
+        response.setData(rows);        
         return response;
       }
 
@@ -133,32 +104,7 @@ public class ResponseBodyService {
         }
         response.setData(rows);
     
-        //Preparing Column data
-        HashMap<String,String> tableColumns=new HashMap<String,String>();
-        tableColumns.put("id", "ID");
-        tableColumns.put("loanAppID", "Loan ID");
-        tableColumns.put("loanAmount", "Loan Amount");
-        tableColumns.put("loanTenor", "Loan Tenor");
-        tableColumns.put("applicationID", "Application ID");
-        tableColumns.put("Action","Action");
-        List<ColumnDTO> columns=new LinkedList<ColumnDTO>();
-        for(Map.Entry<String,String> entry : tableColumns.entrySet()){
-          ColumnDTO columnDTO=new ColumnDTO();
-          columnDTO.setKey(entry.getKey());
-          columnDTO.setTitle(entry.getValue());
-          columnDTO.setDataIndex(entry.getKey());
-          columns.add(columnDTO);
-        }
-        response.setColumns(columns);
-    
-        //Preparing Button data
-        List<ButtonDTO> buttons=new LinkedList<ButtonDTO>();
-        ButtonDTO buttonDTO=new ButtonDTO();
-        buttonDTO.setTitle("Action");
-        buttonDTO.setKey("Action");
-        buttonDTO.setAction("Action");
-        buttons.add(buttonDTO);
-        response.setButton(buttons);
+        
         return response;
       }
 
@@ -185,22 +131,6 @@ public class ResponseBodyService {
         }
         response.setData(rows);
     
-        //Preparing Columns Data
-        HashMap<String,String> tableColumns=new HashMap<String,String>();
-        tableColumns.put("id", "ID");
-        tableColumns.put("loanAppID", "Loan ID");
-        tableColumns.put("loanAmount", "Loan Amount");
-        tableColumns.put("loanTenor", "Loan Tenor");
-        tableColumns.put("applicationID", "Application ID");
-        List<ColumnDTO> columns=new LinkedList<ColumnDTO>();
-        for(Map.Entry<String,String> entry : tableColumns.entrySet()){
-          ColumnDTO columnDTO=new ColumnDTO();
-          columnDTO.setKey(entry.getKey());
-          columnDTO.setTitle(entry.getValue());
-          columnDTO.setDataIndex(entry.getKey());
-          columns.add(columnDTO);
-        }
-        response.setColumns(columns);
         
         //Preparing Additional Data
         HashMap<String,String> data=new HashMap<String,String>();
@@ -231,22 +161,6 @@ public class ResponseBodyService {
           rows.add(transactionReportDTO);
         }
         response.setData(rows);
-        HashMap<String,String> tableColumns=new HashMap<String,String>();
-        tableColumns.put("fundTxnNumber", "Txn ID");
-        tableColumns.put("vaNumber", "VA Number");
-        tableColumns.put("transactionDate", "Transaction Date");
-        tableColumns.put("totalCustomers", "Total Customers");
-        tableColumns.put("totalInvestment", "Total Investment");
-        tableColumns.put("txnStatus", "Status");
-        List<ColumnDTO> columns=new LinkedList<ColumnDTO>();
-        for(Map.Entry<String,String> entry : tableColumns.entrySet()){
-          ColumnDTO columnDTO=new ColumnDTO();
-          columnDTO.setKey(entry.getKey());
-          columnDTO.setTitle(entry.getValue());
-          columnDTO.setDataIndex(entry.getKey());
-          columns.add(columnDTO);
-        }
-        response.setColumns(columns);
         return response;
 	}
 
@@ -279,24 +193,6 @@ public class ResponseBodyService {
       rows.add(detailedTransactionReportDTO);
     }
     response.setData(rows);
-    HashMap<String,String> tableColumns=new HashMap<String,String>();
-    tableColumns.put("loanAppID", "Loan ID");
-    tableColumns.put("applicantName", "Applicant Name");
-    tableColumns.put("loanAmount", "Loan Amount");
-    tableColumns.put("loanType", "Loan Type");
-    tableColumns.put("loanDuration", "Loan Duration");
-    tableColumns.put("Status", "Status");
-    tableColumns.put("operation", "Operation");
-    tableColumns.put("Remarks", "Remarks");
-    List<ColumnDTO> columns=new LinkedList<ColumnDTO>();
-    for(Map.Entry<String,String> entry : tableColumns.entrySet()){
-      ColumnDTO columnDTO=new ColumnDTO();
-      columnDTO.setKey(entry.getKey());
-      columnDTO.setTitle(entry.getValue());
-      columnDTO.setDataIndex(entry.getKey());
-      columns.add(columnDTO);
-    }
-    response.setColumns(columns);
     return response;
   }
   
@@ -322,23 +218,6 @@ public class ResponseBodyService {
     }
 
     response.setData(rows);
-    HashMap<String,String> tableColumns=new HashMap<String,String>();
-    tableColumns.put("applicationID", "Application ID");
-    tableColumns.put("documentLenderID", "Lender Document ID");
-    tableColumns.put("lenderAgreementStatus", "Lender Document Status");
-    List<ColumnDTO> columns=new LinkedList<ColumnDTO>();
-    for(Map.Entry<String,String> entry : tableColumns.entrySet()){
-      ColumnDTO columnDTO=new ColumnDTO();
-      columnDTO.setKey(entry.getKey());
-      columnDTO.setTitle(entry.getValue());
-      columnDTO.setDataIndex(entry.getKey());
-      columns.add(columnDTO);
-    }
-    response.setColumns(columns);
-    List<ButtonDTO> buttons=new LinkedList<ButtonDTO>();
-    ButtonDTO buttonDTO=new ButtonDTO();
-    buttons.add(buttonDTO);
-    response.setButton(buttons);
     //TODO
     //Need to insert additional data like VA Number and Total customer count in reponse
     return response;
