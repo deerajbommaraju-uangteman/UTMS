@@ -62,19 +62,21 @@ public class DVServices {
     private ObjectMapper objectMapper;
 
     public @ResponseBody ResponseDTO<ApplicationDTO> getAvailableLoans() throws Exception {
-        System.out.println("test:::"+this.emailVaildate);
+        //System.out.println("test:::"+this.emailVaildate);
         List<ApplicationData> LoanApplicationsList = applicationDAO.findValueByColumn("Status", "DV");
         return getApplicationResponseBody(LoanApplicationsList);
     }
     
     public String dvAddNotes(ApplicationNotesModel applicationNotes) throws Exception {
         String responseTempID = applicationNotesDAO.save(applicationNotes).toString();
+        System.out.println(responseTempID);
         return responseTempID;
     }
 
     public ResponseDTO<ApplicationNotesDTO> dvViewNotes(String applicationID) throws Exception {
+        //String val=applicationID.getApplicationID().toString();
         List<ApplicationNotesModel> ApplicationNotesList = applicationNotesDAO.findValueByColumn("ApplicationID", applicationID);
-        
+        System.out.println(ApplicationNotesList.size());
         return getApplicationNotesResponseBody(ApplicationNotesList);
     }
 
@@ -86,6 +88,7 @@ public class DVServices {
         while(iterator.hasNext()){
           key++;
           ApplicationNotesModel application=iterator.next();
+          System.out.println(application);
           ApplicationNotesDTO availableLoansDTO=new ApplicationNotesDTO();
           availableLoansDTO.setApplicationID(application.getApplicationID());
           availableLoansDTO.setApplicationNotesID(application.getApplicationNotesID());
@@ -96,9 +99,9 @@ public class DVServices {
         }
         response.setRows(rows);
         HashMap<String,String> tableColumns=new HashMap<String,String>();
-        tableColumns.put("TypeNote", "Note Type");
-        tableColumns.put("Note", "Note");
-        tableColumns.put("InputBy", "Input By");
+        tableColumns.put("typeNote", "Note Type");
+        tableColumns.put("note", "Note");
+        tableColumns.put("inputBy", "Input By");
         List<ColumnDTO> columns=new LinkedList<ColumnDTO>();
         for(Map.Entry<String,String> entry : tableColumns.entrySet()){
           ColumnDTO columnDTO=new ColumnDTO();
@@ -108,6 +111,7 @@ public class DVServices {
           columns.add(columnDTO);
         }
         response.setColumns(columns);
+        System.out.println(response);
         return response;
       }
 

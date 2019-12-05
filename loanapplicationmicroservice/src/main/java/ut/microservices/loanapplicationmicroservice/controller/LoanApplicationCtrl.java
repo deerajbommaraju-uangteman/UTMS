@@ -2,6 +2,8 @@ package ut.microservices.loanapplicationmicroservice.controller;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import ut.microservices.loanapplicationmicroservice.dto.ApplicationStatusDTO;
+import ut.microservices.loanapplicationmicroservice.dto.TestUrlDTO;
 import ut.microservices.loanapplicationmicroservice.model.*;
 import ut.microservices.loanapplicationmicroservice.service.*;
 
@@ -28,6 +31,21 @@ public class LoanApplicationCtrl {
 
   @Autowired
   LoanApplicationService loanApplicationService;
+
+  @CrossOrigin
+  @GetMapping(path = "/testurl")
+  public List<TestUrlDTO> testUrl() {
+    TestUrlDTO test=new TestUrlDTO();
+    List<TestUrlDTO> testList = new LinkedList<TestUrlDTO>();
+    test.setTestUrlData("input", "text", "username","required");
+    testList.add(test);
+    System.out.println(testList.get(0).getLabel());
+    test=new TestUrlDTO();
+    test.setTestUrlData("input", "password", "password","required");
+    testList.add(test);
+    System.out.println(testList);
+    return testList;
+  }
 
   @CrossOrigin
   @PostMapping(path = "/received")

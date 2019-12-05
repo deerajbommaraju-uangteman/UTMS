@@ -15,7 +15,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import ut.microservices.loanapplicationmicroservice.dto.ApplicationDTO;s
+import ut.microservices.loanapplicationmicroservice.dto.ApplicationDTO;
 import ut.microservices.loanapplicationmicroservice.dto.ApplicationNotesDTO;
 import ut.microservices.loanapplicationmicroservice.dto.ButtonDTO;
 import ut.microservices.loanapplicationmicroservice.dto.ColumnDTO;
@@ -171,6 +171,36 @@ public class StaffServices {
         ApplicationScheduleProcessModel applicationSchedule = applicationScheduleList.get(0);
         applicationSchedule.setScheduleDate(new Date());
         applicationScheduleProcessDAO.updateOne(applicationSchedule);
+        return "success";
+      }else{
+        return "fail";
+      }
+    }
+
+    public String scheduleApplicationDocumentSurvey(String ApplicationID){
+      List<ApplicationData> applicationDataList = applicationDAO.findValueByColumn("ApplicationID",ApplicationID);
+      if(applicationDataList.size()>0){
+        ApplicationData applicationData = applicationDataList.get(0);
+        List<ApplicationScheduleProcessModel> applicationScheduleList = applicationScheduleProcessDAO.findValueByColumnOrder("ApplicationID", applicationData.getLoanApplicationID(), "ApplicationScheduleProcessID", "desc");
+        ApplicationScheduleProcessModel applicationSchedule = applicationScheduleList.get(0);
+        applicationSchedule.setScheduleDate(new Date());
+        applicationScheduleProcessDAO.updateOne(applicationSchedule);
+        return "success";
+      }else{
+        return "fail";
+      }
+    }
+
+    public String scheduleAllApplicationsDocumentSurvey(){
+      List<ApplicationData> applicationDataList = applicationDAO.findValueByColumn("Status","ST");
+      if(applicationDataList.size()>0){
+        for(int i=0; i<applicationDataList.size();i++){
+          ApplicationData applicationData = applicationDataList.get(i);
+          List<ApplicationScheduleProcessModel> applicationScheduleList = applicationScheduleProcessDAO.findValueByColumnOrder("ApplicationID", applicationData.getLoanApplicationID(), "ApplicationScheduleProcessID", "desc");
+          ApplicationScheduleProcessModel applicationSchedule = applicationScheduleList.get(i);
+          applicationSchedule.setScheduleDate(new Date());
+          applicationScheduleProcessDAO.updateOne(applicationSchedule);
+        }
         return "success";
       }else{
         return "fail";

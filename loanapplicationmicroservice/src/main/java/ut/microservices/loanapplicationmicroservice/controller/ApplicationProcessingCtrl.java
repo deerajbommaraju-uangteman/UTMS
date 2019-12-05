@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mysql.cj.x.protobuf.MysqlxDatatypes.Array;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,13 +90,17 @@ import ut.microservices.loanapplicationmicroservice.service.*;
     @CrossOrigin
     @PostMapping(path = "/dvAddNotes")
     public String dvAddNotes(@RequestBody ApplicationNotesModel applicationID) throws Exception {
+        System.out.println(applicationID);
         return dvService.dvAddNotes(applicationID);
     }
 
     @CrossOrigin
     @PostMapping(path = "/dvViewNotes")
     public ResponseDTO<ApplicationNotesDTO> dvViewNotes(@RequestBody String applicationID) throws Exception {
-        return dvService.dvViewNotes(applicationID);
+        System.out.println("::"+applicationID);
+        org.json.JSONObject json = new org.json.JSONObject(applicationID); 
+        System.out.println("sjkahdha::"+json.getString("ApplicationID"));
+        return dvService.dvViewNotes(json.getString("ApplicationID"));
     }
 
     @CrossOrigin
@@ -114,6 +119,18 @@ import ut.microservices.loanapplicationmicroservice.service.*;
     @PostMapping(path = "/staffChangeApplicationStatus")
     public String staffChangeApplicationStatus(@RequestBody String applicationID) throws Exception {
         return staffService.ChangeApplicationStatus(applicationID);
+    }
+
+    @CrossOrigin
+    @PostMapping(path = "/staffScheduleApplicationDocuementSurvey")
+    public String staffScheduleApplicationDocuementSurvey(@RequestBody String applicationID) throws Exception {
+        return staffService.scheduleApplicationDocumentSurvey(applicationID);
+    }
+
+    @CrossOrigin
+    @PostMapping(path = "/staffScheduleAllLApplicationDocuementSurvey")
+    public String staffScheduleAllApplicationDocuementSurvey(@RequestBody String applicationID) throws Exception {
+        return staffService.scheduleAllApplicationsDocumentSurvey();
     }
 
     @CrossOrigin
