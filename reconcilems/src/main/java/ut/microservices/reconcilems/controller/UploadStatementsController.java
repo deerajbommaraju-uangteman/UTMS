@@ -44,6 +44,19 @@ public class UploadStatementsController
     public void test() throws Exception {
         readFileService.getCustomerLoanData("2RzhHddpYYLla");
     }
+
+    
+    @CrossOrigin
+    @PostMapping(path="/testgetindex")
+    public String GetIndex() throws Exception {
+       return readFileService.getIndex();
+    }
+
+    @CrossOrigin
+    @PostMapping(path="/testgetviewdetail")
+    public void GetViewDetail() throws Exception {
+        readFileService.getViewDetail("BCA2019110101");
+    }
 }
         
 

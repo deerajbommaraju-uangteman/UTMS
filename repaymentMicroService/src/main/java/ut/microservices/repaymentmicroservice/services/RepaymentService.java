@@ -2,37 +2,22 @@ package ut.microservices.repaymentmicroservice.services;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Date;
+
 import javax.transaction.Transactional;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import ut.microservices.repaymentmicroservice.dao.IGenericDAO;
 import ut.microservices.repaymentmicroservice.dto.CustomerRepaymentHomePageDTO;
 import ut.microservices.repaymentmicroservice.dto.GenerateVaDTO;
-import ut.microservices.repaymentmicroservice.models.ApplicantData;
-import ut.microservices.repaymentmicroservice.models.ApplicationData;
-import ut.microservices.repaymentmicroservice.models.CustomerLoanData;
-import ut.microservices.repaymentmicroservice.models.CustomerLoanInstallmentRepayment;
-import ut.microservices.repaymentmicroservice.models.CustomerLoanRepayment;
-import ut.microservices.repaymentmicroservice.models.CustomerPrimaryData;
-import ut.microservices.repaymentmicroservice.models.CustomerStaticVaActiveLoan;
-import ut.microservices.repaymentmicroservice.models.CustomerVaHistory;
-import ut.microservices.repaymentmicroservice.models.LogDokuAlfa;
-import ut.microservices.repaymentmicroservice.models.LogDokuBca;
-import ut.microservices.repaymentmicroservice.models.LogsArtajasa;
-import ut.microservices.repaymentmicroservice.models.VaArtajasa;
+import ut.microservices.repaymentmicroservice.models.*;
 
 @Service
 @Transactional
@@ -127,28 +112,6 @@ public class RepaymentService {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    public Map<String , Map<String, Object>> loanDataFromLAMS(String LoanApplicationID) throws Exception{
-        final String baseUrl = "http://localhost:9090/application-form/getApplicationData/"+LoanApplicationID;
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> responseEntity = restTemplate.exchange(baseUrl, HttpMethod.GET, null, String.class);
-        JsonNode jn1 = objectMapper.readTree(responseEntity.getBody());
-
-        //save to ApplicantData
-        JsonNode jnApplicantData = jn1.get("ApplicantData");
-        System.out.println(jnApplicantData);
-        ApplicantData objApData = objectMapper.readValue(jnApplicantData.toString(), ApplicantData.class);
-        applicantDataDAO.save(objApData);
-
-        // save to ApplicationData
-        JsonNode jnApplicationData = jn1.get("ApplicationData");
-        System.out.println(jnApplicationData);
-        ApplicationData objApliData = objectMapper.readValue(jnApplicationData.toString(), ApplicationData.class);
-        applicationDataDAO.save(objApliData);
-
-        Map<String , Map<String, Object>> result = objectMapper.convertValue(jn1, new TypeReference<Map<String , Map<String, Object>>>(){});
-        return result;
-    }
        
     public CustomerRepaymentHomePageDTO postCustomerLogin(HashMap<String, String> data) throws Exception{
         CustomerLoanRepayment cust=custLoanRepaymentDAO.findValueByColumn("LoanApplicationID",data.get("LoanApplicationID")).get(0);       
@@ -261,7 +224,7 @@ public class RepaymentService {
             ApplicationData apli = applicationDataDAO.findByTwoColumns("LoanApplicationID", cld.getLoanApplicationID(), "ApplicationApplicantID", cld.getApplicantID().toString()).get(0);
 
             // Add is_installment logic
-            if(apli.getIsInstallment().equals("Y")){
+            if(apli.getIsInstallment() != null && apli.getIsInstallment().equals("Y")){
                 
                 if(userdata.containsKey("CustomerLoanInstallmentRepaymentID")){
                     CustomerLoanInstallmentRepayment clir = clirDAO.findValueByColumn("CustomerLoanInstallmentRepaymentID",userdata.get("CustomerLoanInstallmentRepaymentID")).get(0);
@@ -654,7 +617,7 @@ public class RepaymentService {
     //     }
     // }
 
-    public String loanDataForReconcile(String VaNumber) throws Exception {
+    public String loanDataForReconcile(String VaNumber) throws JsonProcessingException {
         CustomerVaHistory cVaHistory = customerVaHistoryDAO.findValueByColumn("VaNumber", VaNumber).get(0);
         CustomerLoanRepayment custLoanRepayment = custLoanRepaymentDAO.findValueByColumn("ApplicantID", cVaHistory.getApplicantID()).get(0);
         CustomerLoanData custLoanData = custLoanDataDAO.findValueByColumn("ApplicantID",cVaHistory.getApplicantID()).get(0);

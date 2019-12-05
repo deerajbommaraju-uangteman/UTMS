@@ -35,15 +35,15 @@ public class CustomerLoanData implements Serializable{
 
     @Column(name="ApplicantID", nullable = true)
     @JsonProperty(value="ApplicantID")
-    private 	Integer	ApplicantID;
+    private Integer	ApplicantID;
 
     @Column(name="PromoCode", nullable = true)
     @JsonProperty(value="PromoCode")
-    private 	String	PromoCode;
+    private String PromoCode;
 
     @Column(name="LoanApplicationID", nullable = true)
     @JsonProperty(value="LoanApplicationID")
-    private 	String	LoanApplicationID;
+    private String LoanApplicationID;
 
     @Column(name="TrxNo", nullable = true)
     @JsonProperty(value="TrxNo")

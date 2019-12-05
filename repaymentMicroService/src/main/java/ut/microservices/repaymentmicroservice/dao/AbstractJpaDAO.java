@@ -1,6 +1,7 @@
 package ut.microservices.repaymentmicroservice.dao;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -22,10 +23,9 @@ public abstract class AbstractJpaDAO<T extends Serializable> {
        this.clazz = clazzToSet;
     }
 
-   //  public List< T > findAll(){
-   //     return entityManager.createQuery( "from " + clazz.getName() )
-   //      .getResultList();
-   //  }
+    public List< T > findAll(){
+      return entityManager.createQuery( "from " + clazz.getName()).getResultList();
+    }
   
     public void save( T entity ){
       entityManager.persist( entity );
@@ -55,6 +55,10 @@ public abstract class AbstractJpaDAO<T extends Serializable> {
         // q.setParameter("today", date);
      }
 
+     public List<T> findActiveVAByApplicantID(String applicantID) {
+        return  entityManager.createQuery( "from " + clazz.getName() + " e " + " where " + " e.ApplicantID='"+ applicantID + "'" + "and "+ "e.Status = '0'" + "and " +"e.IsVaActive= 'Y' order by e.ID desc").getResultList(); 
+      }
+
      public List<T> findVAInLogs(String VaNumber) {
         return  entityManager.createQuery( "from " + clazz.getName() + " e " + " where " + " e.VaNumber='"+ VaNumber + "'").getResultList(); 
 
@@ -76,10 +80,13 @@ public abstract class AbstractJpaDAO<T extends Serializable> {
       return entityManager.createQuery("from "+ clazz.getName()+" a  where a."+column1+"='"+value1+"' and a."+column2+"='"+value2+"'" +"order by 1 DESC").getResultList();
     }
 
-     public List<T> findInstallmentRepayment(String value){
-      return entityManager.createQuery("from "+clazz.getName()+" a where a.CustomerLoanRepaymentID ='"+value+"'"+ "and a.VtransStatus = 'P' and a.Status ='D' LIMIT 1").setMaxResults(1).getResultList();
+     public List<T> findInstallmentRepayment(Integer value){
+      return entityManager.createQuery("from "+clazz.getName()+" a where a.CustomerLoanRepaymentID ='"+value+"'"+ "and a.VtransStatus = 'P' and a.Status ='D' order by a.CustomerLoanInstallmentRepaymentID desc").setMaxResults(1).getResultList();
      }
   
+     public List<T> findInMrLoanScheme(Double loanAmount, Date loanStartDateTime, Integer MlsLoanIncrement){
+      return entityManager.createNativeQuery("select * from "+clazz.getName()+" a where '"+ loanAmount +"' between a.MlsMinValue and a.MlsMaxValue'"+ loanStartDateTime +"'between a.MlsStartDate and a.MlsEndDate and a.MlsLoanIncrement = '"+ MlsLoanIncrement +"' and a.MlsIsActive = 'y' order by a.MlsID desc").getResultList();
+     }
    //   public List<T> findByJoin(){
    //      return entityManager.createQuery("FROM "+clazz.getName()+" a LEFT JOIN ApplicantData b on a.ApplicationApplicantID = b.ApplicantID").getResultList();
    //   }

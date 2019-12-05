@@ -79,6 +79,11 @@ public class VAGenerationService {
       if (investorVAHistoryList.isEmpty()) {
         // Payment not done
         // VA not generated
+        HashMap<String,String> data=new HashMap<String,String>();
+        data.put("bankCode","PERMATA");
+        data.put("investorID",Integer.toString(investorID));
+        
+        vaNumber=Integer.parseInt(generateVA(objectMapper.writeValueAsString(data)));
         while (iterator.hasNext()) {
           LoanInvestment loan = iterator.next();
           databaseService.insertRecordToInvestorVAHistory(loan, vaNumber);
@@ -116,7 +121,7 @@ public class VAGenerationService {
         Integer.toString(investorID), "txnStatus", "0");
     List<InvestorVAHistory> investorVAHistoryList = investorVAHistoryDAO.findBy("investorID",
         Integer.toString(investorID), "status", "0");
-    if(!investorFundingHsitoryList.isEmpty() && !investorVAHistoryList.isEmpty()){
+    if(investorFundingHsitoryList.isEmpty() && investorVAHistoryList.isEmpty()){
       randomNumber = random.nextInt((max - min) + 1) + min;
       if(bankCode.equalsIgnoreCase("BCA")){
         vaNumber="1108"+randomNumber;
@@ -124,7 +129,7 @@ public class VAGenerationService {
       else if(bankCode.equalsIgnoreCase("PERMATA")){
         vaNumber="8977"+randomNumber;
       }
-      updateVANumber(vaNumber, investorID);
+      //updateVANumber(vaNumber, investorID);
     }
     return vaNumber;
   }
