@@ -224,8 +224,8 @@ public class DokuPaymentService {
         CustomerLoanRepayment clr = custLoanRepaymentDAO.findValueByColumn("ApplicantID",cld.getApplicantID().toString()).get(0);  
         String customerLoanRepaymentStatus = clr.getClrStatus();
 
-        ApplicationData apli = applicationDataDAO.findByTwoColumns("LoanApplicationID", cld.getLoanApplicationID(), "ApplicantID", cld.getApplicantID().toString()).get(0);
-        if(apli.getIsInstallment().equals("Y")){
+        ApplicationData apli = applicationDataDAO.findByTwoColumns("LoanApplicationID", cld.getLoanApplicationID(), "ApplicationApplicantID", cld.getApplicantID().toString()).get(0);
+        if(apli.getIsInstallment() != null && apli.getIsInstallment().equals("Y")){
             CustomerLoanInstallmentRepayment clir = custLoanInstallmentRepaymentDAO.findValueByColumn("CustomerLoanRepaymentID", clr.getId().toString()).get(0);
             customerLoanRepaymentStatus = clir.getStatus();
         }

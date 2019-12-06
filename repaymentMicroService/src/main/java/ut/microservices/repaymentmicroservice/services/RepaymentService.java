@@ -251,7 +251,7 @@ public class RepaymentService {
             }
 
             
-            result.setResponse("Doku VA Created Successfully: " + va.getVaNumber().toString());
+            result.setResponse("VA Created Successfully: " + va.getVaNumber().toString());
             result.setloanAppId(repay.getLoanApplicationID());
             result.setVaNumber(va.getVaNumber().toString());
             result.setRepaymentAmount(va.getVaCreatedOutstandingAmt());
