@@ -114,7 +114,9 @@ public class RepaymentService {
     private ObjectMapper objectMapper;
        
     public CustomerRepaymentHomePageDTO postCustomerLogin(HashMap<String, String> data) throws Exception{
-        CustomerLoanRepayment cust=custLoanRepaymentDAO.findValueByColumn("LoanApplicationID",data.get("LoanApplicationID")).get(0);       
+        CustomerLoanRepayment cust=custLoanRepaymentDAO.findValueByColumn("LoanApplicationID",data.get("LoanApplicationID")).get(0);
+
+        ApplicationData apli = applicationDataDAO.findValueByColumn("LoanApplicationID", data.get("LoanApplicationID")).get(0);
         CustomerRepaymentHomePageDTO response=new CustomerRepaymentHomePageDTO();
         if(cust == null){
             response.setMessage("No Active Loans");
@@ -123,7 +125,7 @@ public class RepaymentService {
             response.setRepaymentAmount(cust.getRepaymentAmount()); 
             response.setMessage("success");
             SimpleDateFormat dateformatJava = new SimpleDateFormat("dd-MM-yyyy");
-            response.setDueDate(dateformatJava.format(cust.getDueDate()));
+            response.setDueDate(dateformatJava.format(apli.getLoanDueDateTime()));
         }
         return response;
     }
