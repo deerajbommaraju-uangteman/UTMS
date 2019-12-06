@@ -212,7 +212,7 @@ public class RepaymentService {
             // log to save customer va
             va.setTransactionID(transId);
             va.setApplicantID(userdata.get("ApplicantID"));
-            // va.setCustomerID(cld.getID());
+            va.setCustomerID(cld.getID());
             va.setVaNumber(response.get("payment_code"));
             va.setAmountToPay(Double.parseDouble(userdata.get("AmountToPay")));
             va.setVaCreatedOutstandingAmt(Double.parseDouble(userdata.get("AmountToPay")));
