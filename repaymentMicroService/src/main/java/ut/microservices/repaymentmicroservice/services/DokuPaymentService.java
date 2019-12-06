@@ -1,5 +1,6 @@
 package ut.microservices.repaymentmicroservice.services;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -262,15 +263,21 @@ public class DokuPaymentService {
             fpay.setSignature(signature);
             vaFirstPayDAO.save(fpay);
 
+            //SimpleDateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss");
+            // System.out.println(dateFormat.format(new Date()));
+
             // Inquiry response for unpaid loan
             String nPaidResp = "<PAYMENTCODE>" + requestdata.get("PAYMENTCODE") + "</PAYMENTCODE>\n";
             nPaidResp += "<AMOUNT>"+ vaNumberData.getAmountToPay() +"</AMOUNT>\n";
             nPaidResp += "<PURCHASEAMOUNT>"+ vaNumberData.getAmountToPay() +"</PURCHASEAMOUNT>\n";
             nPaidResp += "<TRANSIDMERCHANT>" + randTransId + "</TRANSIDMERCHANT>\n";
-            nPaidResp += "<WORDS>"+ signature +"</PURCHASEAMOUNT>\n";
+            nPaidResp += "<WORDS>"+ signature +"</WORDS>\n";
+            nPaidResp += "<REQUESTDATETIME>"+ new Date() +"</REQUESTDATETIME>\n";
             nPaidResp += "<CURRENCY>" + this.PAY_CURRENCY +"</CURRENCY>\n";
             nPaidResp += "<PURCHASECURRENCY>" + this.PAY_CURRENCY +"</PURCHASECURRENCY>\n";
             nPaidResp += "<SESSIONID>" + DigestUtils.shaHex(RandomStringUtils.randomAlphanumeric(32)) +"</SESSIONID>\n";
+            nPaidResp += "<NAME>" + borrower.getFullName() +"</NAME>\n";
+            nPaidResp += "<EMAIL>" + borrower.getEmailAddress() +"</EMAIL>\n";
             nPaidResp += "<ADDITIONALDATA>UangTeman</ADDITIONALDATA>\n";
             // CustomerLoanRepayment clr = custLoanRepaymentDAO.findValueByColumn("ApplicantID",vaNumberData.getApplicantID()).get(0);    
 
