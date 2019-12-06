@@ -127,7 +127,7 @@ public class LoanApplicationService {
             ApplicationStatusModel applicationStatus=new ApplicationStatusModel();
             applicationStatus.setApplicationStatusData(Integer.parseInt(applicationID), applicationData.getLoanApplicationID(), 0, 0, "", 1, "D");
             applicationStatusDAO.save(applicationStatus);
-            Boolean creCheck = this.CRECheck(application); 
+            Boolean creCheck = this.CRECheck(application,applicantID); 
             if(creCheck){
                 applicationData.setStatus("DV");
                 applicationDAO.save(applicationData);
@@ -150,8 +150,8 @@ public class LoanApplicationService {
 		return 0;
     }
     
-    public boolean CRECheck(TempApplicantDataModel applicantData) {
-        List<CreFeatureSetModel> creFeatureSetList= creFeatureSetDAO.findValueByColumn("ApplicantID", applicantData.getApplicantID().toString());
+    public boolean CRECheck(TempApplicantDataModel applicantData,int applicantID) {
+        List<CreFeatureSetModel> creFeatureSetList= creFeatureSetDAO.findValueByColumn("ApplicantID", String.valueOf(applicantID));
         if(creFeatureSetList.isEmpty()) {
             int gender = applicantData.getGender().equals("M")?0:1;
             int maritalStatus=0;

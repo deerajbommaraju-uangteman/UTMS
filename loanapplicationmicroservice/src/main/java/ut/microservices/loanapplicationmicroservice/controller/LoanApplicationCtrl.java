@@ -34,21 +34,68 @@ public class LoanApplicationCtrl {
 
   @CrossOrigin
   @GetMapping(path = "/testurl")
-  public List<TestUrlDTO> testUrl() {
-    TestUrlDTO test=new TestUrlDTO();
-    List<TestUrlDTO> testList = new LinkedList<TestUrlDTO>();
-    test.setTestUrlData("input", "text", "username","required");
-    testList.add(test);
-    System.out.println(testList.get(0).getLabel());
-    test=new TestUrlDTO();
-    test.setTestUrlData("input", "password", "password","required");
-    testList.add(test);
-    System.out.println(testList);
-    return testList;
+  public String testUrl() {
+    // TestUrlDTO test=new TestUrlDTO();
+    // List<TestUrlDTO> testList = new LinkedList<TestUrlDTO>();
+    // test.setTestUrlData("input", "text", "username","required");
+    // testList.add(test);
+    // System.out.println(testList.get(0).getLabel());
+    // test=new TestUrlDTO();
+    // test.setTestUrlData("input", "password", "password","required");
+    // testList.add(test);
+    // System.out.println(testList);
+    String model="";
+    model+="{[";
+    model+="{ key: 'name', label: 'Name', props: { required: true } },";
+    model+="{ key: 'age', label: 'Age', type: 'number' },";
+    model+="{";
+    model+="key: 'rating',";
+    model+="label: 'Rating',";
+    model+="type: 'number',";
+    model+="props: { min: 0, max: 5 }";
+    model+="},";
+    model+="{";
+    model+="key: 'gender',";
+    model+="label: 'Gender',";
+    model+="type: 'radio',";
+    model+="options: [";
+    model+="{ key: 'male', label: 'Male', name: 'gender', value: 'male' },";
+    model+="{";
+    model+="key: 'female',";
+    model+="label: 'Female',";
+    model+="name: 'gender',";
+    model+="value: 'female'";
+    model+="}";
+    model+="]";
+    model+="},";
+    model+="{ key: 'qualification', label: 'Qualification' },";
+    model+="{";
+    model+="key: 'city',";
+    model+="label: 'City',";
+    model+="type: 'select',";
+    model+="value: 'Kerala',";
+    model+="options: [";
+    model+="{ key: 'mumbai', label: 'Mumbai', value: 'Mumbai' },";
+    model+="{ key: 'bangalore', label: 'Bangalore', value: 'Bangalore' },";
+    model+="{ key: 'kerala', label: 'Kerala', value: 'Kerala' }";
+    model+="]";
+    model+="},";
+    model+="{";
+    model+="key: 'skills',";
+    model+="label: 'Skills',";
+    model+="type: 'checkbox',";
+    model+="options: [";
+    model+="{ key: 'reactjs', label: 'ReactJS', value: 'reactjs' },";
+    model+="{ key: 'angular', label: 'Angular', value: 'angular' },";
+    model+="{ key: 'vuejs', label: 'VueJS', value: 'vuejs' }";
+    model+="]}]}";
+    System.out.println(model);
+    return model;
   }
 
   @CrossOrigin
   @PostMapping(path = "/received")
+  
   public String newApplicationReceived(@RequestBody TempApplicantDataModel application) {
     // //System.out.println(application);
     if(application.getID() != null) {

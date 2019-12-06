@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mysql.cj.x.protobuf.MysqlxDatatypes.Array;
 
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,8 +28,8 @@ import ut.microservices.loanapplicationmicroservice.service.*;
  */
 @RestController
 @RequestMapping("/application-processing")
- public class ApplicationProcessingCtrl {
-    
+public class ApplicationProcessingCtrl {
+
     @Autowired
     ManagerServices managerService;
 
@@ -37,7 +38,7 @@ import ut.microservices.loanapplicationmicroservice.service.*;
 
     @Autowired
     StaffServices staffService;
-  
+
     @CrossOrigin
     @GetMapping(path = "/dvRecievedApplications")
     public @ResponseBody ResponseDTO<ApplicationDTO> dvApplicationRecieved() throws Exception {
@@ -46,8 +47,8 @@ import ut.microservices.loanapplicationmicroservice.service.*;
 
     @CrossOrigin
     @PostMapping(path = "/testcurl")
-    public String testcurl(@RequestBody String data){
-        System.out.println("test::"+data);
+    public String testcurl(@RequestBody String data) {
+        System.out.println("test::" + data);
         JSONObject obj = new JSONObject();
         String ocr_message = "test message";
         String result = "FAIL";
@@ -58,33 +59,39 @@ import ut.microservices.loanapplicationmicroservice.service.*;
 
     @CrossOrigin
     @PostMapping(path = "/dvEditApplicationPersonalDetails")
-    public @ResponseBody ApplicantData dvEditApplicationPersonalDetails(@RequestBody HashMap<String,String> ApplicationID) throws JsonProcessingException {
+    public @ResponseBody ApplicantData dvEditApplicationPersonalDetails(
+            @RequestBody HashMap<String, String> ApplicationID) throws JsonProcessingException {
         return dvService.dvEditApplicationPersonalDetails(ApplicationID);
     }
 
     @CrossOrigin
     @PostMapping(path = "/dvSubmitApplicationPersonalDetails")
-    public @ResponseBody String dvSubmitApplicationPersonalDetails(@RequestBody ApplicantData ApplicationID) throws JsonProcessingException {
-        ////System.out.println(ApplicationID);
+    public @ResponseBody String dvSubmitApplicationPersonalDetails(@RequestBody ApplicantData ApplicationID)
+            throws JsonProcessingException {
+        //// System.out.println(ApplicationID);
         return dvService.dvSubmitApplicationPersonalDetails(ApplicationID);
     }
-    
+
     @CrossOrigin
     @PostMapping(path = "/dvEditLoanDetails")
-    public @ResponseBody String dvEditLoanData(@RequestBody ApplicantData ApplicationID) throws JsonProcessingException {
+    public @ResponseBody String dvEditLoanData(@RequestBody ApplicantData ApplicationID)
+            throws JsonProcessingException {
         return dvService.dvEditLoanDetails(ApplicationID);
     }
 
     @CrossOrigin
     @PostMapping("/dvApprovedLoans")
-    public void dvApprovedLoans(@RequestBody String ApplicationID) throws JsonProcessingException {
-        dvService.approvedLoan(ApplicationID);
+    public void dvApprovedLoans(@RequestBody String ApplicationID) throws JsonProcessingException, JSONException {
+        org.json.JSONObject json = new org.json.JSONObject(ApplicationID); 
+        dvService.approvedLoan(json.getString("ApplicationID").toString());
+        //dvService.approvedLoan(ApplicationID);
     }
 
     @CrossOrigin
     @PostMapping(path = "/dvRejectedLoans")
-    public void dvRejectedLoans(@RequestBody String applicationID){
-        dvService.rejectedLoan(applicationID);
+    public void dvRejectedLoans(@RequestBody String ApplicationID) throws JSONException {
+        org.json.JSONObject json = new org.json.JSONObject(ApplicationID); 
+        dvService.rejectedLoan(json.getString("ApplicationID").toString());
     }
 
     @CrossOrigin
@@ -97,9 +104,7 @@ import ut.microservices.loanapplicationmicroservice.service.*;
     @CrossOrigin
     @PostMapping(path = "/dvViewNotes")
     public ResponseDTO<ApplicationNotesDTO> dvViewNotes(@RequestBody String applicationID) throws Exception {
-        System.out.println("::"+applicationID);
         org.json.JSONObject json = new org.json.JSONObject(applicationID); 
-        System.out.println("sjkahdha::"+json.getString("ApplicationID"));
         return dvService.dvViewNotes(json.getString("ApplicationID"));
     }
 
@@ -154,14 +159,16 @@ import ut.microservices.loanapplicationmicroservice.service.*;
 
     @CrossOrigin
     @PostMapping("/staffApprovedLoans")
-    public void staffApprovedLoans(@RequestBody String ApplicationID) throws JsonProcessingException {
-        staffService.approvedLoan(ApplicationID);
+    public void staffApprovedLoans(@RequestBody String ApplicationID) throws JsonProcessingException, JSONException {
+        org.json.JSONObject json = new org.json.JSONObject(ApplicationID); 
+        staffService.approvedLoan(json.getString("ApplicationID").toString());
     }
 
     @CrossOrigin
     @PostMapping(path = "/staffRejectedLoans")
-    public void staffRejectedLoans(@RequestBody String applicationID){
-        staffService.rejectedLoan(applicationID);
+    public void staffRejectedLoans(@RequestBody String ApplicationID) throws JSONException {
+        org.json.JSONObject json = new org.json.JSONObject(ApplicationID); 
+        staffService.rejectedLoan(json.getString("ApplicationID").toString());
     }
 
     @CrossOrigin
@@ -172,13 +179,15 @@ import ut.microservices.loanapplicationmicroservice.service.*;
 
     @CrossOrigin
     @PostMapping("/managerApprovedLoans")
-    public void managerApprovedLoans(@RequestBody String ApplicationID) throws JsonProcessingException {
-        managerService.approvedLoan(ApplicationID);
+    public void managerApprovedLoans(@RequestBody String ApplicationID) throws JsonProcessingException, JSONException {
+        org.json.JSONObject json = new org.json.JSONObject(ApplicationID); 
+        managerService.approvedLoan(json.getString("ApplicationID").toString());
     }
 
     @CrossOrigin
     @PostMapping(path = "/managerRejectedLoans")
-    public void managerRejectedLoans(@RequestBody String applicationID){
-        managerService.rejectedLoan(applicationID);
+    public void managerRejectedLoans(@RequestBody String ApplicationID) throws JSONException {
+        org.json.JSONObject json = new org.json.JSONObject(ApplicationID); 
+        managerService.rejectedLoan(json.getString("ApplicationID").toString());
     }
 }
