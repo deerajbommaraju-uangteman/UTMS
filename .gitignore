@@ -8,7 +8,6 @@ repaymentMicroService/.classpath
 repaymentMicroService/.project
 repaymentMicroService/.factorypath
 .vscode/settings.json
-*.properties
 *.json
 
 loanapplicationmicroservice/.classpath
