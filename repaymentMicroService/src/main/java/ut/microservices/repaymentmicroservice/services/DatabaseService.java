@@ -114,12 +114,12 @@ public class DatabaseService {
         
         CustomerLoanRepayment clr = new CustomerLoanRepayment();
         clr.setApplicantID(dataMap.get("ApplicantID").toString());
-        clr.setLoanApplicationID(dataMap.get("LoanApplicationID").toString());
-        clr.setRepaymentAmount(Double.parseDouble(dataMap.get("RepaymentAmount").toString()));
+        clr.setLoanApplicationID(dataMap.get("loanAppID").toString());
+        clr.setRepaymentAmount(Double.parseDouble(dataMap.get("loanAmount").toString()));
         clr.setPartialStatus("N");
         custLoanRepaymentDAO.save(clr);
 
-        this.postDisbusementSaveDetails(dataMap.get("LoanApplicationID").toString());
+        this.postDisbusementSaveDetails(dataMap.get("loanAppID").toString());
 
         List<ApplicationData> apliDataList = applicationDataDAO.findValueByColumn("ApplicationID", dataMap.get("ApplicationID").toString());       
         if(apliDataList.size() >0){
