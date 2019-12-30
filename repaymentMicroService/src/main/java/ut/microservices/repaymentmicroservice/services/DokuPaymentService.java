@@ -279,6 +279,7 @@ public class DokuPaymentService {
             nPaidResp += "<NAME>" + borrower.getFullName() +"</NAME>\n";
             nPaidResp += "<EMAIL>" + borrower.getEmailAddress() +"</EMAIL>\n";
             nPaidResp += "<ADDITIONALDATA>UangTeman</ADDITIONALDATA>\n";
+            nPaidResp += "<RESPONSECODE>0000</RESPONSECODE>\n";
             // CustomerLoanRepayment clr = custLoanRepaymentDAO.findValueByColumn("ApplicantID",vaNumberData.getApplicantID()).get(0);    
 
             objLog.setVaNumber(requestdata.get("PAYMENTCODE"));

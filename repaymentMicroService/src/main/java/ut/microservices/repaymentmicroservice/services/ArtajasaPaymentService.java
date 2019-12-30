@@ -263,7 +263,18 @@ public class ArtajasaPaymentService {
 
             VaArtajasa vaa = vaArtajasaDAO.findValueByColumn("CvhID", vaNumberData.getID().toString()).get(0);
 
-            if(vaNumberData.getStatus() == 1 && vaNumberData.getIsVaActive().equals("Y")){
+            CustomerLoanData cld = custLoanDataDAO.findValueByColumn("ApplicantID", vaNumberData.getApplicantID()).get(0);
+            CustomerPrimaryData borrower = custPrimaryDataDAO.findValueByColumn("ApplicantID", cld.getApplicantID().toString()).get(0);
+            CustomerLoanRepayment clr = custLoanRepaymentDAO.findValueByColumn("ApplicantID",cld.getApplicantID().toString()).get(0);  
+            String customerLoanRepaymentStatus = clr.getClrStatus();
+
+            ApplicationData apli = applicationDataDAO.findByTwoColumns("LoanApplicationID", cld.getLoanApplicationID(), "ApplicationApplicantID", cld.getApplicantID().toString()).get(0);
+            if(apli.getIsInstallment() != null && apli.getIsInstallment().equals("Y")){
+                CustomerLoanInstallmentRepayment clir = custLoanInstallmentRepaymentDAO.findValueByColumn("CustomerLoanRepaymentID", clr.getId().toString()).get(0);
+                customerLoanRepaymentStatus = clir.getStatus();
+            }
+
+            if(vaNumberData.getStatus() == 1 && customerLoanRepaymentStatus.equals("Y")){
                 // already paid 
                 Resp += "<ack>"+ ServicesConfig.ALREADY_PAID_78 +"</ack>\n";
                 Resp += "<bookingid>" + vaa.getBookingID() + "</bookingid>\n";
@@ -284,11 +295,11 @@ public class ArtajasaPaymentService {
                 logsArtajasaDAO.save(logArtajasa);
     
                 return ;   
-            }else if(vaNumberData.getStatus() == 0 && vaNumberData.getIsVaActive().equals("Y")){
+            }else if(vaNumberData.getStatus() == 0 && !customerLoanRepaymentStatus.equals("Y")){
                 // not yet paid 
                 Resp += "<ack>"+ ServicesConfig.TRANSACTION_SUCCESS_00 +"</ack>\n";
                 Resp += "<bookingid>" + vaa.getBookingID() + "</bookingid>\n";
-                Resp += "<customer_name>NULL</customer_name>\n";
+                Resp += "<customer_name>" + borrower.getFullName() + "</customer_name>\n";
                 Resp += "<min_amount>" + vaNumberData.getAmountToPay() + "</min_amount>\n";
                 Resp += "<max_amount>" + vaNumberData.getAmountToPay() +"</max_amount>\n";
                 Resp += "<productid>NULL</productid>\n";

@@ -217,6 +217,20 @@ public class BorrowerService {
         return resultdata;
     }
 
+    public HashMap<String, String> postResetPaymentOption(String loanApplicationID){
+        HashMap<String, String> response = new HashMap<>();
+        ApplicationData apliData = applicationDataDAO.findValueByColumn("LoanApplicationID", loanApplicationID).get(0);
+
+        CustomerVaHistory objVa = customerVaHistoryDAO.findActiveVAByApplicantID(apliData.getApplicationApplicantID().toString()).get(0);
+
+        if(objVa != null){
+            objVa.setIsVaActive("N");
+            customerVaHistoryDAO.update(objVa);
+            response.put("callback", "success");
+        }
+        return response;
+    }
+
     private void getLoanHistory() {
     }
 }

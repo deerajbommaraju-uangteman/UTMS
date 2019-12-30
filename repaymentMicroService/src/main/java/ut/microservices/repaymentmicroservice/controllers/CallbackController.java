@@ -54,5 +54,9 @@ public class CallbackController {
       return new ResponseEntity<>(callbackService.getCallbackNotifyData(data), HttpStatus.OK);
    }   
 
+   // @PostMapping(value = "/callback/cimb/virtual-account", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+   // public ResponseEntity<?> getCimbInquiryData(@RequestParam HashMap<String, String>  vendor) throws Exception {
+   // return CimbSoapController.getCIMBInquiryData(vendor);
+   // }
 
 }

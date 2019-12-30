@@ -124,7 +124,7 @@ public class DatabaseService {
         List<ApplicationData> apliDataList = applicationDataDAO.findValueByColumn("ApplicationID", dataMap.get("ApplicationID").toString());       
         if(apliDataList.size() >0){
             ApplicationData apliData = apliDataList.get(0);
-            if(apliData.getIsInstallment().equals("Y")){        
+            if(apliData.getIsInstallment() !=null && apliData.getIsInstallment().equals("Y")){        
                 installmentService.insertInstallmentLoanRepayment(apliData, clr);
             }
         }
