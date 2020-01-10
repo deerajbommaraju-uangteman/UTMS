@@ -122,12 +122,11 @@ public class LoanApplicationCtrl {
   }
   
   @CrossOrigin
-  @GetMapping(path = "/getDistrictData")
-  public @ResponseBody String getDistrictData() throws JsonProcessingException {
-
-    //System.out.println(loanApplicationService.getDistrictData());
-    return "success"; 
+  @GetMapping(path = "/getProvinceData")
+  public @ResponseBody String getProvinceData() throws JsonProcessingException {
+    String provinceList=loanApplicationService.getProvinceData();
+    System.out.println(provinceList);
+    return provinceList.toString(); 
   }
   
-
 }

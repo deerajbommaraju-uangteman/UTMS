@@ -1,33 +1,28 @@
 package ut.microservices.loanapplicationmicroservice.service;
 
 import java.io.InputStream;
-import java.io.Serializable;
-import java.sql.Date;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.internal.function.text.Concatenate;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 
-import ut.microservices.loanapplicationmicroservice.dto.*;
-import ut.microservices.loanapplicationmicroservice.model.*;
-import ut.microservices.loanapplicationmicroservice.repository.*;
+import ut.microservices.loanapplicationmicroservice.dto.ApplicationStatusDTO;
+import ut.microservices.loanapplicationmicroservice.model.ApplicantData;
+import ut.microservices.loanapplicationmicroservice.model.ApplicationData;
+import ut.microservices.loanapplicationmicroservice.model.ApplicationStatusModel;
+import ut.microservices.loanapplicationmicroservice.model.CreFeatureSetModel;
+import ut.microservices.loanapplicationmicroservice.model.MrProvince;
+import ut.microservices.loanapplicationmicroservice.model.TempApplicantDataModel;
+import ut.microservices.loanapplicationmicroservice.repository.IGenericDAO;
 
 
 @Service
@@ -43,6 +38,13 @@ public class LoanApplicationService {
     IGenericDAO<ApplicationData> applicationDAO;
     IGenericDAO<CreFeatureSetModel> creFeatureSetDAO;
     IGenericDAO<ApplicationStatusModel> applicationStatusDAO;
+    IGenericDAO<MrProvince> mrProvinceDAO;
+    
+    @Autowired
+    public void mrProvinceDAO(IGenericDAO<MrProvince> DAOToSet) {
+        mrProvinceDAO = DAOToSet;
+        mrProvinceDAO.setClazz(MrProvince.class);
+    }
 
     @Autowired
     public void setApplicantDAO(IGenericDAO<ApplicantData> DAOToSet) {
@@ -78,11 +80,11 @@ public class LoanApplicationService {
     private ObjectMapper objectMapper;
 
     public String newApplicationStarted(TempApplicantDataModel application) {
-        String emailvaildate=emailValidate(application.getEmailAddress());
-        String checkData = this.isDataRecordInRPMS(application.getEmailAddress(), application.getMobileNumber(), application.getPersonalIDNumber());
-        if(!checkData.equals("failed")){
-            return "Data Already Exists";
-        }    
+        // String emailvaildate=emailValidate(application.getEmailAddress());
+        // String checkData = this.isDataRecordInRPMS(application.getEmailAddress(), application.getMobileNumber(), application.getPersonalIDNumber());
+        // if(!checkData.equals("failed")){
+        //     return "Data Already Exists";
+        // }    
         String responseTempID = tempApplicantDAO.save(application).toString();
         return responseTempID;
     }
@@ -120,6 +122,8 @@ public class LoanApplicationService {
             applicationData.setLoanApplicationID(LoanIdEncrypt+"-"+year);
             applicationData.setLoanDaysLength(30);
             applicationData.setApplicationApplicantID(applicantID);
+            applicationData.setApplicantID(applicantID);
+            applicationData.setIsInstallment("N");
             applicationData.setLoanStartDateTime(Calendar.getInstance().getTime());
             applicationData.setLoanDueDateTime(Calendar.getInstance().getTime());
             applicationData.setStatus("D");
@@ -141,7 +145,6 @@ public class LoanApplicationService {
                 applicationStatus=new ApplicationStatusModel();
                 applicationStatus.setApplicationStatusData(Integer.parseInt(applicationID), applicationData.getLoanApplicationID(), 0, 1, "D", 91, "R");
                 applicationStatusDAO.save(applicationStatus);
-            
             }
             return applicantID;
         }  catch (Exception e) {
@@ -167,6 +170,9 @@ public class LoanApplicationService {
                 break;
             case "widowed":
                 maritalStatus = 3;
+                break;
+            default:
+                maritalStatus = 0;
                 break;
             }
             CreFeatureSetModel creFeatureSet=new CreFeatureSetModel();
@@ -225,6 +231,10 @@ public class LoanApplicationService {
     public String PostApplicationStatusData(ApplicationStatusDTO ApplicationStatus) throws JsonProcessingException {
         
         return "success";
+    }
+    public String getProvinceData(){
+        List<MrProvince> provinceMap=mrProvinceDAO.findValueByColumn("ActiveStatus", "Y");
+        return provinceMap.toString();
     }
 
 }
