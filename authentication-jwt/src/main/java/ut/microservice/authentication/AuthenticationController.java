@@ -7,7 +7,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import javax.crypto.*;
+import javax.crypto.spec.SecretKeySpec;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -35,6 +39,16 @@ public class AuthenticationController {
         byte[] byteArray2=Base64.getUrlDecoder().decode(decarray);
         String str2 = new String(byteArray2);
         System.out.println(str2);
+        String data=parts[0]+"."+parts[1];
+        String key="your-256-bit-secret";
+        final Mac hMacSHA256=Mac.getInstance("HMAC_SHA256");
+        byte[]hmacKeyBytes=key.getBytes(StandardCharsets.UTF_8);
+        final SecretKeySpec secretKey=new SecretKeySpec(hmacKeyBytes,"HMAC_SHA256");
+        hMacSHA256.init(secretKey);
+        byte[] parts2=hMacSHA256.doFinal(data.getBytes());
+        if(!parts2.toString().equals(parts[2])){
+            return "failed";
+        }
         if(json.getUserid().equals("user") && json.getPassword().equals("pass")){
             return "Success";
             }
